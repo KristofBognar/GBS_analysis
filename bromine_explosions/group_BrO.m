@@ -110,9 +110,14 @@ for i=1:length(run_start)
             mean_tmp=mean(tmp.bro_col);
             do_sort=1;
             
-        case 'ssa'
-            % get mean concentration in selected period
-            mean_tmp=mean(tmp.OPC_supermicron);
+        case 'ssa_hm'
+            % get mean aer concetration for sizes half micron and up
+            mean_tmp=mean(tmp.aer_halfmicron);
+            do_sort=1;
+
+        case 'ssa_sm'
+            % get mean aer concetration for supermicron particles
+            mean_tmp=mean(tmp.aer_supermicron);
             do_sort=1;
             
         case 'o3'
