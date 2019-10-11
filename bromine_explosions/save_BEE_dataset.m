@@ -6,6 +6,8 @@ function save_BEE_dataset()
 
 
 %% Load data
+disp('Loading data')
+
 
 info=[];
 
@@ -22,11 +24,11 @@ load('/home/kristof/work/profile_retrievals/profile_results/tracegas_profiles_fi
 % BrO a priori info
 load('/home/kristof/work/profile_retrievals/retr_times.mat');
 
-% OPC data
-load('/home/kristof/work/SMPS/smps+opc_2016-2018/opc_size_dist_all.mat');
+% OPC+APS data
+load('/home/kristof/work/SMPS/smps+opc+aps/tot_ssa.mat');
 
 % SMPS data
-load('/home/kristof/work/SMPS/smps+opc_2016-2018/smps_size_dist_all.mat');
+load('/home/kristof/work/SMPS/smps+opc+aps/smps_size_dist_all.mat');
 
 % PWS data
 load('/home/kristof/work/weather_stations/ridge_lab/PWS_all.mat');
@@ -38,8 +40,8 @@ load('/home/kristof/work/weather_stations/Eureka/EWS_PTU_and_weather_complete.ma
 ews_data=data;
 
 % surface ozone data
-load('/home/kristof/work/surface_ozone/surf_o3_all.mat');
-surf_o3((month(surf_o3.DateTime)>5 | month(surf_o3.DateTime)<3),:)=[];
+load('/home/kristof/work/surface_ozone/surf_o3_hourly_all.mat');
+% surf_o3((month(surf_o3.DateTime)>5 | month(surf_o3.DateTime)<3),:)=[];
 
 % pTOMCAT data
 load('/home/kristof/work/models/pTOMCAT/pTOMCAT_ssa_all.mat');
@@ -94,6 +96,7 @@ prof_len=prof_len/2; % +- minutes around mean time
 %% Pair all variables to the BrO profiles
 
 %%% wind speed and direction
+disp('Pairing weather data')
 wspd_mean=find_coincident_mean(times, pws_data.DateTime, pws_data.WindSpd, prof_len);
 
 wdir_mean=find_coincident_mean(times, pws_data.DateTime, pws_data.WindDir, prof_len, true);
@@ -133,6 +136,8 @@ diff=abs(bsxfun(@minus,mjd2k_ews,mjd2k_bro'));
 ews_weather=ews_data.Weather(ind');
 
 %%% T inversin from sonde
+disp('Pairing sonde data')
+
 t_sonde=[];
 wnd_sonde=[];
 for yr=unique(times.Year)'
@@ -169,17 +174,23 @@ tmp=interp1(wnd_sonde.date,tmp,times,'linear','extrap');
 wdir_600=mod(tmp,360);
 
 
-%%% OPC data
-% 1-10 microns (larger particles are extremely rare)
-opc_sum=sum(opc_data(:,3:5),2);
+%%% OPC+APS data
+disp('Pairing aerosol data')
 
-ind=find(opc_sum==0 | isnan(opc_sum) | opc_sum>1.2); % there are a few spikes in the data
-opc_data(ind,:)=[];
-opc_time(ind)=[];
-opc_tot_data(ind)=[];
-opc_sum(ind)=[];
+% >1 microns 
+supermicron=tot_ssa.supermicron;
 
-opc_mean=find_coincident_mean(times, opc_time, opc_sum, prof_len);
+% there are a few spikes in the OPC data, get rid of them here (delete
+% lines from >0.5 micron data as well, same spikes affect both)
+ind=find(supermicron==0 | isnan(supermicron) | supermicron>1.2); 
+tot_ssa(ind,:)=[];
+supermicron(ind)=[];
+
+supermicron_mean=find_coincident_mean(times, tot_ssa.DateTime, supermicron, prof_len);
+
+% >1 microns 
+halfmicron=tot_ssa.halfmicron;
+halfmicron_mean=find_coincident_mean(times, tot_ssa.DateTime, halfmicron, prof_len);
 
 %%% SMPS data
 % integrate Dp data
@@ -196,9 +207,15 @@ smps_sum(ind)=[];
 smps_mean=find_coincident_mean(times, smps_time, smps_sum, prof_len);
 
 %%% surface ozone data
-o3_mean=find_coincident_mean(times, surf_o3.DateTime, surf_o3.o3_ppb, prof_len);
+disp('Pairing surface ozone data')
+
+% o3_mean=find_coincident_mean(times, surf_o3.DateTime, surf_o3.o3_ppb, prof_len);
+o3_mean=interp1(surf_o3_hourly.DateTime,surf_o3_hourly.o3_ppb,times,'linear');
+
 
 %%% pTOMCAT data
+disp('Pairing pTOMCAT data')
+
 % 0-4 km column
 ptom_col_bro_out=interp1(ptom_time,ptom_col_bro,times,'linear','extrap');
 
@@ -262,8 +279,26 @@ ptom_P_600=interp1(ptom_time,ptom_P_600_tmp,times,'linear','extrap')*1e-2;
 ptom_P_600_prev=interp1(ptom_time,ptom_P_600_tmp,times-duration(1,0,0),...
                         'linear','extrap')*1e-2;
 
+% sea ice/water/land contact from FLEXPART and sea ice age data
+disp('Pairing sea ice contact data')
+
+surfaces={'FYSI', 'MYSI', 'water', 'land'};
+
+contact_all=NaN(length(times),20);
+contact_labels={};
+
+for i=1:4
+    for j=1:5
+        contact_labels=[contact_labels, {[surfaces{i} '_' num2str(j) 'day']}];
+        contact_all(:,(i-1)*5+j) = retrieve_SI_contact( times, j, surfaces{i} );
+    end
+end
+
+contact_all=array2table(contact_all,'variablenames',contact_labels);
 
 %% Create and save table
+disp('Saving results')
+
 
 bee_dataset=table();
 
@@ -313,7 +348,8 @@ bee_dataset.sonde_wdir_200=wdir_200;
 bee_dataset.sonde_wdir_400=wdir_400;
 bee_dataset.sonde_wdir_600=wdir_600;
 
-bee_dataset.OPC_supermicron=opc_mean;
+bee_dataset.aer_supermicron=supermicron_mean;
+bee_dataset.aer_halfmicron=halfmicron_mean;
 
 bee_dataset.SMPS_100_500=smps_mean;
 
@@ -335,31 +371,13 @@ bee_dataset.ptom_P_0_tend=ptom_P_0-ptom_P_0_prev;
 bee_dataset.ptom_P_600=ptom_P_600;
 bee_dataset.ptom_P_600_tend=ptom_P_600-ptom_P_600_prev;
 
+bee_dataset=[bee_dataset,contact_all];
 
 save('/home/kristof/work/BEEs/BEE_dataset_all.mat','bee_dataset')
 
+disp('Done')
 
 
-end
-
-function prof_len=match_prof_length(times)
-
-    prof_len=NaN(size(times));
-    x=datestr(times,'mmdd');
-    
-    yr=times(1).Year-1;
-    
-    for i=1:length(times)
-        
-        if times(i).Year == yr+1,
-            load(['/home/kristof/work/profile_retrievals/profile_results/profile_details/'...
-                  'prof_info_' num2str(times(i).Year) '.mat']);
-            yr=times(i).Year;
-        end
-        
-        prof_len(i)=str2double(daily_times{find_in_cell(daily_times(:,4),x(i,:)),3});
-    end
-    
 end
 
 

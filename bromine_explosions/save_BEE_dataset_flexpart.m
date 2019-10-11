@@ -30,18 +30,28 @@ end
 %% get info to group dataset by
 
 % get BrO column percentiles
-bro_25=prctile(bee_dataset.bro_col,25);
-bro_50=prctile(bee_dataset.bro_col,50);
-bro_75=prctile(bee_dataset.bro_col,75);
-bro_90=prctile(bee_dataset.bro_col,90);
+bro_prctile=[];
+for i=10:10:90
+    bro_prctile(i/10)=prctile(bee_dataset.bro_col,i);
+end
+
 bro_mean=mean(bee_dataset.bro_col);
 
+% get dp>0.5 micron aer concentration percentiles
+ssa_prctile=[];
+for i=10:10:90
+    ssa_prctile(i/10)=prctile(bee_dataset.aer_halfmicron,i);
+end
+
+ssa_mean=mean(bee_dataset.aer_halfmicron);
+
 % get supermicron aer concentration percentiles
-ssa_25=prctile(bee_dataset.OPC_supermicron,25);
-ssa_50=prctile(bee_dataset.OPC_supermicron,50);
-ssa_75=prctile(bee_dataset.OPC_supermicron,75);
-ssa_90=prctile(bee_dataset.OPC_supermicron,90);
-ssa_mean=mean(bee_dataset.OPC_supermicron);
+ssa_prctile_sm=[];
+for i=10:10:90
+    ssa_prctile_sm(i/10)=prctile(bee_dataset.aer_supermicron,i);
+end
+
+ssa_mean_sm=mean(bee_dataset.aer_supermicron);
 
 %% group dataset
 
@@ -52,21 +62,28 @@ ind_wdir(ind_wdir==0)=3; % merge other>50% and none>50%
 
 %%% group by BrO column
 % percentiles
-[ind_bro_pc,run_mean_bro]=group_BrO(bee_dataset, run_start, run_end, 'bro', [bro_25, bro_50, bro_75, bro_90]);
+[ind_bro_pc,run_mean_bro]=group_BrO(bee_dataset, run_start, run_end, 'bro', bro_prctile);
 % mean
 ind_bro_m=group_BrO(bee_dataset, run_start, run_end, 'bro', bro_mean);
 
+%%% group by Dp>0.5 micron aer concentration
+% percentiles
+[ind_ssa_pc,run_mean_ssa]=group_BrO(bee_dataset, run_start, run_end, 'ssa_hm', ssa_prctile);
+% mean
+ind_ssa_m=group_BrO(bee_dataset, run_start, run_end, 'ssa_hm', ssa_mean);
+
 %%% group by supermicron aer concentration
 % percentiles
-[ind_ssa_pc,run_mean_ssa]=group_BrO(bee_dataset, run_start, run_end, 'ssa', [ssa_25, ssa_50, ssa_75, ssa_90]);
+[ind_ssa_pc_sm,run_mean_ssa_sm]=group_BrO(bee_dataset,run_start,run_end,'ssa_sm',ssa_prctile_sm);
 % mean
-ind_ssa_m=group_BrO(bee_dataset, run_start, run_end, 'ssa', ssa_mean);
+ind_ssa_m_sm=group_BrO(bee_dataset, run_start, run_end, 'ssa_sm', ssa_mean_sm);
 
 %%% group by surface ozone
 [ind_o3,run_mean_o3]=group_BrO(bee_dataset, run_start, run_end, 'o3', [5,10,20]);
 
 %%% group by surface to lab T inversion strength
 [ind_dT,run_mean_dT]=group_BrO(bee_dataset, run_start, run_end, 'inv', 7);
+
 
 %% save data
  
@@ -80,11 +97,37 @@ bee_fp.bro_mean_col=run_mean_bro;
 bee_fp.ssa_pc=ind_ssa_pc;
 bee_fp.ssa_m=ind_ssa_m;
 bee_fp.ssa_mean=run_mean_ssa;
+bee_fp.ssa_pc_sm=ind_ssa_pc_sm;
+bee_fp.ssa_m_sm=ind_ssa_m_sm;
+bee_fp.ssa_mean_sm=run_mean_ssa_sm;
 bee_fp.o3=ind_o3;
 bee_fp.o3_mean=run_mean_o3;
 bee_fp.dT=ind_dT;
 bee_fp.dT_mean=run_mean_dT;
 
+%% add ice /water/land contact times
+
+for f=1:5 % back traj length in days
+
+    load(['/home/kristof/work/BEEs/flexpart_SI_contact/FP_FYSI_contact_'...
+          num2str(f) 'day.mat'])
+    eval(['bee_fp.fysi_' num2str(f) 'day=FP_SI_contact.contact;']);
+
+    load(['/home/kristof/work/BEEs/flexpart_SI_contact/FP_MYSI_contact_'...
+          num2str(f) 'day.mat'])
+    eval(['bee_fp.mysi_' num2str(f) 'day=FP_SI_contact.contact;']);
+
+    load(['/home/kristof/work/BEEs/flexpart_SI_contact/FP_water_contact_'...
+          num2str(f) 'day.mat'])
+    eval(['bee_fp.water_' num2str(f) 'day=FP_SI_contact.contact;']);
+
+    load(['/home/kristof/work/BEEs/flexpart_SI_contact/FP_land_contact_'...
+          num2str(f) 'day.mat'])
+    eval(['bee_fp.land_' num2str(f) 'day=FP_SI_contact.contact;']);
+    
+end
+
+%% save file
 
 save('/home/kristof/work/BEEs/BEE_dataset_flexpart.mat','bee_fp');
 
