@@ -168,6 +168,11 @@ else
     disp('Error: location not recognized')
 end     
 
+% check that we are in correct directory, and bias/dc files are there
+if ~isdir(csv), error('Must run code in yearly GBS folder, where the csv/ directory is'), end
+if ~exist('bias.inp','file'), error('Bias file must be in working directory'), end
+if ~exist('dark_c.inp','file'), error('Bias file must be in working directory'), end
+
 % make output file directory if necessary
 if write_ASC
 
