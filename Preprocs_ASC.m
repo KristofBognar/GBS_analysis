@@ -115,8 +115,14 @@ if nargin<7
    view_elev = -99.99;
    view_azimuth= -99.99;
    filter_id=0;
-   if nargin < 6
-       version = 1;
+   if nargin == 5
+       if yyyy>2010
+            version = 2;
+       else
+           error('Old data, specify version number')
+       end
+   elseif nargin<5
+       error('Need default arguments: yyyy, jjj_beg, jjj_end, instrument, loc')
    end
    sat_lev = 60000;
 end
