@@ -135,7 +135,8 @@ diff=abs(bsxfun(@minus,mjd2k_ews,mjd2k_bro'));
 
 ews_weather=ews_data.Weather(ind');
 
-%%% T inversin from sonde
+%%% Sonde data
+%T inversion
 disp('Pairing sonde data')
 
 t_sonde=[];
@@ -152,6 +153,7 @@ t_600=interp1(t_sonde.date,t_sonde.T_600,times,'linear','extrap');
 t_inv_all=interp1(t_sonde.date,t_sonde.dT,times,'linear','extrap');
 % t_inv_all=interp1(t_inv.date,t_inv.dT,times,'nearest','extrap');
 
+% wind speed
 wspd_0=interp1(wnd_sonde.date,wnd_sonde.wspd_0,times,'linear','extrap');
 wspd_200=interp1(wnd_sonde.date,wnd_sonde.wspd_200,times,'linear','extrap');
 wspd_400=interp1(wnd_sonde.date,wnd_sonde.wspd_400,times,'linear','extrap');
@@ -173,6 +175,9 @@ tmp=unwrap(wnd_sonde.wdir_600*pi/180)*180/pi;
 tmp=interp1(wnd_sonde.date,tmp,times,'linear','extrap');
 wdir_600=mod(tmp,360);
 
+% boundary layer height
+BL_out=get_BL_height( unique(times.Year)' );
+bl_height=interp1(BL_out.DateTime,BL_out.BL_height_m,times,'linear','extrap');
 
 %%% OPC+APS data
 disp('Pairing aerosol data')
@@ -337,6 +342,7 @@ bee_dataset.sonde_T_200=t_200;
 bee_dataset.sonde_T_400=t_400;
 bee_dataset.sonde_T_600=t_600;
 bee_dataset.sonde_dT=t_inv_all;
+bee_dataset.bl_height=bl_height;
 
 bee_dataset.sonde_wspd_0=wspd_0;
 bee_dataset.sonde_wspd_200=wspd_200;

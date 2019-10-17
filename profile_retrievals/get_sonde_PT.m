@@ -103,6 +103,8 @@ end
 
 if plot_prof
     
+    figure(99)
+    
     inds=find(x>day_range(1) & x<day_range(2)+1);
 
     times=ft_to_date(x(inds),year);

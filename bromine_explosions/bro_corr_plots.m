@@ -1,15 +1,15 @@
-function bro_corr_plots
+function [r_all,lag_all]=bro_corr_plots()
 % generate correlation plots of BrO columns with other parameters
 
 % select plots
 wspd_corr=0;
 wdir_corr=0;
 t_rl_corr=0;
-opc_corr=0;
-smps_corr=0;
+ssa_corr=0;
+smps_corr=1;
 o3_corr=0;
 
-ptom_comp=1;
+ptom_comp=0;
 
 plot_availability=0;
 
@@ -28,7 +28,7 @@ ind_SE=bee_dataset.N_SE_rest==2;
 ind_rest=bee_dataset.N_SE_rest==3;
 
 ind_t_rl=~isnan(bee_dataset.T_PWS);
-ind_opc=(bee_dataset.OPC_supermicron <= 1);
+ind_ssa=(bee_dataset.aer_halfmicron <= 100);
 ind_smps=~isnan(bee_dataset.SMPS_100_500);
 ind_o3=~isnan(bee_dataset.o3_surf);
 
@@ -184,19 +184,32 @@ if t_rl_corr
     
 end
 
-if opc_corr
+if ssa_corr
 
     figure
     txt_pos=0.08;
 
-    % all OPC data
-    subplot(221), hold on, box on
-    dscatter(bee_dataset.OPC_supermicron(ind_opc), plot_var(ind_opc))
+    plot_type='hm';
     
-    plot_fit_line(bee_dataset.OPC_supermicron(ind_opc),plot_var(ind_opc),text_size)
+    switch plot_type
+        case 'sm'
+            plot_data=bee_dataset.aer_supermicron;
+            xlim_end=1;
+            x_label='D_p > 1 \mum (cm^{-3})';
+        case 'hm'
+            plot_data=bee_dataset.aer_halfmicron;
+            xlim_end=6;
+            x_label='D_p > 0.5 \mum (cm^{-3})';
+    end
+    
+    % all aer data
+    subplot(221), hold on, box on
+    dscatter(plot_data(ind_ssa), plot_var(ind_ssa))
+    
+    plot_fit_line(plot_data(ind_ssa),plot_var(ind_ssa),text_size)
     
     ylim([0,16]*1e13)
-    xlim([0,1])    
+    xlim([0,xlim_end])    
     ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
 
     text(0.95,txt_pos,'Wind: 0-360°', 'color','k','Units','normalized',...
@@ -205,27 +218,27 @@ if opc_corr
     % Northerly winds only
     txt_pos=0.92;
     subplot(222), hold on, box on
-    ind=(ind_opc & ind_N);
-    dscatter(bee_dataset.OPC_supermicron(ind), plot_var(ind))
+    ind=(ind_ssa & ind_N);
+    dscatter(plot_data(ind), plot_var(ind))
     
-    plot_fit_line(bee_dataset.OPC_supermicron(ind),plot_var(ind),text_size)    
+    plot_fit_line(plot_data(ind),plot_var(ind),text_size)    
     
     ylim([0,16]*1e13)
-    xlim([0,1])    
+    xlim([0,xlim_end])    
 
     text(0.95,txt_pos,'Wind: 354° \pm 30°', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
     
     % Southeasterly winds only
     subplot(223), hold on, box on
-    ind=(ind_opc & ind_SE);
-    dscatter(bee_dataset.OPC_supermicron(ind), plot_var(ind))
+    ind=(ind_ssa & ind_SE);
+    dscatter(plot_data(ind), plot_var(ind))
     
-    plot_fit_line(bee_dataset.OPC_supermicron(ind),plot_var(ind),text_size)    
+    plot_fit_line(plot_data(ind),plot_var(ind),text_size)    
     
     ylim([0,16]*1e13)
-    xlim([0,1])    
-    xlabel('OPC 1-10 \mum (cm^{-3})')
+    xlim([0,xlim_end])    
+    xlabel(x_label)
     ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
 
     text(0.95,txt_pos,'Wind: 123° \pm 30°', 'color','k','Units','normalized',...
@@ -233,23 +246,26 @@ if opc_corr
     
     % all other wind directions
     subplot(224), hold on, box on
-    ind=(ind_opc & ind_rest);
-    dscatter(bee_dataset.OPC_supermicron(ind), plot_var(ind))
+    ind=(ind_ssa & ind_rest);
+    dscatter(plot_data(ind), plot_var(ind))
     
-    plot_fit_line(bee_dataset.OPC_supermicron(ind),plot_var(ind),text_size)    
+    plot_fit_line(plot_data(ind),plot_var(ind),text_size)    
     
     ylim([0,16]*1e13)
-    xlim([0,1])    
-    xlabel('OPC 1-10 \mum (cm^{-3})')
+    xlim([0,xlim_end])    
+    xlabel(x_label)
 
     text(0.95,txt_pos,'Wind: other', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
     
+    set(gcf, 'Position', [100, 100, 900, 750]);
+
 end
 
 if smps_corr
     
     figure, hold on
+    set(gcf, 'Position', [100, 100, 900, 750]);
 
     subplot(221), hold on, box on
     dscatter(bee_dataset.SMPS_100_500(ind_smps), plot_var(ind_smps))
@@ -270,7 +286,7 @@ if smps_corr
     plot_fit_line(bee_dataset.SMPS_100_500(ind),plot_var(ind),text_size)
     xlim([0,500])
     ylim([0,13]*1e13)
-
+    
     subplot(224), hold on, box on
     ind=(ind_smps & ind_rest);
     dscatter(bee_dataset.SMPS_100_500(ind), plot_var(ind))
@@ -285,26 +301,26 @@ end
 if o3_corr
     
 %     figure, hold on
-%     dscatter(bee_dataset.surf_o3(ind_o3), plot_var(ind_o3))
-% %     plot_fit_line(bee_dataset.surf_o3(ind_o3),plot_var(ind_o3),text_size,'right')
+%     dscatter(bee_dataset.o3_surf(ind_o3), plot_var(ind_o3))
+% %     plot_fit_line(bee_dataset.o3_surf(ind_o3),plot_var(ind_o3),text_size,'right')
 %     ylim([0,9]*1e13)
 %     
 %     figure, hold on
 %     ind=(ind_o3, & ind_N);
-%     dscatter(bee_dataset.surf_o3(ind), plot_var(ind))
-% %     plot_fit_line(bee_dataset.surf_o3(ind),plot_var(ind),text_size,'right')
+%     dscatter(bee_dataset.o3_surf(ind), plot_var(ind))
+% %     plot_fit_line(bee_dataset.o3_surf(ind),plot_var(ind),text_size,'right')
 %     ylim([0,9]*1e13)
 % 
 %     figure, hold on
 %     ind=(ind_o3 & ind_SE);
-%     dscatter(bee_dataset.surf_o3(ind), plot_var(ind))
-% %     plot_fit_line(bee_dataset.surf_o3(ind),plot_var(ind),text_size,'right')
+%     dscatter(bee_dataset.o3_surf(ind), plot_var(ind))
+% %     plot_fit_line(bee_dataset.o3_surf(ind),plot_var(ind),text_size,'right')
 %     ylim([0,9]*1e13)
 % 
 %     figure, hold on
 %     ind=(ind_o3 & ind_rest);
-%     dscatter(bee_dataset.surf_o3(ind), plot_var(ind))
-% %     plot_fit_line(bee_dataset.surf_o3(ind),plot_var(ind),text_size,'right')
+%     dscatter(bee_dataset.o3_surf(ind), plot_var(ind))
+% %     plot_fit_line(bee_dataset.o3_surf(ind),plot_var(ind),text_size,'right')
 %     ylim([0,9]*1e13)
     
 
@@ -314,12 +330,12 @@ if o3_corr
 %     bro_sort=sort(bee_dataset.bro_col);
 %     bro_limit=bro_sort(floor(length(bee_dataset.bro_col)*0.75)+1);
     
-    o3_0_10=(bee_dataset.surf_o3<10 & bee_dataset.bro_col>=bro_limit);
-    o3_10_20=(bee_dataset.surf_o3>=10 & bee_dataset.surf_o3<20 & ...
+    o3_0_10=(bee_dataset.o3_surf<10 & bee_dataset.bro_col>=bro_limit);
+    o3_10_20=(bee_dataset.o3_surf>=10 & bee_dataset.o3_surf<20 & ...
               bee_dataset.bro_col>=bro_limit);
-    o3_20_30=(bee_dataset.surf_o3>=20 & bee_dataset.surf_o3<30 & ...
+    o3_20_30=(bee_dataset.o3_surf>=20 & bee_dataset.o3_surf<30 & ...
               bee_dataset.bro_col>=bro_limit);
-    o3_30_up=(bee_dataset.surf_o3>=30 & bee_dataset.bro_col>=bro_limit);
+    o3_30_up=(bee_dataset.o3_surf>=30 & bee_dataset.bro_col>=bro_limit);
     
     by_wind=[ [sum(o3_0_10 & ind_N),...
                 sum(o3_0_10 & ind_SE),...
