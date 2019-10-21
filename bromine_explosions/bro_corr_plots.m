@@ -2,11 +2,12 @@ function [r_all,lag_all]=bro_corr_plots()
 % generate correlation plots of BrO columns with other parameters
 
 % select plots
+windrose=0;
 wspd_corr=0;
 wdir_corr=0;
 t_rl_corr=0;
-ssa_corr=0;
-smps_corr=1;
+ssa_corr=1;
+smps_corr=0;
 o3_corr=0;
 
 ptom_comp=0;
@@ -44,8 +45,6 @@ end
 
 if wspd_corr
     
-% % %     WindRose(data.WindDir,data.WindSpd,'AngleNorth',0,'AngleEast',90,...
-% % %              'FreqLabelAngle',45,'vWinds',[0 3 6 9 12 15]);
     
     if plot_column, txt_pos=0.92; else txt_pos=0.08; end
          
@@ -187,7 +186,10 @@ end
 if ssa_corr
 
     figure
-    txt_pos=0.08;
+    set(gcf, 'Position', [100, 100, 900, 750]);
+    fig_ax = tight_subplot(2,2,[0.1,0.07],[0.12,0.07],[0.11,0.05]);
+    
+    txt_pos=0.92;
 
     plot_type='hm';
     
@@ -195,16 +197,16 @@ if ssa_corr
         case 'sm'
             plot_data=bee_dataset.aer_supermicron;
             xlim_end=1;
-            x_label='D_p > 1 \mum (cm^{-3})';
+            x_label='D_P > 1 \mum (cm^{-3})';
         case 'hm'
             plot_data=bee_dataset.aer_halfmicron;
             xlim_end=6;
-            x_label='D_p > 0.5 \mum (cm^{-3})';
+            x_label='D_P > 0.5 \mum (cm^{-3})';
     end
     
     % all aer data
-    subplot(221), hold on, box on
-    dscatter(plot_data(ind_ssa), plot_var(ind_ssa))
+    axes(fig_ax(1))
+    dscatter(plot_data(ind_ssa), plot_var(ind_ssa)), hold on, box on
     
     plot_fit_line(plot_data(ind_ssa),plot_var(ind_ssa),text_size)
     
@@ -212,27 +214,26 @@ if ssa_corr
     xlim([0,xlim_end])    
     ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
 
-    text(0.95,txt_pos,'Wind: 0-360°', 'color','k','Units','normalized',...
+    text(0.95,txt_pos,'Wind: \bf{all}', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
     
     % Northerly winds only
-    txt_pos=0.92;
-    subplot(222), hold on, box on
+    axes(fig_ax(2))
     ind=(ind_ssa & ind_N);
-    dscatter(plot_data(ind), plot_var(ind))
+    dscatter(plot_data(ind), plot_var(ind)), hold on, box on
     
     plot_fit_line(plot_data(ind),plot_var(ind),text_size)    
     
     ylim([0,16]*1e13)
     xlim([0,xlim_end])    
 
-    text(0.95,txt_pos,'Wind: 354° \pm 30°', 'color','k','Units','normalized',...
+    text(0.95,txt_pos,'Wind: \bf{N}', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
     
     % Southeasterly winds only
-    subplot(223), hold on, box on
+    axes(fig_ax(3))
     ind=(ind_ssa & ind_SE);
-    dscatter(plot_data(ind), plot_var(ind))
+    dscatter(plot_data(ind), plot_var(ind)), hold on, box on
     
     plot_fit_line(plot_data(ind),plot_var(ind),text_size)    
     
@@ -241,13 +242,13 @@ if ssa_corr
     xlabel(x_label)
     ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
 
-    text(0.95,txt_pos,'Wind: 123° \pm 30°', 'color','k','Units','normalized',...
+    text(0.95,txt_pos,'Wind: \bf{SE}', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
     
     % all other wind directions
-    subplot(224), hold on, box on
+    axes(fig_ax(4))
     ind=(ind_ssa & ind_rest);
-    dscatter(plot_data(ind), plot_var(ind))
+    dscatter(plot_data(ind), plot_var(ind)), hold on, box on
     
     plot_fit_line(plot_data(ind),plot_var(ind),text_size)    
     
@@ -255,11 +256,11 @@ if ssa_corr
     xlim([0,xlim_end])    
     xlabel(x_label)
 
-    text(0.95,txt_pos,'Wind: other', 'color','k','Units','normalized',...
+    text(0.95,txt_pos,'Wind: \bf{other}', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
     
-    set(gcf, 'Position', [100, 100, 900, 750]);
-
+    set(findall(gcf,'-property','FontSize'),'FontSize',17)
+    
 end
 
 if smps_corr
@@ -487,6 +488,17 @@ if plot_availability
     set(findall(gcf,'-property','FontName'),'FontName','Arial') 
     set(gcf, 'Position', [100, 100, 1000, 300]);
 
+end
+
+if windrose
+   
+    % PWS wind data
+    load('/home/kristof/work/weather_stations/ridge_lab/PWS_all.mat');
+    data((month(data.DateTime)>5 | month(data.DateTime)<3),:)=[];
+
+    WindRose(data.WindDir,data.WindSpd,'AngleNorth',0,'AngleEast',90,...
+             'FreqLabelAngle',45,'vWinds',[0 3 6 9 12 15]);
+    
 end
 end
 

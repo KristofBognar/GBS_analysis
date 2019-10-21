@@ -5,8 +5,8 @@
 weather_only=0; % use weather data only (adds OPC and SMPS if set to false)
 weather_comp=0; % weather only, but remove 2015 to compare to aer data
 
-plot_pca=1; % all components wth var>1, on separate plots by wind speed
-plot_pca_poster=0; % first 2 PC for N and SE winds on one plot
+plot_pca=0; % all components wth var>1, on separate plots by wind speed
+plot_pca_poster=1; % first 2 PC for N and SE winds on one plot
 
 % load dataset
 load('/home/kristof/work/BEEs/BEE_dataset_all.mat')
@@ -15,15 +15,21 @@ load('/home/kristof/work/BEEs/BEE_dataset_all.mat')
 if weather_only
     vars={'BrO','Ext','V','T','dT_{200}','dT_{600}','PBLH','P','\DeltaP'};
 else
-    vars={'BrO','Ext','V','T','dT_{200}','dT_{600}','PBLH','P','\DeltaP','Aer'};
+    vars={'BrO','Ext','V','T','dT_{200}','dT_{600}','PBLH','P','\DeltaP','Aer','FYSI','MYSI'};
 %     vars={'BrO','Ext','V','T','dT_{200}','dT_{600}','P','\DeltaP','Aer','SMPS'};
 end
 
 % wind direction key
-wdir_key={'all','N','SE','other'};
-wdir_key2={'all','Wind: 354° \pm 30°','Wind: 123° \pm 30°','other'};
+wdir_key={'all','\bf{N}','\bf{SE}','other'};
+wdir_key2={'Wind: all','Wind: \bf{N}','Wind: \bf{SE}','Wind: other'};
 
 %% loopover each wind direction
+
+if plot_pca_poster
+    figure(99)
+    set(gcf, 'Position', [100, 100, 1100, 310]);
+    fig_ax = tight_subplot(2,2,[0.15,0.04],[0.11,0.1],[0.05,0.01]);
+end
 
 for wdir=0:3
     
@@ -60,6 +66,8 @@ for wdir=0:3
                  bee_dataset.P_PWS(ind),...
                  bee_dataset.P_PWS_tend(ind),...
                  bee_dataset.aer_halfmicron(ind),...
+                 bee_dataset.FYSI_3day(ind),...
+                 bee_dataset.MYSI_3day(ind),...
                  ];
 %     data_in_aer=[bee_dataset.bro_col(ind),...
 %                  bee_dataset.aer_ext(ind),...
@@ -166,7 +174,7 @@ for wdir=0:3
             else
                 set(gca,'XTickLabel',[]);
 
-                if i==1, title(['Wind direction: ' wdir_key{wdir+1}]); end
+                if i==1, title(wdir_key2{wdir+1},'fontweight','normal'); end
             end
 
         end
@@ -183,7 +191,7 @@ for wdir=0:3
         for i=1:2
 
             plotind=2*i+wdir-2;
-            subplot(2,2,plotind)
+            axes(fig_ax(plotind))
 
             % loading greater than cutoff, for coloring bars
             ind=abs(coeffs(:,i))>0.25;
@@ -208,7 +216,7 @@ for wdir=0:3
             ylim([-0.6,0.6])
             xlim([0.5,length(vars)+0.5])
 
-            ylabel([wdir_key{wdir+1} '-PC' num2str(i)])
+            if any(plotind==[1,3]), ylabel(['PC' num2str(i)]); end
 
 %             % add percent of variance explained to plot
 %             text(0.01,0.8,['Var: ' num2str(round(tot_var(i),1)) '%'],...
@@ -216,14 +224,13 @@ for wdir=0:3
 
             % use labels for last subplot only
             if i==2
-                set(gca,'XTickLabel',vars,'FontSize',12);
+                set(gca,'XTickLabel',vars,'FontSize',10);
             else
-%                 set(gca,'XTickLabel',[],'FontSize',12);
-                set(gca,'XTickLabel',vars,'FontSize',12);
-                title(wdir_key2{wdir+1},'fontweight','normal','FontSize',19)
+%                 set(gca,'XTickLabel',[],'FontSize',11);
+                set(gca,'XTickLabel',vars,'FontSize',10);
+                title(wdir_key2{wdir+1},'fontweight','normal','FontSize',17)
             end
 
-            set(gcf, 'Position', [100, 100, 1100, 310]);
             
         end
 

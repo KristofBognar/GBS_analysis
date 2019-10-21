@@ -13,7 +13,7 @@ for i=1:length(year)
     load(['/home/kristof/work/radiosonde/Eureka/radiosonde_' num2str(year(i)) '_interp.mat']);
 
     % launch times indicated as noon and midnight in GRAW files; 
-    % launches are probably 11 someting and 23 something -- subtract 30 min
+    % launches are probably 11 someting and 23 something -- subtract ~30 min
     % from fractional times
     if year(i)>=2019; x=x-0.01; end
 
@@ -54,6 +54,7 @@ for i=1:length(year)
     
     tmp.DateTime=times';
     tmp.BL_height_m=bl_height';
+    tmp.theta_15=theta(1,:)';
     
     BL_out=[BL_out;tmp];
     

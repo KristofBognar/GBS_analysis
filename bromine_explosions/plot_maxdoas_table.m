@@ -1,9 +1,9 @@
 % to plot maxdoas results for PEARL-GBS
 
 
-% load('/home/kristof/aurora/ground/eureka/gbs/pearl-gbs/2016/output/maxdoas_d66-131.mat')
+load('/home/kristof/aurora/ground/eureka/gbs/pearl-gbs/2016/output/maxdoas_d66-131.mat')
 % load('/home/kristof/aurora/ground/eureka/gbs/pearl-gbs/2010/QDOAS_output/maxdoas_d84-151.mat')
-load('/home/kristof/work/GBS/PEARL-GBS/2018/QDOAS_output/maxdoas_d64-151.mat')
+% load('/home/kristof/work/GBS/PEARL-GBS/2018/QDOAS_output/maxdoas_d64-151.mat')
 % load('/home/kristof/work/GBS/PEARL-GBS/2019/QDOAS_output/maxdoas_d64-151.mat')
 % load('/home/kristof/work/GBS/PEARL-GBS/2017/QDOAS_output/maxdoas_d64-94.mat')
 % load('/home/kristof/aurora/ground/eureka/gbs/pearl-gbs/2017/QDOAS_output/maxdoas_d66-94.mat')
