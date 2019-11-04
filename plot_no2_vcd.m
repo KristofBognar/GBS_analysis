@@ -1,4 +1,4 @@
-%this scripts use to plot VCDs
+% plot VCDs
 
 figure(1)
 

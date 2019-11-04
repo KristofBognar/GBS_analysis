@@ -3,11 +3,11 @@
 %% control variables
 
 %instrument
-instr='UT-GBS';
-% instr='PEARL-GBS';
+% instr='UT-GBS';
+instr='PEARL-GBS';
 
 % trace gas (1: ozone, 2: NO2, 3: NO2 UV)
-tg=2;
+tg=3;
 tgstr={'O3','NO2','NO2_UV'};
 
 % year

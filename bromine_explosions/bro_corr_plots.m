@@ -5,10 +5,15 @@ function [r_all,lag_all]=bro_corr_plots()
 windrose=0;
 wspd_corr=0;
 wdir_corr=0;
-t_rl_corr=0;
-ssa_corr=1;
+T_rl_corr=0;
+T_ews_corr=1;
+sonde_dT_corr=0;
+ssa_corr=0;
 smps_corr=0;
 o3_corr=0;
+
+SI_corr=0;
+SI_corr_flip=0;
 
 ptom_comp=0;
 
@@ -29,6 +34,7 @@ ind_SE=bee_dataset.N_SE_rest==2;
 ind_rest=bee_dataset.N_SE_rest==3;
 
 ind_t_rl=~isnan(bee_dataset.T_PWS);
+ind_t_ews=~isnan(bee_dataset.T_EWS);
 ind_ssa=(bee_dataset.aer_halfmicron <= 100);
 ind_smps=~isnan(bee_dataset.SMPS_100_500);
 ind_o3=~isnan(bee_dataset.o3_surf);
@@ -45,6 +51,7 @@ end
 
 if wspd_corr
     
+    edges=0:18;
     
     if plot_column, txt_pos=0.92; else txt_pos=0.08; end
          
@@ -53,7 +60,7 @@ if wspd_corr
     subplot(221), hold on, box on
     ind=~isnan(bee_dataset.wspd_ms);
     dscatter(bee_dataset.wspd_ms(ind), plot_var(ind))
-    plot_mean_std(bee_dataset.wspd_ms(ind),plot_var(ind),plot_column)
+    plot_mean_std(bee_dataset.wspd_ms(ind),plot_var(ind),edges,plot_column)
 
     text(0.95,txt_pos,'Wind: 0-360°', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
@@ -69,7 +76,7 @@ if wspd_corr
     subplot(222), hold on, box on
 
     dscatter(bee_dataset.wspd_ms(ind_N), plot_var(ind_N))
-    plot_mean_std(bee_dataset.wspd_ms(ind_N),plot_var(ind_N),plot_column)
+    plot_mean_std(bee_dataset.wspd_ms(ind_N),plot_var(ind_N),edges,plot_column)
     
     text(0.95,txt_pos,'Wind: 354° \pm 30°', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
@@ -80,7 +87,7 @@ if wspd_corr
     subplot(223), hold on, box on
 
     dscatter(bee_dataset.wspd_ms(ind_SE), plot_var(ind_SE))
-    plot_mean_std(bee_dataset.wspd_ms(ind_SE),plot_var(ind_SE),plot_column)
+    plot_mean_std(bee_dataset.wspd_ms(ind_SE),plot_var(ind_SE),edges,plot_column)
     
     text(0.95,txt_pos,'Wind: 123° \pm 30°', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
@@ -97,7 +104,7 @@ if wspd_corr
     subplot(224), hold on, box on
 
     dscatter(bee_dataset.wspd_ms(ind_rest), plot_var(ind_rest))
-    plot_mean_std(bee_dataset.wspd_ms(ind_rest),plot_var(ind_rest),plot_column)
+    plot_mean_std(bee_dataset.wspd_ms(ind_rest),plot_var(ind_rest),edges,plot_column)
     
     text(0.95,txt_pos,'Wind: other', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
@@ -116,7 +123,83 @@ if wdir_corr
     
 end
 
-if t_rl_corr
+if sonde_dT_corr
+    
+%     figure
+%     dscatter(bee_dataset.T_PWS(ind), plot_var(ind))
+    
+    figure
+    txt_pos=0.92;
+    edges=-5:2:25;
+
+    % all data
+    subplot(221), hold on, box on
+    dscatter(bee_dataset.sonde_dT, plot_var)
+    
+    plot_mean_std(bee_dataset.sonde_dT,plot_var,edges,plot_column)
+    
+    if plot_column, ylim([0,16]*1e13), else ylim([0.17,1]), end
+    xlim([-5.88,24])    
+    if plot_column
+        ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
+    else
+         ylabel('VCD_{0-0.6 km} / VCD_{0-4 km}')
+    end
+
+    text(0.95,txt_pos,'Wind: 0-360°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    
+    % Northerly winds only
+    txt_pos=0.92;
+    subplot(222), hold on, box on
+    ind=(ind_N);
+    dscatter(bee_dataset.sonde_dT(ind), plot_var(ind))
+    
+    plot_mean_std(bee_dataset.sonde_dT(ind),plot_var(ind),edges,plot_column)
+    
+    if plot_column, ylim([0,16]*1e13), else ylim([0.17,1]), end
+    xlim([-5.88,24])    
+
+    text(0.95,txt_pos,'Wind: 354° \pm 30°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    
+    % Southeasterly winds only
+    subplot(223), hold on, box on
+    ind=(ind_SE);
+    dscatter(bee_dataset.sonde_dT(ind), plot_var(ind))
+    
+    plot_mean_std(bee_dataset.sonde_dT(ind),plot_var(ind),edges,plot_column)
+    
+    if plot_column, ylim([0,16]*1e13), else ylim([0.17,1]), end
+    xlim([-5.88,24])    
+    xlabel('Sonde dT (°C)')
+    if plot_column
+        ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
+    else
+         ylabel('VCD_{0-0.6 km} / VCD_{0-4 km}')
+    end
+
+    text(0.95,txt_pos,'Wind: 123° \pm 30°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    
+    % all other wind directions
+    subplot(224), hold on, box on
+    ind=(ind_rest);
+    dscatter(bee_dataset.sonde_dT(ind), plot_var(ind))
+    
+    plot_mean_std(bee_dataset.sonde_dT(ind),plot_var(ind),edges,plot_column)
+    
+    if plot_column, ylim([0,16]*1e13), else ylim([0.17,1]), end
+    xlim([-5.88,24])    
+    xlabel('Sonde dT (°C)')
+
+    text(0.95,txt_pos,'Wind: other', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    
+    
+end
+
+if T_rl_corr
     
 %     figure
 %     dscatter(bee_dataset.T_PWS(ind), plot_var(ind))
@@ -182,6 +265,75 @@ if t_rl_corr
     
     
 end
+
+
+if T_ews_corr
+    
+%     figure
+%     dscatter(bee_dataset.T_PWS(ind), plot_var(ind))
+    
+    figure
+    txt_pos=0.92;
+
+    % all data
+    subplot(221), hold on, box on
+    dscatter(bee_dataset.T_EWS(ind_t_ews), plot_var(ind_t_ews))
+    
+    plot_fit_line(bee_dataset.T_EWS(ind_t_ews),plot_var(ind_t_ews),text_size)
+    
+    ylim([0,16]*1e13)
+    xlim([-45,5])    
+    ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
+
+    text(0.95,txt_pos,'Wind: 0-360°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    
+    % Northerly winds only
+    txt_pos=0.92;
+    subplot(222), hold on, box on
+    ind=(ind_t_ews & ind_N);
+    dscatter(bee_dataset.T_EWS(ind), plot_var(ind))
+    
+    plot_fit_line(bee_dataset.T_EWS(ind),plot_var(ind),text_size)    
+    
+    ylim([0,16]*1e13)
+    xlim([-45,5])    
+
+    text(0.95,txt_pos,'Wind: 354° \pm 30°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    
+    % Southeasterly winds only
+    subplot(223), hold on, box on
+    ind=(ind_t_ews & ind_SE);
+    dscatter(bee_dataset.T_EWS(ind), plot_var(ind))
+    
+    plot_fit_line(bee_dataset.T_EWS(ind),plot_var(ind),text_size)    
+    
+    ylim([0,16]*1e13)
+    xlim([-45,5])    
+    xlabel('EWS T (°C)')
+    ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
+
+    text(0.95,txt_pos,'Wind: 123° \pm 30°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    
+    % all other wind directions
+    subplot(224), hold on, box on
+    ind=(ind_t_ews & ind_rest);
+    dscatter(bee_dataset.T_EWS(ind), plot_var(ind))
+    
+    plot_fit_line(bee_dataset.T_EWS(ind),plot_var(ind),text_size)    
+    
+    ylim([0,16]*1e13)
+    xlim([-45,5])    
+    xlabel('EWS T (°C)')
+
+    text(0.95,txt_pos,'Wind: other', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    
+    
+end
+
 
 if ssa_corr
 
@@ -446,6 +598,135 @@ if ptom_comp
     
 end
 
+if SI_corr
+    
+    edges=[0:0.5:11]*1e13;
+    
+    txt_pos=0.92;
+         
+    plot_x=bee_dataset.FYSI_3day;
+    
+    % all winds
+    figure
+    subplot(221), hold on, box on
+    
+    ind_ok=~isnan(plot_x);
+    dscatter(plot_x(ind_ok), plot_var(ind_ok))
+    plot_mean_std(plot_x(ind_ok),plot_var(ind_ok),edges)
+
+    text(0.95,txt_pos,'Wind: 0-360°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    ylim([0,12]*1e13)
+    xlim([0,11]*1e13)   
+    ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
+    
+    % northerly winds, mean: 354 deg from gaussian fit, +-30 deg
+    subplot(222), hold on, box on
+
+    ind=(ind_ok & ind_N);
+    dscatter(plot_x(ind), plot_var(ind))
+    plot_mean_std(plot_x(ind),plot_var(ind),edges)
+    
+    text(0.95,txt_pos,'Wind: 354° \pm 30°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    ylim([0,12]*1e13)
+    xlim([0,11]*1e13)   
+    
+    % southeasterly winds, mean: 123 deg from gaussian fit, +-30 deg  
+    subplot(223), hold on, box on
+
+    ind=(ind_ok & ind_SE);
+    dscatter(plot_x(ind), plot_var(ind))
+    plot_mean_std(plot_x(ind),plot_var(ind),edges)
+    
+    text(0.95,txt_pos,'Wind: 123° \pm 30°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    ylim([0,12]*1e13)
+    xlim([0,11]*1e13)    
+    xlabel('FYSI contact (s m^2)')
+    ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
+
+    % everything else
+    subplot(224), hold on, box on
+
+    ind=(ind_ok & ind_rest);
+    dscatter(plot_x(ind), plot_var(ind))
+    plot_mean_std(plot_x(ind),plot_var(ind),edges)
+    
+    text(0.95,txt_pos,'Wind: other', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    ylim([0,12]*1e13)
+    xlim([0,11]*1e13)    
+    xlabel('FYSI contact (s m^2)')
+    
+    
+end
+
+if SI_corr_flip
+    
+    edges=[0:0.5:11]*1e13;
+    
+    txt_pos=0.92;
+         
+    plot_x=plot_var;
+    plot_var=bee_dataset.FYSI_3day;
+    
+    % all winds
+    figure
+    subplot(221), hold on, box on
+
+    ind_ok=~isnan(plot_var);
+    dscatter(plot_x(ind_ok), plot_var(ind_ok))
+    plot_mean_std(plot_x(ind_ok),plot_var(ind_ok),edges)
+
+    text(0.95,txt_pos,'Wind: 0-360°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    ylim([0,11]*1e13)
+    xlim([0,12]*1e13)   
+    ylabel('FYSI contact (s m^2)')
+    
+    % northerly winds, mean: 354 deg from gaussian fit, +-30 deg
+    subplot(222), hold on, box on
+
+    ind=(ind_ok & ind_N);
+    dscatter(plot_x(ind), plot_var(ind))
+    plot_mean_std(plot_x(ind),plot_var(ind),edges)
+    
+    text(0.95,txt_pos,'Wind: 354° \pm 30°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    ylim([0,11]*1e13)
+    xlim([0,12]*1e13)   
+    
+    % southeasterly winds, mean: 123 deg from gaussian fit, +-30 deg  
+    subplot(223), hold on, box on
+
+    ind=(ind_ok & ind_SE);
+    dscatter(plot_x(ind), plot_var(ind))
+    plot_mean_std(plot_x(ind),plot_var(ind),edges)
+    
+    text(0.95,txt_pos,'Wind: 123° \pm 30°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    ylim([0,11]*1e13)
+    xlim([0,12]*1e13)    
+    xlabel('BrO VCD_{0-4 km} (molec/cm^2)')
+    ylabel('FYSI contact (s m^2)')
+
+    % everything else
+    subplot(224), hold on, box on
+
+    ind=(ind_ok & ind_rest);
+    dscatter(plot_x(ind), plot_var(ind))
+    plot_mean_std(plot_x(ind),plot_var(ind),edges)
+    
+    text(0.95,txt_pos,'Wind: other', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    ylim([0,11]*1e13)
+    xlim([0,12]*1e13)    
+    xlabel('BrO VCD_{0-4 km} (molec/cm^2)')
+    
+    
+end
+
 %% plot data availability
 % consider March-May only
 if plot_availability
@@ -528,24 +809,26 @@ function plot_avail(tmp, plotnum, fig_ax)
 
 end
 
-function plot_mean_std(xx,yy,plot_column)
+function plot_mean_std(xx,yy,edges,plot_column)
 
-    if nargin==2, plot_column=1; end
+    if nargin==3, plot_column=1; end
     
     tmp_mean=[];
     tmp_std=[];
     
-    for i=0:17
-        tmp_mean=[tmp_mean,nanmean(yy(xx>=i & xx < i+1))];
-        tmp_std=[tmp_std,nanstd(yy(xx>=i & xx < i+1))];
+    for i=1:length(edges)-1
+        tmp_mean=[tmp_mean,nanmean(yy(xx>=edges(i) & xx < edges(i+1)))];
+        tmp_std=[tmp_std,nanstd(yy(xx>=edges(i) & xx < edges(i+1)))];
     end    
     
     
-    if ~plot_column, plot([0,17],[0.83,0.83],'b-','linewidth',1), end
+    if ~plot_column, plot([edges(1),edges(end)],[0.83,0.83],'b-','linewidth',1), end
 
-    plot([0:17]+0.5,tmp_mean,'k-','linewidth',2)
-    plot([0:17]+0.5,tmp_mean+tmp_std,'k--','linewidth',2)
-    plot([0:17]+0.5,tmp_mean-tmp_std,'k--','linewidth',2)   
+    plot_x=edges(1:end-1)+diff(edges)/2;
+    
+    plot(plot_x,tmp_mean,'k-','linewidth',2)
+    plot(plot_x,tmp_mean+tmp_std,'k--','linewidth',2)
+    plot(plot_x,tmp_mean-tmp_std,'k--','linewidth',2)   
 
 end
 

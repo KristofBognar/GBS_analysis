@@ -5,8 +5,8 @@
 weather_only=0; % use weather data only (adds OPC and SMPS if set to false)
 weather_comp=0; % weather only, but remove 2015 to compare to aer data
 
-plot_pca=0; % all components wth var>1, on separate plots by wind speed
-plot_pca_poster=1; % first 2 PC for N and SE winds on one plot
+plot_pca=1; % all components wth var>1, on separate plots by wind speed
+plot_pca_poster=0; % first 2 PC for N and SE winds on one plot
 
 % load dataset
 load('/home/kristof/work/BEEs/BEE_dataset_all.mat')

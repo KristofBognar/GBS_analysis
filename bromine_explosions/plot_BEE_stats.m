@@ -1,12 +1,16 @@
 % plot yearly results form MAX-DOAS profile retrievals
 
-plot_monthly=0;
+plot_monthly=1;
 
-plot_bro=1;
+plot_bro=0;
 plot_aod=0;
 plot_dT=0;
-plot_T=0;
+plot_T_10=0;
+plot_ws_dT=1;
 plot_BL=0;
+plot_ssa=0;
+plot_fysi=0;
+plot_o3=0;
 
 
 %% load/filter BEE dataset
@@ -26,10 +30,11 @@ m_names={'March','April','May'};
 
 if plot_bro
     plot_y=bee_dataset.bro_col;
-    y_label='0-4 km BrO column (molec/cm^2)';
+    y_label='BrO VCD (molec/cm^2)';
     yscale='linear';
     ymin=-5e12;
 end
+
 if plot_aod
     plot_y=bee_dataset.aer_ext;
     y_label='AOD';
@@ -55,7 +60,31 @@ if plot_dT
     ymin=-6;
 end
 
-if plot_T
+if plot_ws_dT
+    
+    % PWS data
+    load('/home/kristof/work/weather_stations/ridge_lab/PWS_all.mat');
+    data((month(data.DateTime)>5 | month(data.DateTime)<3),:)=[];
+    data(year(data.DateTime)==2015,:)=[];
+    pws_data=data;
+
+    % EWS data
+    load('/home/kristof/work/weather_stations/Eureka/EWS_PTU_and_weather_complete.mat')
+    data(year(data.DateTime)==2015,:)=[];
+    ews_data=data;    
+    
+    tmp=find_coincident_mean(ews_data.DateTime,pws_data.DateTime,pws_data.TempC,30);
+    
+    plot_y=tmp-ews_data.TempC;
+    plot_x=ews_data.DateTime;
+
+    y_label='PWS T - EWS T (^{\circ}C)';
+    yscale='linear';
+    ymin=-8;
+    
+end
+
+if plot_T_10
     
     load('/home/kristof/work/weather_stations/Eureka/EWS_PTU_and_weather_complete.mat')
     data(data.Year<2016,:)=[];
@@ -80,6 +109,26 @@ if plot_BL
     ymin=-6;
 end
 
+if plot_ssa
+    plot_y=bee_dataset.aer_halfmicron;
+    y_label='D_p > 0.5 \mum';
+    yscale='linear';
+    ymin=0;
+end
+
+if plot_fysi
+    plot_y=bee_dataset.FYSI_3day;
+    y_label='3 day FYSI contact (s m^2)';
+    yscale='linear';
+    ymin=0;
+end
+
+if plot_o3
+    plot_y=bee_dataset.o3_surf;
+    y_label='Surface ozone (ppbv)';
+    yscale='linear';
+    ymin=0;
+end
 
 %% plot monthly stats
 if plot_monthly
