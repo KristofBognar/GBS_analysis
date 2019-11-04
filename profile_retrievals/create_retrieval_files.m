@@ -20,24 +20,24 @@ function create_retrieval_files()
 %% setup
 
 aer=0; % 1 for aerosol, 0 for BrO
-year=2018;
+year=2015;
 
 % change number of aerosol iteration steps? 
-% iter_step=[]; % leave at 5, as in template
-iter_step=10; % increase to given number
+iter_step=[]; % leave at 5, as in template
+% iter_step=10; % increase to given number
 
 % change output folder
 change_folder=1;
 
 if change_folder
-    out_folder_name='aer_10iter';
+%     out_folder_name='aer_10iter';
+    out_folder_name='surf_ppt_5to1';
 else
     out_folder_name='';
     if ~isempty(iter_step), warning('Aer iterations changed, should use different folder'); end
 end
     
-% start/stop times and BrO a priori are selected manually, data typed up at
-% the end of this file
+% start/stop times and BrO a priori are selected manually, and saved
 [dates,daily_times,apriori_BrO] = variable_init(year);
 
 %% read template
@@ -68,6 +68,17 @@ for i=1:length(dates)
     
     if ~strcmp(daily_times{i,4},datestr(dates(i),'mmdd'))
         error([datestr(dates(i),'mmm dd') ' missing from daily_times cell'])
+    end
+    
+    % specific case:
+    % recreate retrieval files for days when BrO surf conc was set to 5
+    % ppt, skip other days
+    if strcmp(out_folder_name,'surf_ppt_5to1') && ~aer
+        if str2double(apriori_BrO{i,1})==5
+            apriori_BrO{i,1}='1';
+        else
+            continue
+        end
     end
     
     %% modify relevant lines

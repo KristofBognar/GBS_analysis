@@ -300,7 +300,7 @@ function merge_and_save(f_list, save_name, filter, year)
     if filter
 
         % filter data 
-        if year<=2015 % only include full scans for 2015 and before, except 2010
+        if year<=2015 & year>2006 % only include full scans for 2015 and before, except 2010
             if year==2010
                 ind_filt=find(sum(elevs{:,:}==0,2)>1 | elevs.el_90==0);
             else

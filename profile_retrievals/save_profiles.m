@@ -5,9 +5,10 @@
 
 % profiles to read
 % 'a' for aerosol, 'tg' for tracegas
-option='a'; 
+option='tg'; 
 
 year=2019;
+% year=1; % for reading a priori test results
 
 % elevation correction used in the retrieval (to correctly read in number of elevs used)
 elev_corr=0;
@@ -24,6 +25,7 @@ default_version_eureka='Retrieval_settings_A';
 
 version_eureka=default_version_eureka;
 % version_eureka='aer_10iter';
+% version_eureka='surf_ppt_10'; % for reading a priori test results
 
 
 
@@ -71,6 +73,11 @@ elseif year==2019
     % April 22, 28 missing
     start_date=datetime(year,3,5,12,0,0);
     end_date=datetime(year,5,31,12,0,0);
+    
+elseif year==1
+    % reading a priori test results
+    start_date=datetime(2018,4,17,12,0,0);
+    end_date=datetime(2019,5,11,12,0,0);
     
 end
 
