@@ -4,12 +4,42 @@ function save_BEE_dataset()
 % high frequency observations are averaged for the time coverage of each profile
 % low frequency observations are interpolated to the mean profile time
 
+%% select a priori for BrO data!
+    
+good_input=0;
+disp_txt=1;
 
-%% Load data
+while ~good_input
+    
+    if disp_txt
+        disp(['Select a priori for BrO data'])
+        disp('(1): All BrO a priori surf. conc. at 1 ppt (files replaced with new retrievals)')
+        disp('(5): Some BrO a priori surf. conc. at 1 ppt, some at 5 (original retrieval)')
+        disp_txt=0;
+    end
+    tmp=input('','s');
+
+    if str2double(tmp)==1
+        use_all_1ppt=1;
+        disp('Using all 1 ppt surf. conc.')
+        good_input=1;
+    elseif str2double(tmp)==5
+        use_all_1ppt=0;
+        disp('Using original retrieval (1 or 5 ppt surf. conc.)')
+        good_input=1;
+    else
+        disp('Please enter 1 or 5')
+        disp('')
+    end
+
+end
+
+%% Load BrO data
 disp('Loading data')
 
 
 info=[];
+times=[];
 
 % save some aerosol data
 load('/home/kristof/work/profile_retrievals/profile_results/aerosol_profiles_filt_all.mat');
@@ -18,48 +48,63 @@ prof_aer=prof;
 prof_aer_err=prof_err;
 info_aer=info;
 
-% BrO data
-load('/home/kristof/work/profile_retrievals/profile_results/tracegas_profiles_filt_all.mat');
+% replace BrO profiles
+if use_all_1ppt
+    
+    % rerun of BrO with all 5 ppt suf conc set to 1
+    load(['/home/kristof/work/profile_retrievals/profile_results/',...
+          'eureka_1_surf_ppt_5to1/tracegas/profiles_1_filt.mat'])
+
+    prof_1_ppt=prof;
+    prof_1_ppt_err=prof_err;
+    prof_nd_1_ppt=prof_nd;
+    prof_nd_1_ppt_err=prof_nd_err;
+    avk_1ppt=avk;
+    
+    info_1_ppt=info;
+    times_1ppt=times;
+    
+    % BrO data
+    load('/home/kristof/work/profile_retrievals/profile_results/tracegas_profiles_filt_all.mat');
+
+    % filtering by eleva ngles remains correct, just need to replace
+    % profiles that appear in both datasets
+    [~,overwrite,new_ind]=intersect(times, times_1ppt);
+    
+    % make sure to remove profiles that are in the original dataset, but
+    % not in the 1ppt rerun (retrieval likely failed)
+    apriori_orig=get_BrO_apriori(times);
+    
+    if isequal(find(apriori_orig.surf_ppt==5),overwrite)
+        
+        info(overwrite,:)=info_1_ppt(new_ind,:);
+
+        prof(:,overwrite)=prof_1_ppt(:,new_ind);
+        prof_err(:,overwrite)=prof_1_ppt_err(:,new_ind);
+
+        prof_nd(:,overwrite)=prof_nd_1_ppt(:,new_ind);
+        prof_nd_err(:,overwrite)=prof_nd_1_ppt_err(:,new_ind);
+
+        avk(:,:,overwrite)=avk_1ppt(:,:,new_ind);
+        
+    else
+        error('Deal with extra profiles')
+    end
+    
+else
+    
+    % BrO data
+    load('/home/kristof/work/profile_retrievals/profile_results/tracegas_profiles_filt_all.mat');    
+    
+end
+
 
 % BrO a priori info
 load('/home/kristof/work/profile_retrievals/retr_times.mat');
 
-% OPC+APS data
-load('/home/kristof/work/SMPS/smps+opc+aps/tot_ssa.mat');
 
-% SMPS data
-load('/home/kristof/work/SMPS/smps+opc+aps/smps_size_dist_all.mat');
-
-% PWS data
-load('/home/kristof/work/weather_stations/ridge_lab/PWS_all.mat');
-data((month(data.DateTime)>5 | month(data.DateTime)<3),:)=[];
-pws_data=data;
-
-% EWS data
-load('/home/kristof/work/weather_stations/Eureka/EWS_PTU_and_weather_complete.mat')
-ews_data=data;
-
-% surface ozone data
-load('/home/kristof/work/surface_ozone/surf_o3_hourly_all.mat');
-% surf_o3((month(surf_o3.DateTime)>5 | month(surf_o3.DateTime)<3),:)=[];
-
-% pTOMCAT data
-load('/home/kristof/work/models/pTOMCAT/pTOMCAT_ssa_all.mat');
-ptom_time_ssa=ptom_time;
-ptom_alt_ssa=ptom_alt;
-load('/home/kristof/work/models/pTOMCAT/pTOMCAT_tg_all.mat');
-
-
-%% Filter BrO profiles
-
+%%% Filter BrO profiles
 ind_bad=find( info.DOFS<0.7 | info_aer.DOFS<0.7 | info_aer.col>5);
-% percentiles with this filter (2015-2018):
-% median: 9.1125e+12
-% mean: 1.4578e+13
-% 75: 1.5958e+13
-% 80: 2.0782e+13
-% 90: 3.4780e+13
-% 95: 4.4484e+13
 
 times(ind_bad)=[];
 info(ind_bad,:)=[];
@@ -91,6 +136,35 @@ above_lab=sum(part_prof(top+1:end,:))';
 prof_len=match_prof_length(times);
 
 prof_len=prof_len/2; % +- minutes around mean time
+
+
+
+%% Load other data
+
+% OPC+APS data
+load('/home/kristof/work/SMPS/smps+opc+aps/tot_ssa.mat');
+
+% SMPS data
+load('/home/kristof/work/SMPS/smps+opc+aps/smps_size_dist_all.mat');
+
+% PWS data
+load('/home/kristof/work/weather_stations/ridge_lab/PWS_all.mat');
+data((month(data.DateTime)>5 | month(data.DateTime)<3),:)=[];
+pws_data=data;
+
+% EWS data
+load('/home/kristof/work/weather_stations/Eureka/EWS_PTU_and_weather_complete.mat')
+ews_data=data;
+
+% surface ozone data
+load('/home/kristof/work/surface_ozone/surf_o3_hourly_all.mat');
+% surf_o3((month(surf_o3.DateTime)>5 | month(surf_o3.DateTime)<3),:)=[];
+
+% pTOMCAT data
+load('/home/kristof/work/models/pTOMCAT/pTOMCAT_ssa_all.mat');
+ptom_time_ssa=ptom_time;
+ptom_alt_ssa=ptom_alt;
+load('/home/kristof/work/models/pTOMCAT/pTOMCAT_tg_all.mat');
 
 
 %% Pair all variables to the BrO profiles
@@ -193,7 +267,7 @@ supermicron(ind)=[];
 
 supermicron_mean=find_coincident_mean(times, tot_ssa.DateTime, supermicron, prof_len);
 
-% >1 microns 
+% >0.5 microns 
 halfmicron=tot_ssa.halfmicron;
 halfmicron_mean=find_coincident_mean(times, tot_ssa.DateTime, halfmicron, prof_len);
 
@@ -292,10 +366,18 @@ surfaces={'FYSI', 'MYSI', 'water', 'land'};
 contact_all=NaN(length(times),20);
 contact_labels={};
 
-for i=1:4
-    for j=1:5
-        contact_labels=[contact_labels, {[surfaces{i} '_' num2str(j) 'day']}];
-        contact_all(:,(i-1)*5+j) = retrieve_SI_contact( times, j, surfaces{i} );
+for i=1:4 % surfaces
+    for j=1:5 % back traj length in days
+        if any(i==[1,2]) && any(j==[3])
+            % exact calculation is available (sum of mean sensitivity in each cell)
+            contact_labels=[contact_labels, {[surfaces{i} '_' num2str(j) 'day']}];
+            contact_all(:,(i-1)*5+j) = retrieve_SI_contact('exact',times,j,surfaces{i},'linear' );
+        else
+            % only approximate result was saved (mean sensitivity over all SI areas * n.o. cells)
+            contact_labels=[contact_labels, {['approx_' surfaces{i} '_' num2str(j) 'day']}];
+            contact_all(:,(i-1)*5+j) = retrieve_SI_contact('approx',times,j,surfaces{i},'linear' );
+        end
+            
     end
 end
 
@@ -310,12 +392,15 @@ bee_dataset=table();
 bee_dataset.times=times;
 
 bee_dataset.bro_col=info.col;
+bee_dataset.bro_dofs=info.DOFS;
 bee_dataset.bro_col_err=info.col_err;
 bee_dataset.bro_surf_ppt=prof(1,:)'*1e6;
 bee_dataset.bro_surf_ppt_err=prof_err(1,:)'*1e6;
 bee_dataset.bro_col_ratio=below_lab./info.col;
 
 bee_dataset.aer_ext=info_aer.col;
+bee_dataset.aer_ext_err=info_aer.col_err;
+bee_dataset.aer_dofs=info_aer.DOFS;
 
 bee_dataset.wspd_ms=wspd_mean;
 bee_dataset.wdir=wdir_mean;
@@ -380,6 +465,12 @@ bee_dataset.ptom_P_600_tend=ptom_P_600-ptom_P_600_prev;
 bee_dataset=[bee_dataset,contact_all];
 
 save('/home/kristof/work/BEEs/BEE_dataset_all.mat','bee_dataset')
+
+%% update linked datasets
+disp('Updating FLEXPART dataset')
+save_BEE_dataset_flexpart()
+
+try delete('/home/kristof/work/documents/paper_bro/data/daily_mean_BrO.mat'); end
 
 disp('Done')
 

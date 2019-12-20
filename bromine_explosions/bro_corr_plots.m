@@ -6,14 +6,23 @@ windrose=0;
 wspd_corr=0;
 wdir_corr=0;
 T_rl_corr=0;
-T_ews_corr=1;
-sonde_dT_corr=0;
+T_ews_corr=0;
+sonde_dT_corr=1;
 ssa_corr=0;
 smps_corr=0;
 o3_corr=0;
 
+aod_corr=0;
+aod_to_aer=0;
+
+aod_wspd=0;
+aer_wspd=0;
+smps_wspd=0;
+
 SI_corr=0;
 SI_corr_flip=0;
+
+SI_to_SI=0;
 
 ptom_comp=0;
 
@@ -27,6 +36,10 @@ plot_column=1;
 
 % load data
 load('/home/kristof/work/BEEs/BEE_dataset_all.mat');
+bee_dataset(bee_dataset.times.Year==2015,:)=[];
+% bee_dataset(bee_dataset.bro_col<prctile(bee_dataset.bro_col,90),:)=[];
+    
+
 
 % setup plotting indices
 ind_N=bee_dataset.N_SE_rest==1;
@@ -35,7 +48,6 @@ ind_rest=bee_dataset.N_SE_rest==3;
 
 ind_t_rl=~isnan(bee_dataset.T_PWS);
 ind_t_ews=~isnan(bee_dataset.T_EWS);
-ind_ssa=(bee_dataset.aer_halfmicron <= 100);
 ind_smps=~isnan(bee_dataset.SMPS_100_500);
 ind_o3=~isnan(bee_dataset.o3_surf);
 
@@ -58,13 +70,13 @@ if wspd_corr
     % all winds
     figure
     subplot(221), hold on, box on
-    ind=~isnan(bee_dataset.wspd_ms);
+    ind=(~isnan(bee_dataset.wspd_ms) & ~isnan(plot_var));
     dscatter(bee_dataset.wspd_ms(ind), plot_var(ind))
     plot_mean_std(bee_dataset.wspd_ms(ind),plot_var(ind),edges,plot_column)
 
     text(0.95,txt_pos,'Wind: 0-360°', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
-    if plot_column, ylim([0,12]*1e13), else ylim([0.28,1]), end
+%     if plot_column, ylim([0,12]*1e13), else ylim([0.28,1]), end
     xlim([0,15])   
     if plot_column
         ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
@@ -140,6 +152,7 @@ if sonde_dT_corr
     
     if plot_column, ylim([0,16]*1e13), else ylim([0.17,1]), end
     xlim([-5.88,24])    
+    ylim([0,8]*1e13)
     if plot_column
         ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
     else
@@ -159,6 +172,7 @@ if sonde_dT_corr
     
     if plot_column, ylim([0,16]*1e13), else ylim([0.17,1]), end
     xlim([-5.88,24])    
+    ylim([0,8]*1e13)
 
     text(0.95,txt_pos,'Wind: 354° \pm 30°', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
@@ -172,6 +186,7 @@ if sonde_dT_corr
     
     if plot_column, ylim([0,16]*1e13), else ylim([0.17,1]), end
     xlim([-5.88,24])    
+    ylim([0,8]*1e13)
     xlabel('Sonde dT (°C)')
     if plot_column
         ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
@@ -191,6 +206,7 @@ if sonde_dT_corr
     
     if plot_column, ylim([0,16]*1e13), else ylim([0.17,1]), end
     xlim([-5.88,24])    
+    ylim([0,8]*1e13)
     xlabel('Sonde dT (°C)')
 
     text(0.95,txt_pos,'Wind: other', 'color','k','Units','normalized',...
@@ -213,7 +229,7 @@ if T_rl_corr
     
     plot_fit_line(bee_dataset.T_PWS(ind_t_rl),plot_var(ind_t_rl),text_size)
     
-    ylim([0,16]*1e13)
+    ylim([0,8]*1e13)
     xlim([-45,5])    
     ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
 
@@ -228,7 +244,7 @@ if T_rl_corr
     
     plot_fit_line(bee_dataset.T_PWS(ind),plot_var(ind),text_size)    
     
-    ylim([0,16]*1e13)
+    ylim([0,8]*1e13)
     xlim([-45,5])    
 
     text(0.95,txt_pos,'Wind: 354° \pm 30°', 'color','k','Units','normalized',...
@@ -241,7 +257,7 @@ if T_rl_corr
     
     plot_fit_line(bee_dataset.T_PWS(ind),plot_var(ind),text_size)    
     
-    ylim([0,16]*1e13)
+    ylim([0,8]*1e13)
     xlim([-45,5])    
     xlabel('PWS T (°C)')
     ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
@@ -256,7 +272,7 @@ if T_rl_corr
     
     plot_fit_line(bee_dataset.T_PWS(ind),plot_var(ind),text_size)    
     
-    ylim([0,16]*1e13)
+    ylim([0,8]*1e13)
     xlim([-45,5])    
     xlabel('PWS T (°C)')
 
@@ -281,7 +297,7 @@ if T_ews_corr
     
     plot_fit_line(bee_dataset.T_EWS(ind_t_ews),plot_var(ind_t_ews),text_size)
     
-    ylim([0,16]*1e13)
+    ylim([0,8]*1e13)
     xlim([-45,5])    
     ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
 
@@ -296,7 +312,7 @@ if T_ews_corr
     
     plot_fit_line(bee_dataset.T_EWS(ind),plot_var(ind),text_size)    
     
-    ylim([0,16]*1e13)
+    ylim([0,8]*1e13)
     xlim([-45,5])    
 
     text(0.95,txt_pos,'Wind: 354° \pm 30°', 'color','k','Units','normalized',...
@@ -309,7 +325,7 @@ if T_ews_corr
     
     plot_fit_line(bee_dataset.T_EWS(ind),plot_var(ind),text_size)    
     
-    ylim([0,16]*1e13)
+    ylim([0,8]*1e13)
     xlim([-45,5])    
     xlabel('EWS T (°C)')
     ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
@@ -324,7 +340,7 @@ if T_ews_corr
     
     plot_fit_line(bee_dataset.T_EWS(ind),plot_var(ind),text_size)    
     
-    ylim([0,16]*1e13)
+    ylim([0,8]*1e13)
     xlim([-45,5])    
     xlabel('EWS T (°C)')
 
@@ -334,6 +350,188 @@ if T_ews_corr
     
 end
 
+if aod_corr
+    
+    figure
+
+    subplot(221), hold on
+    dscatter(log(bee_dataset.aer_ext),plot_var);
+    plot_mean_std(log(bee_dataset.aer_ext),plot_var,1,plot_column)
+    ylim([0,8]*1e13)
+    xlim([-5,2])
+     
+    set(gca,'XTick',log([0.01,0.1,1]))
+    set(gca,'XMinorTick','on')%log([[0.01:0.01:0.09],[0.1:0.1:0.9],[1:1:2]]))
+    tmp=gca;
+    tmp.XAxis.MinorTickValues = log([[0.007,0.008,0.009],[0.01:0.01:0.09],[0.1:0.1:0.9],[1:1:7]]);
+    set(gca,'XTickLabel',{'10^{-2}','10^{-1}','10^{0}'})
+    
+    subplot(222), hold on
+    dscatter(log(bee_dataset.aer_ext(ind_N)),plot_var(ind_N));
+    plot_mean_std(log(bee_dataset.aer_ext(ind_N)),plot_var(ind_N),1,plot_column)
+    ylim([0,8]*1e13)
+    xlim([-5,2])
+
+    set(gca,'XTick',log([0.01,0.1,1]))
+    set(gca,'XTickLabel',{'10^{-2}','10^{-1}','10^{0}'})
+    
+    subplot(223), hold on
+    dscatter(log(bee_dataset.aer_ext(ind_SE)),plot_var(ind_SE));
+    plot_mean_std(log(bee_dataset.aer_ext(ind_SE)),plot_var(ind_SE),1,plot_column)
+    ylim([0,8]*1e13)
+    xlim([-5,2])
+
+    set(gca,'XTick',log([0.01,0.1,1]))
+    set(gca,'XTickLabel',{'10^{-2}','10^{-1}','10^{0}'})
+    
+    subplot(224), hold on
+    dscatter(log(bee_dataset.aer_ext(ind_rest)),plot_var(ind_rest));
+    plot_mean_std(log(bee_dataset.aer_ext(ind_rest)),plot_var(ind_rest),1,plot_column)
+    ylim([0,8]*1e13)
+    xlim([-5,2])
+   
+    set(gca,'XTick',log([0.01,0.1,1]))
+    set(gca,'XTickLabel',{'10^{-2}','10^{-1}','10^{0}'})
+    
+end
+
+if aod_to_aer
+    
+    aer_val=bee_dataset.aer_halfmicron;
+%     aer_val=bee_dataset.SMPS_100_500;
+    figure
+
+    hold on
+    ind=~isnan(aer_val);
+    dscatter(log(bee_dataset.aer_ext(ind)),aer_val(ind));
+    plot_mean_std(log(bee_dataset.aer_ext(ind)),aer_val(ind),1,plot_column)
+%     ylim([0,5])
+    xlim([-5,2])
+     
+    set(gca,'XTick',log([0.01,0.1,1]))
+    set(gca,'XMinorTick','on')%log([[0.01:0.01:0.09],[0.1:0.1:0.9],[1:1:2]]))
+    tmp=gca;
+    tmp.XAxis.MinorTickValues = log([[0.007,0.008,0.009],[0.01:0.01:0.09],[0.1:0.1:0.9],[1:1:7]]);
+    set(gca,'XTickLabel',{'10^{-2}','10^{-1}','10^{0}'})
+    
+    figure
+
+    hold on
+    ind=~isnan(aer_val);
+    dscatter(aer_val(ind),log(bee_dataset.aer_ext(ind)));
+    plot_mean_std(aer_val(ind),log(bee_dataset.aer_ext(ind)),1,plot_column)
+%     xlim([0,5])
+    ylim([-5,2])
+     
+    set(gca,'YTick',log([0.01,0.1,1]))
+    set(gca,'YMinorTick','on')%log([[0.01:0.01:0.09],[0.1:0.1:0.9],[1:1:2]]))
+    tmp=gca;
+    tmp.YAxis.MinorTickValues = log([[0.007,0.008,0.009],[0.01:0.01:0.09],[0.1:0.1:0.9],[1:1:7]]);
+    set(gca,'YTickLabel',{'10^{-2}','10^{-1}','10^{0}'})
+    
+end
+
+if aod_wspd
+    
+    figure
+    subplot(221), hold on
+    ind=~isnan(bee_dataset.N_SE_rest);
+    dscatter(bee_dataset.wspd_ms(ind),log(bee_dataset.aer_ext(ind)))
+    plot_mean_std(bee_dataset.wspd_ms(ind),log(bee_dataset.aer_ext(ind)),1)
+    xlim([0,15])
+    ylim(log([0.014,5]))
+
+    subplot(222), hold on
+    ind=bee_dataset.N_SE_rest==1;
+    dscatter(bee_dataset.wspd_ms(ind),log(bee_dataset.aer_ext(ind)))
+    plot_mean_std(bee_dataset.wspd_ms(ind),log(bee_dataset.aer_ext(ind)),1)
+    xlim([0,15])
+    ylim(log([0.014,5]))
+
+    subplot(223), hold on
+    ind=bee_dataset.N_SE_rest==2;
+    dscatter(bee_dataset.wspd_ms(ind),log(bee_dataset.aer_ext(ind)))
+    plot_mean_std(bee_dataset.wspd_ms(ind),log(bee_dataset.aer_ext(ind)),1)
+    xlim([0,15])
+    ylim(log([0.014,5]))
+
+    subplot(224), hold on
+    ind=bee_dataset.N_SE_rest==3;
+    dscatter(bee_dataset.wspd_ms(ind),log(bee_dataset.aer_ext(ind)))
+    plot_mean_std(bee_dataset.wspd_ms(ind),log(bee_dataset.aer_ext(ind)),1)
+    xlim([0,15])
+    ylim(log([0.014,5]))
+    
+    
+
+    
+end
+
+if aer_wspd
+    
+    figure
+    subplot(221), hold on
+    ind=(~isnan(bee_dataset.N_SE_rest) & ~isnan(bee_dataset.aer_halfmicron));
+    dscatter(bee_dataset.wspd_ms(ind),bee_dataset.aer_halfmicron(ind))
+    plot_mean_std(bee_dataset.wspd_ms(ind),bee_dataset.aer_halfmicron(ind),1)
+    xlim([0,15])
+    ylim([0,5])
+
+    subplot(222), hold on
+    ind=(bee_dataset.N_SE_rest==1 & ~isnan(bee_dataset.aer_halfmicron));
+    dscatter(bee_dataset.wspd_ms(ind),bee_dataset.aer_halfmicron(ind))
+    plot_mean_std(bee_dataset.wspd_ms(ind),bee_dataset.aer_halfmicron(ind),1)
+    xlim([0,15])
+    ylim([0,5])
+
+    subplot(223), hold on
+    ind=(bee_dataset.N_SE_rest==2 & ~isnan(bee_dataset.aer_halfmicron));
+    dscatter(bee_dataset.wspd_ms(ind),bee_dataset.aer_halfmicron(ind))
+    plot_mean_std(bee_dataset.wspd_ms(ind),bee_dataset.aer_halfmicron(ind),1)
+    xlim([0,15])
+    ylim([0,5])
+
+    subplot(224), hold on
+    ind=(bee_dataset.N_SE_rest==3 & ~isnan(bee_dataset.aer_halfmicron));
+    dscatter(bee_dataset.wspd_ms(ind),bee_dataset.aer_halfmicron(ind))
+    plot_mean_std(bee_dataset.wspd_ms(ind),bee_dataset.aer_halfmicron(ind),1)
+    xlim([0,15])
+    ylim([0,5])
+    
+end
+
+if smps_wspd
+    
+    figure
+    subplot(221), hold on
+    ind=(~isnan(bee_dataset.N_SE_rest) & ~isnan(bee_dataset.SMPS_100_500));
+    dscatter(bee_dataset.wspd_ms(ind),bee_dataset.SMPS_100_500(ind))
+    plot_mean_std(bee_dataset.wspd_ms(ind),bee_dataset.SMPS_100_500(ind),1)
+    xlim([0,15])
+%     ylim([0,5])
+
+    subplot(222), hold on
+    ind=(bee_dataset.N_SE_rest==1 & ~isnan(bee_dataset.SMPS_100_500));
+    dscatter(bee_dataset.wspd_ms(ind),bee_dataset.SMPS_100_500(ind))
+    plot_mean_std(bee_dataset.wspd_ms(ind),bee_dataset.SMPS_100_500(ind),1)
+    xlim([0,15])
+%     ylim([0,5])
+
+    subplot(223), hold on
+    ind=(bee_dataset.N_SE_rest==2 & ~isnan(bee_dataset.SMPS_100_500));
+    dscatter(bee_dataset.wspd_ms(ind),bee_dataset.SMPS_100_500(ind))
+    plot_mean_std(bee_dataset.wspd_ms(ind),bee_dataset.SMPS_100_500(ind),1)
+    xlim([0,15])
+%     ylim([0,5])
+
+    subplot(224), hold on
+    ind=(bee_dataset.N_SE_rest==3 & ~isnan(bee_dataset.SMPS_100_500));
+    dscatter(bee_dataset.wspd_ms(ind),bee_dataset.SMPS_100_500(ind))
+    plot_mean_std(bee_dataset.wspd_ms(ind),bee_dataset.SMPS_100_500(ind),1)
+    xlim([0,15])
+%     ylim([0,5])
+    
+end
 
 if ssa_corr
 
@@ -343,17 +541,19 @@ if ssa_corr
     
     txt_pos=0.92;
 
-    plot_type='hm';
+    plot_type='sm';
     
     switch plot_type
         case 'sm'
             plot_data=bee_dataset.aer_supermicron;
             xlim_end=1;
             x_label='D_P > 1 \mum (cm^{-3})';
+            ind_ssa=(bee_dataset.aer_halfmicron <= 100);
         case 'hm'
             plot_data=bee_dataset.aer_halfmicron;
             xlim_end=6;
             x_label='D_P > 0.5 \mum (cm^{-3})';
+            ind_ssa=(bee_dataset.aer_halfmicron <= 100);
     end
     
     % all aer data
@@ -362,7 +562,7 @@ if ssa_corr
     
     plot_fit_line(plot_data(ind_ssa),plot_var(ind_ssa),text_size)
     
-    ylim([0,16]*1e13)
+    ylim([0,8]*1e13)
     xlim([0,xlim_end])    
     ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
 
@@ -376,7 +576,7 @@ if ssa_corr
     
     plot_fit_line(plot_data(ind),plot_var(ind),text_size)    
     
-    ylim([0,16]*1e13)
+    ylim([0,8]*1e13)
     xlim([0,xlim_end])    
 
     text(0.95,txt_pos,'Wind: \bf{N}', 'color','k','Units','normalized',...
@@ -389,7 +589,7 @@ if ssa_corr
     
     plot_fit_line(plot_data(ind),plot_var(ind),text_size)    
     
-    ylim([0,16]*1e13)
+    ylim([0,8]*1e13)
     xlim([0,xlim_end])    
     xlabel(x_label)
     ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
@@ -404,7 +604,7 @@ if ssa_corr
     
     plot_fit_line(plot_data(ind),plot_var(ind),text_size)    
     
-    ylim([0,16]*1e13)
+    ylim([0,8]*1e13)
     xlim([0,xlim_end])    
     xlabel(x_label)
 
@@ -453,65 +653,123 @@ end
 
 if o3_corr
     
-%     figure, hold on
-%     dscatter(bee_dataset.o3_surf(ind_o3), plot_var(ind_o3))
-% %     plot_fit_line(bee_dataset.o3_surf(ind_o3),plot_var(ind_o3),text_size,'right')
-%     ylim([0,9]*1e13)
-%     
-%     figure, hold on
-%     ind=(ind_o3, & ind_N);
-%     dscatter(bee_dataset.o3_surf(ind), plot_var(ind))
-% %     plot_fit_line(bee_dataset.o3_surf(ind),plot_var(ind),text_size,'right')
-%     ylim([0,9]*1e13)
-% 
-%     figure, hold on
-%     ind=(ind_o3 & ind_SE);
-%     dscatter(bee_dataset.o3_surf(ind), plot_var(ind))
-% %     plot_fit_line(bee_dataset.o3_surf(ind),plot_var(ind),text_size,'right')
-%     ylim([0,9]*1e13)
-% 
-%     figure, hold on
-%     ind=(ind_o3 & ind_rest);
-%     dscatter(bee_dataset.o3_surf(ind), plot_var(ind))
-% %     plot_fit_line(bee_dataset.o3_surf(ind),plot_var(ind),text_size,'right')
-%     ylim([0,9]*1e13)
+% %     figure, hold on
+% %     subplot(221)
+% %     dscatter(plot_var(ind_o3),bee_dataset.o3_surf(ind_o3)), hold on
+% % %     plot_fit_line(bee_dataset.o3_surf(ind_o3),plot_var(ind_o3),text_size,'right')
+% %     xlim([0,7]*1e13)
+% %     
+% %     subplot(222)
+% %     ind=(ind_o3 & ind_N);
+% %     dscatter(plot_var(ind),bee_dataset.o3_surf(ind)), hold on
+% % %     plot_fit_line(plot_var(ind),bee_dataset.o3_surf(ind),text_size,'right')
+% %     xlim([0,7]*1e13)
+% % 
+% %     subplot(223)
+% %     ind=(ind_o3 & ind_SE);
+% %     dscatter(plot_var(ind),bee_dataset.o3_surf(ind)), hold on
+% % %     plot_fit_line(plot_var(ind),bee_dataset.o3_surf(ind),text_size,'right')
+% %     xlim([0,7]*1e13)
+% % 
+% %     subplot(224)
+% %     ind=(ind_o3 & ind_rest);
+% %     dscatter(plot_var(ind),bee_dataset.o3_surf(ind)), hold on
+% % %     plot_fit_line(bee_dataset.o3_surf(ind),plot_var(ind),text_size,'right')
+% %     xlim([0,7]*1e13)
     
-
-    % bar plot of BrO in ozone bins (ignores NaN)
     
-    bro_limit=mean(bee_dataset.bro_col);
-%     bro_sort=sort(bee_dataset.bro_col);
-%     bro_limit=bro_sort(floor(length(bee_dataset.bro_col)*0.75)+1);
     
-    o3_0_10=(bee_dataset.o3_surf<10 & bee_dataset.bro_col>=bro_limit);
-    o3_10_20=(bee_dataset.o3_surf>=10 & bee_dataset.o3_surf<20 & ...
-              bee_dataset.bro_col>=bro_limit);
-    o3_20_30=(bee_dataset.o3_surf>=20 & bee_dataset.o3_surf<30 & ...
-              bee_dataset.bro_col>=bro_limit);
-    o3_30_up=(bee_dataset.o3_surf>=30 & bee_dataset.bro_col>=bro_limit);
-    
-    by_wind=[ [sum(o3_0_10 & ind_N),...
-                sum(o3_0_10 & ind_SE),...
-                sum(o3_0_10 & ind_rest) ];...
-              [sum(o3_10_20 & ind_N),...
-                sum(o3_10_20 & ind_SE),...
-                sum(o3_10_20 & ind_rest) ];...
-              [sum(o3_20_30 & ind_N),...
-                sum(o3_20_30 & ind_SE),...
-                sum(o3_20_30 & ind_rest) ];...
-              [sum(o3_30_up & ind_N),...
-                sum(o3_30_up & ind_SE),...
-                sum(o3_30_up & ind_rest) ] ];
-            
+    % box plot
     figure
-    bar(by_wind./sum(sum(by_wind)),'stacked');
-    legend('354° \pm 30°','123° \pm 30°','Other','location','north')
-    xlabel('Surface O_3 (ppbv)')
-    ylabel('p for BrO VCD_{0-4 km} > mean')
-    xlim([0.5,4.5])
+    nbars=3;
+    a=0.2;
     
-    c = {'0-10','10-20','20-30','>30'};
-    set(gca,'xticklabel',c)
+    data=bee_dataset.bro_col;
+    
+    o3_var=NaN(size(bee_dataset.o3_surf));
+    o3_var(bee_dataset.o3_surf<10)=1;
+    o3_var(bee_dataset.o3_surf>=10 & bee_dataset.o3_surf<15)=2;
+    o3_var(bee_dataset.o3_surf>=15 & bee_dataset.o3_surf<25)=3;
+    o3_var(bee_dataset.o3_surf>=25)=4;
+    
+    box_group=o3_var*10+bee_dataset.N_SE_rest;
+
+    % get position of each bar
+    box_pos=sort([1:a:1+a*(nbars-1),2:a:2+a*(nbars-1),3:a:3+a*(nbars-1),4:a:4+a*(nbars-1)]);
+
+    % set tick position as the mean of each group
+    tick_pos=[];
+    for i=1:4
+        tick_pos=[tick_pos,mean(box_pos((nbars)*(i-1)+1:(nbars)*i))];
+    end
+
+    c_list=winter(3);
+    % do box plot
+    boxplot(data,box_group,'positions',box_pos,'colors',c_list,...
+            'jitter',0.5,'symbol','.')
+    hold on, box on
+        
+    % plot mean as well
+    group_ind=unique(box_group(~isnan(box_group)));
+    c_ind=repmat(1:nbars,1,length(group_ind)/nbars);
+    for i=1:length(group_ind)
+        plot(box_pos(i), nanmean(data(box_group==group_ind(i))),'x','color',c_list(c_ind(i),:))
+    end
+        
+    % some formatting
+    set(findobj(gca,'type','line'),'linew',1.5)
+    set(findall(gca,'tag','Outliers'),'MarkerSize',4);
+    
+    set(gca,'xtick',tick_pos)
+    set(gca,'xticklabel',{'<10','10-15','15-25','>25'})
+    
+    xlim([box_pos(1)-0.15,box_pos(end)+0.15])
+    
+    set(gca, 'YGrid', 'on')
+
+    % legend for one figure only -- position set later
+    ll=legend(flipud(findall(gca,'Tag','Box')),...
+           {'N','SE','other'},...
+           'Orientation','horizontal','location','northeast');
+    
+    
+       
+       
+% %     % bar plot of BrO in ozone bins (ignores NaN)
+% %     bro_limit=mean(bee_dataset.bro_col);
+% % %     bro_sort=sort(bee_dataset.bro_col);
+% % %     bro_limit=bro_sort(floor(length(bee_dataset.bro_col)*0.75)+1);
+% %     
+% %     o3_0_10=(bee_dataset.o3_surf<10 & bee_dataset.bro_col>=bro_limit);
+% %     o3_10_20=(bee_dataset.o3_surf>=10 & bee_dataset.o3_surf<20 & ...
+% %               bee_dataset.bro_col>=bro_limit);
+% %     o3_20_30=(bee_dataset.o3_surf>=20 & bee_dataset.o3_surf<30 & ...
+% %               bee_dataset.bro_col>=bro_limit);
+% %     o3_30_up=(bee_dataset.o3_surf>=30 & bee_dataset.bro_col>=bro_limit);
+% %     
+% %     by_wind=[ [sum(o3_0_10 & ind_N),...
+% %                 sum(o3_0_10 & ind_SE),...
+% %                 sum(o3_0_10 & ind_rest) ];...
+% %               [sum(o3_10_20 & ind_N),...
+% %                 sum(o3_10_20 & ind_SE),...
+% %                 sum(o3_10_20 & ind_rest) ];...
+% %               [sum(o3_20_30 & ind_N),...
+% %                 sum(o3_20_30 & ind_SE),...
+% %                 sum(o3_20_30 & ind_rest) ];...
+% %               [sum(o3_30_up & ind_N),...
+% %                 sum(o3_30_up & ind_SE),...
+% %                 sum(o3_30_up & ind_rest) ] ];
+% %             
+% %     figure
+% % %     bar(by_wind./sum(sum(by_wind)),'stacked');
+% %     bar(by_wind./sum(sum(by_wind)));
+% %     legend('354° \pm 30°','123° \pm 30°','Other','location','north')
+% %     xlabel('Surface O_3 (ppbv)')
+% %     ylabel('p for BrO VCD_{0-4 km} > mean')
+% %     xlim([0.5,4.5])
+% %     
+% %     c = {'0-10','10-20','20-30','>30'};
+% %     set(gca,'xticklabel',c)
     
     
 end
@@ -606,18 +864,20 @@ if SI_corr
          
     plot_x=bee_dataset.FYSI_3day;
     
+    si_x_lim=log([50,8.1e5]);
+    
     % all winds
     figure
     subplot(221), hold on, box on
     
     ind_ok=~isnan(plot_x);
     dscatter(plot_x(ind_ok), plot_var(ind_ok))
-    plot_mean_std(plot_x(ind_ok),plot_var(ind_ok),edges)
+%     plot_mean_std(plot_x(ind_ok),plot_var(ind_ok),edges)
 
     text(0.95,txt_pos,'Wind: 0-360°', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
     ylim([0,12]*1e13)
-    xlim([0,11]*1e13)   
+    xlim(si_x_lim)    
     ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
     
     % northerly winds, mean: 354 deg from gaussian fit, +-30 deg
@@ -625,25 +885,26 @@ if SI_corr
 
     ind=(ind_ok & ind_N);
     dscatter(plot_x(ind), plot_var(ind))
-    plot_mean_std(plot_x(ind),plot_var(ind),edges)
+%     plot_mean_std(plot_x(ind),plot_var(ind),edges)
+%     plot_fit_line(plot_x(ind),plot_var(ind),12)
     
     text(0.95,txt_pos,'Wind: 354° \pm 30°', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
     ylim([0,12]*1e13)
-    xlim([0,11]*1e13)   
+    xlim(si_x_lim)    
     
     % southeasterly winds, mean: 123 deg from gaussian fit, +-30 deg  
     subplot(223), hold on, box on
 
     ind=(ind_ok & ind_SE);
     dscatter(plot_x(ind), plot_var(ind))
-    plot_mean_std(plot_x(ind),plot_var(ind),edges)
+%     plot_mean_std(plot_x(ind),plot_var(ind),edges)
     
     text(0.95,txt_pos,'Wind: 123° \pm 30°', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
     ylim([0,12]*1e13)
-    xlim([0,11]*1e13)    
-    xlabel('FYSI contact (s m^2)')
+    xlim(si_x_lim)    
+    xlabel('FYSI contact (s)')
     ylabel('BrO VCD_{0-4 km} (molec/cm^2)')
 
     % everything else
@@ -651,13 +912,13 @@ if SI_corr
 
     ind=(ind_ok & ind_rest);
     dscatter(plot_x(ind), plot_var(ind))
-    plot_mean_std(plot_x(ind),plot_var(ind),edges)
+%     plot_mean_std(plot_x(ind),plot_var(ind),edges)
     
     text(0.95,txt_pos,'Wind: other', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
     ylim([0,12]*1e13)
-    xlim([0,11]*1e13)    
-    xlabel('FYSI contact (s m^2)')
+    xlim(si_x_lim)    
+    xlabel('FYSI contact (s)')
     
     
 end
@@ -683,7 +944,7 @@ if SI_corr_flip
         'fontsize',text_size,'HorizontalAlignment','right')
     ylim([0,11]*1e13)
     xlim([0,12]*1e13)   
-    ylabel('FYSI contact (s m^2)')
+    ylabel('FYSI contact (s)')
     
     % northerly winds, mean: 354 deg from gaussian fit, +-30 deg
     subplot(222), hold on, box on
@@ -709,7 +970,7 @@ if SI_corr_flip
     ylim([0,11]*1e13)
     xlim([0,12]*1e13)    
     xlabel('BrO VCD_{0-4 km} (molec/cm^2)')
-    ylabel('FYSI contact (s m^2)')
+    ylabel('FYSI contact (s)')
 
     % everything else
     subplot(224), hold on, box on
@@ -724,6 +985,40 @@ if SI_corr_flip
     xlim([0,12]*1e13)    
     xlabel('BrO VCD_{0-4 km} (molec/cm^2)')
     
+    
+end
+
+if SI_to_SI
+    
+    ind_ok=(~isnan(bee_dataset.FYSI_3day) & ~isnan(bee_dataset.MYSI_3day));
+
+    figure
+    loglog(bee_dataset.FYSI_3day(ind_ok)+bee_dataset.MYSI_3day(ind_ok),...
+         bee_dataset.FYSI_3day(ind_ok),'b.')
+    xlabel('Total ice contact (s)')
+    ylabel('FYI contact (s)')
+    
+    figure
+
+    subplot(221), box on
+    ind=ind_ok;
+    loglog(bee_dataset.FYSI_3day(ind),bee_dataset.MYSI_3day(ind),'b.')
+    ylabel('MYSI contact (s)')
+
+    subplot(222), box on
+    ind=(ind_ok & ind_N);
+    loglog(bee_dataset.FYSI_3day(ind),bee_dataset.MYSI_3day(ind),'b.')
+
+    subplot(223), box on
+    ind=(ind_ok & ind_SE);
+    loglog(bee_dataset.FYSI_3day(ind),bee_dataset.MYSI_3day(ind),'b.')
+    xlabel('FYSI contact (s)')
+    ylabel('MYSI contact (s)')
+
+    subplot(224), box on
+    ind=(ind_ok & ind_rest);
+    loglog(bee_dataset.FYSI_3day(ind),bee_dataset.MYSI_3day(ind),'b.')
+    xlabel('FYSI contact (s)')
     
 end
 
@@ -816,11 +1111,15 @@ function plot_mean_std(xx,yy,edges,plot_column)
     tmp_mean=[];
     tmp_std=[];
     
+    if length(edges)==1
+        % use deciles
+        edges=prctile(xx,0:10:100);
+    end
+
     for i=1:length(edges)-1
         tmp_mean=[tmp_mean,nanmean(yy(xx>=edges(i) & xx < edges(i+1)))];
         tmp_std=[tmp_std,nanstd(yy(xx>=edges(i) & xx < edges(i+1)))];
     end    
-    
     
     if ~plot_column, plot([edges(1),edges(end)],[0.83,0.83],'b-','linewidth',1), end
 

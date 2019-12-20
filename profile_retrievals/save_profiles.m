@@ -7,8 +7,8 @@
 % 'a' for aerosol, 'tg' for tracegas
 option='tg'; 
 
-year=2019;
-% year=1; % for reading a priori test results
+% year=2019;
+year=1; % for reading tests/rerurns for multiple years
 
 % elevation correction used in the retrieval (to correctly read in number of elevs used)
 elev_corr=0;
@@ -23,9 +23,10 @@ folder_str='';
 % other versions: output folders named  just eureka_<year>_<version>
 default_version_eureka='Retrieval_settings_A';
 
-version_eureka=default_version_eureka;
+% version_eureka=default_version_eureka;
 % version_eureka='aer_10iter';
 % version_eureka='surf_ppt_10'; % for reading a priori test results
+version_eureka='surf_ppt_5to1'; % surf conc = 5 ppt replaced with 1 ppt
 
 
 
@@ -76,8 +77,8 @@ elseif year==2019
     
 elseif year==1
     % reading a priori test results
-    start_date=datetime(2018,4,17,12,0,0);
-    end_date=datetime(2019,5,11,12,0,0);
+    start_date=datetime(2015,3,1,12,0,0);
+    end_date=datetime(2019,5,31,12,0,0);
     
 end
 
@@ -339,14 +340,16 @@ for current_date=start_date:1:end_date
     
     % weighting functions have elevations in the easiest-to-read format
     cd('../weighting_func')
+    
+    year_tmp=str2double(ymd(1:4));
 
     % create elevations table: different for pre-2015 data (5/6 deg is lowest)
-    if year>=2015 
+    if year_tmp>=2015 
         elevs=zeros(size(ft,1),8);
         elevs=array2table(elevs,'VariableNames',...
                           {'el_90','el_30','el_15','el_10','el_5','el_2','el_1','el_m1'});
     else
-        if year==2010
+        if year_tmp==2010
             elevs=zeros(size(ft,1),7);
             elevs=array2table(elevs,'VariableNames',...
                               {'el_90','el_30','el_15','el_10','el_4','el_2','el_1'});
@@ -385,9 +388,9 @@ for current_date=start_date:1:end_date
         elevs.el_15(i)=sum(tmp==15+elev_corr);
         elevs.el_10(i)=sum(tmp==10+elev_corr);
         
-        if year<2015
+        if year_tmp<2015
            
-            if year==2010
+            if year_tmp==2010
                 % different sequence for 2010: 90, 30, 15, 10, 4, 2, 1:
                 elevs.el_4(i)=sum(tmp==4+elev_corr);
                 elevs.el_2(i)=sum(tmp==2+elev_corr); 
@@ -403,7 +406,7 @@ for current_date=start_date:1:end_date
             
             elevs.el_5(i)=sum(tmp==5+elev_corr);
 
-            if year~=2015,
+            if year_tmp~=2015,
                 elevs.el_2(i)=sum(tmp==2+elev_corr); 
             else
                 % no 2 deg elevation for 2015, keep table format for consistency
@@ -452,7 +455,7 @@ for current_date=start_date:1:end_date
         % xlim([ft(1),ft(end)])
         ylim([-0.1,4.1])
 
-        xlabel(['Fractional day, ' num2str(year) ' (UTC)'])
+        xlabel(['Fractional day, ' ymd(1:4) ' (UTC)'])
         ylabel('Altitude (km)')
 
         title(ymd)

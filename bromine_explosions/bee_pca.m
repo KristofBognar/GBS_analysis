@@ -10,6 +10,7 @@ plot_pca_poster=0; % first 2 PC for N and SE winds on one plot
 
 % load dataset
 load('/home/kristof/work/BEEs/BEE_dataset_all.mat')
+bee_dataset(bee_dataset.times.Year==2015,:)=[];
 
 % variables included in PCA
 if weather_only

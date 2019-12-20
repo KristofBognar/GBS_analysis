@@ -299,17 +299,39 @@ function merge_and_save(f_list, save_name, filter, year)
 
     if filter
 
-        % filter data 
-        if year<=2015 & year>2006 % only include full scans for 2015 and before, except 2010
-            if year==2010
-                ind_filt=find(sum(elevs{:,:}==0,2)>1 | elevs.el_90==0);
-            else
-                ind_filt=find(sum(elevs{:,:}==0,2)>0);
+%         if length(unique(times.Year))==1 % one year only, original filtering works
+%             % filter data 
+%             if year<=2015 % only include full scans for 2015 and before, except 2010
+%                 if year==2010
+%                     ind_filt=find(sum(elevs{:,:}==0,2)>1 | elevs.el_90==0);
+%                 else
+%                     ind_filt=find(sum(elevs{:,:}==0,2)>0);
+%                 end
+%             else % 2016 and later: allow partial scans with one elev missing(filter by DOFS later)
+%                  % must still have 90 deg
+%                 ind_filt=find(sum(elevs{:,:}==0,2)>1 | elevs.el_90==0);
+%             end
+%         
+%         else 
+        
+        % might have multiple years, have to filter separately for each year
+        ind_filt=[];
+        for yr_tmp=unique(times.Year)'
+
+            if yr_tmp==2010 || yr_tmp>2015
+                % 2016 and later: allow partial scans with one elev
+                % missing (filter by DOFS later)
+                % must still have 90 deg
+                ind_filt=[ind_filt; find((sum(elevs{:,:}==0,2)>1 | elevs.el_90==0) &...
+                                         times.Year==yr_tmp)];
+            else % only include full scans for 2015 and before, except 2010
+                ind_filt=[ind_filt; find(sum(elevs{:,:}==0,2)>0 & times.Year==yr_tmp)];
             end
-        else % 2016 and later: allow partial scans with one elev missing (filter by DOFS later)
-             % must still have 90 deg
-            ind_filt=find(sum(elevs{:,:}==0,2)>1 | elevs.el_90==0);
+
         end
+            
+%         end
+        
         
         filter_data(ind_filt,times,ft,info,elevs,avk_col,avk,...
                     prof,prof_err,prof_nd,prof_nd_err,[save_name '_filt.mat'],...

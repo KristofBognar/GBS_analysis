@@ -20,7 +20,9 @@ function create_retrieval_files()
 %% setup
 
 aer=0; % 1 for aerosol, 0 for BrO
-year=2015;
+year=2019;
+
+use_uniform_BrO_surf_conc=1; % 1: set all surf. conc. to 1 pptv; 0: use original (1 or 5 pptv)
 
 % change number of aerosol iteration steps? 
 iter_step=[]; % leave at 5, as in template
@@ -70,16 +72,25 @@ for i=1:length(dates)
         error([datestr(dates(i),'mmm dd') ' missing from daily_times cell'])
     end
     
-    % specific case:
-    % recreate retrieval files for days when BrO surf conc was set to 5
-    % ppt, skip other days
+    % special case:
+    % recreate retrieval files only for days when BrO surf conc was set to
+    % 5 ppt, ppt, skip other days
     if strcmp(out_folder_name,'surf_ppt_5to1') && ~aer
+        
+        if i==1, disp('WARNING: all BrO a priori surf. conc. are set to 1 pptv'), end
+        
         if str2double(apriori_BrO{i,1})==5
             apriori_BrO{i,1}='1';
         else
             continue
         end
     end
+    
+    %%% if required, replace 5 ppt BrO surface concentrations with 1 ppt
+    if use_uniform_BrO_surf_conc && str2double(apriori_BrO{i,1})==5 && ~aer
+        apriori_BrO{i,1}='1';
+    end
+    
     
     %% modify relevant lines
 

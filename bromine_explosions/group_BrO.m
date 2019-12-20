@@ -28,7 +28,8 @@ function [ out_arr, out_arr2 ] = group_BrO(bee_dataset, run_start, run_end, type
 %              last bin is considered to go to infinity.
 %              Output is the index of the bin the mean BrO column falls
 %              into for the given period.
-%       'ssa': same as 'bro', for OPC supermicron particle concentrations
+%       'wdir': same as 'bro', for PWS wind speed
+%       'ssa': same as 'bro', for OPC+APS coarse mode particles (d_p>0.5 microns)
 %       'o3': same as 'bro', for surface ozone vmr (in ppb)
 %       'inv': same as 'bro', for surface to lab inversion strength
 %
@@ -105,6 +106,11 @@ for i=1:length(run_start)
                 end
             end
             
+        case 'wspd'
+            % get mean column in selected period
+            mean_tmp=mean(tmp.wspd_ms);
+            do_sort=1;
+
         case 'bro'
             % get mean column in selected period
             mean_tmp=mean(tmp.bro_col);

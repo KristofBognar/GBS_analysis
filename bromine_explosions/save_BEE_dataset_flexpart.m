@@ -60,6 +60,9 @@ ssa_mean_sm=mean(bee_dataset.aer_supermicron);
 [ind_wdir]=group_BrO(bee_dataset, run_start, run_end, 'wdir', 0.5);
 ind_wdir(ind_wdir==0)=3; % merge other>50% and none>50%
 
+% get mean wind speed
+[~,mean_wspd]=group_BrO(bee_dataset, run_start, run_end, 'wspd',8);
+
 %%% group by BrO column
 % percentiles
 [ind_bro_pc,run_mean_bro]=group_BrO(bee_dataset, run_start, run_end, 'bro', bro_prctile);
@@ -91,6 +94,7 @@ bee_fp=table();
 
 bee_fp.mean_time=run_times';
 bee_fp.wdir=ind_wdir;
+bee_fp.wspd=mean_wspd;
 bee_fp.bro_pc=ind_bro_pc;
 bee_fp.bro_m=ind_bro_m;
 bee_fp.bro_mean_col=run_mean_bro;
@@ -109,25 +113,49 @@ bee_fp.dT_mean=run_mean_dT;
 
 for f=1:5 % back traj length in days
 
-    load(['/home/kristof/work/BEEs/flexpart_SI_contact/FP_FYSI_contact_'...
-          num2str(f) 'day.mat'])
-    eval(['bee_fp.fysi_' num2str(f) 'day=FP_SI_contact.contact;']);
+    if f==3
+        
+        load(['/home/kristof/work/BEEs/flexpart_SI_contact/FP_FYSI_contact_'...
+              num2str(f) 'day.mat'])
+        eval(['bee_fp.fysi_' num2str(f) 'day=FP_SI_contact.contact;']);
 
-    load(['/home/kristof/work/BEEs/flexpart_SI_contact/FP_MYSI_contact_'...
-          num2str(f) 'day.mat'])
-    eval(['bee_fp.mysi_' num2str(f) 'day=FP_SI_contact.contact;']);
+        load(['/home/kristof/work/BEEs/flexpart_SI_contact/FP_MYSI_contact_'...
+              num2str(f) 'day.mat'])
+        eval(['bee_fp.mysi_' num2str(f) 'day=FP_SI_contact.contact;']);
 
-    load(['/home/kristof/work/BEEs/flexpart_SI_contact/FP_water_contact_'...
-          num2str(f) 'day.mat'])
-    eval(['bee_fp.water_' num2str(f) 'day=FP_SI_contact.contact;']);
+        load(['/home/kristof/work/BEEs/flexpart_SI_contact/approximate/FP_water_contact_'...
+              num2str(f) 'day.mat'])
+        eval(['bee_fp.approx_water_' num2str(f) 'day=FP_SI_contact.contact;']);
 
-    load(['/home/kristof/work/BEEs/flexpart_SI_contact/FP_land_contact_'...
-          num2str(f) 'day.mat'])
-    eval(['bee_fp.land_' num2str(f) 'day=FP_SI_contact.contact;']);
+        load(['/home/kristof/work/BEEs/flexpart_SI_contact/approximate/FP_land_contact_'...
+              num2str(f) 'day.mat'])
+        eval(['bee_fp.approx_land_' num2str(f) 'day=FP_SI_contact.contact;']);
+        
+    else
+        
+        load(['/home/kristof/work/BEEs/flexpart_SI_contact/approximate/FP_FYSI_contact_'...
+              num2str(f) 'day.mat'])
+        eval(['bee_fp.approx_fysi_' num2str(f) 'day=FP_SI_contact.contact;']);
+
+        load(['/home/kristof/work/BEEs/flexpart_SI_contact/approximate/FP_MYSI_contact_'...
+              num2str(f) 'day.mat'])
+        eval(['bee_fp.approx_mysi_' num2str(f) 'day=FP_SI_contact.contact;']);
+
+        load(['/home/kristof/work/BEEs/flexpart_SI_contact/approximate/FP_water_contact_'...
+              num2str(f) 'day.mat'])
+        eval(['bee_fp.approx_water_' num2str(f) 'day=FP_SI_contact.contact;']);
+
+        load(['/home/kristof/work/BEEs/flexpart_SI_contact/approximate/FP_land_contact_'...
+              num2str(f) 'day.mat'])
+        eval(['bee_fp.approx_land_' num2str(f) 'day=FP_SI_contact.contact;']);
     
+    end
 end
 
 %% save file
+
+% remove NaNs (FP rauns where all BrO measurements were filtered out)
+% bee_fp(isnan(bee_fp.bro_mean_col),:)=[];
 
 save('/home/kristof/work/BEEs/BEE_dataset_flexpart.mat','bee_fp');
 
