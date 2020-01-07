@@ -17,7 +17,6 @@ if option=='tg';
           num2str(year) '/tracegas/' 'profiles_' num2str(year) '_filt.mat'];
 
     f_out=[savedir 'Eureka_BrO_profiles_' num2str(year) '.nc'];
-    f_out_tmp=[savedir 'tmp_Eureka_BrO_profiles_' num2str(year) '.nc'];
 
 else
     
@@ -30,7 +29,6 @@ else
           num2str(year) '/aerosol/' 'profiles_' num2str(year) '_filt.mat'];
 
     f_out=[savedir 'Eureka_aerorol_profiles_' num2str(year) '.nc'];
-    f_out_tmp=[savedir 'tmp_Eureka_aerorol_profiles_' num2str(year) '.nc'];
     
 end
 
@@ -40,16 +38,12 @@ end
 load(f_in)
 
 if exist(f_out,'file'), delete(f_out); end
+ncid = netcdf.create(f_out,'netcdf4'); % change type to netcdf4 (default is netcdf4_classic)
+netcdf.close(ncid);
 
 % create netCDF file with variables
-nccreate(f_out_tmp, 'altitude','Dimensions',{'Altitude',length(alt)});
-nccreate(f_out_tmp, 'time','Dimensions',{'Time',length(ft)});
-
-% change type to netcdf4 (from netcdf4_classic)
-S = ncinfo(f_out_tmp);
-S.Format = 'netcdf4';
-ncwriteschema(f_out,S)
-delete(f_out_tmp);
+nccreate(f_out, 'altitude','Dimensions',{'Altitude',length(alt)});
+nccreate(f_out, 'time','Dimensions',{'Time',length(ft)});
 
 % write tracegas-specific data
 if option=='tg'
