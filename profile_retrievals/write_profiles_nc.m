@@ -1,8 +1,8 @@
 % function write_profiles_nc(option, year)
 % write aerosol or BrO profiles to netCDF file
 
-year=2018;
-option='a';
+year=2019;
+option='tg';
 
 % directories and output file name
 if option=='tg';
@@ -17,6 +17,7 @@ if option=='tg';
           num2str(year) '/tracegas/' 'profiles_' num2str(year) '_filt.mat'];
 
     f_out=[savedir 'Eureka_BrO_profiles_' num2str(year) '.nc'];
+    f_out_tmp=[savedir 'tmp_Eureka_BrO_profiles_' num2str(year) '.nc'];
 
 else
     
@@ -29,6 +30,7 @@ else
           num2str(year) '/aerosol/' 'profiles_' num2str(year) '_filt.mat'];
 
     f_out=[savedir 'Eureka_aerorol_profiles_' num2str(year) '.nc'];
+    f_out_tmp=[savedir 'tmp_Eureka_aerorol_profiles_' num2str(year) '.nc'];
     
 end
 
@@ -40,8 +42,16 @@ load(f_in)
 if exist(f_out,'file'), delete(f_out); end
 
 % create netCDF file with variables
-nccreate(f_out, 'altitude','Dimensions',{'Altitude',length(alt)});
-nccreate(f_out, 'time','Dimensions',{'Time',length(ft)});
+nccreate(f_out_tmp, 'altitude','Dimensions',{'Altitude',length(alt)});
+nccreate(f_out_tmp, 'time','Dimensions',{'Time',length(ft)});
+
+% change type to netcdf4 (from netcdf4_classic)
+S = ncinfo(f_out_tmp);
+S.Format = 'netcdf4';
+ncwriteschema(f_out,S)
+delete(f_out_tmp);
+
+% write tracegas-specific data
 if option=='tg'
     nccreate(f_out, 'profile_vmr','Dimensions',{'Altitude',length(alt),'Time',length(ft)});
     nccreate(f_out, 'profile_vmr_error','Dimensions',{'Altitude',length(alt),'Time',length(ft)});
