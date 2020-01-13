@@ -22,7 +22,10 @@ function create_retrieval_files()
 aer=0; % 1 for aerosol, 0 for BrO
 year=2019;
 
-use_uniform_BrO_surf_conc=1; % 1: set all surf. conc. to 1 pptv; 0: use original (1 or 5 pptv)
+use_uniform_BrO_surf_conc=5; % 0: use original (1 or 5 pptv)
+                             % 1: set all surf. conc. to 1 pptv
+                             % 5: set all surf. conc. to 5 pptv
+                             % change_folder setting takes precedence!
 
 % change number of aerosol iteration steps? 
 iter_step=[]; % leave at 5, as in template
@@ -33,7 +36,8 @@ change_folder=1;
 
 if change_folder
 %     out_folder_name='aer_10iter';
-    out_folder_name='surf_ppt_5to1';
+%     out_folder_name='surf_ppt_5to1'; % resets all 5 ppt suf conc to 1
+    out_folder_name='surf_ppt_1to5'; % resets all 1 ppt suf conc to 5
 else
     out_folder_name='';
     if ~isempty(iter_step), warning('Aer iterations changed, should use different folder'); end
@@ -72,7 +76,7 @@ for i=1:length(dates)
         error([datestr(dates(i),'mmm dd') ' missing from daily_times cell'])
     end
     
-    % special case:
+    % special cases:
     % recreate retrieval files only for days when BrO surf conc was set to
     % 5 ppt, ppt, skip other days
     if strcmp(out_folder_name,'surf_ppt_5to1') && ~aer
@@ -86,11 +90,23 @@ for i=1:length(dates)
         end
     end
     
-    %%% if required, replace 5 ppt BrO surface concentrations with 1 ppt
-    if use_uniform_BrO_surf_conc && str2double(apriori_BrO{i,1})==5 && ~aer
-        apriori_BrO{i,1}='1';
+    % recreate retrieval files only for days when BrO surf conc was set to
+    % 1 ppt, ppt, skip other days
+    if strcmp(out_folder_name,'surf_ppt_1to5') && ~aer
+        
+        if i==1, disp('WARNING: all BrO a priori surf. conc. are set to 5 pptv'), end
+        
+        if str2double(apriori_BrO{i,1})==1
+            apriori_BrO{i,1}='5';
+        else
+            continue
+        end
     end
-    
+
+    % regular files: set BrO a priori surf conc to required value
+    if ~change_folder && use_uniform_BrO_surf_conc > 0 && ~aer
+        apriori_BrO{i,1}=num2str(use_uniform_BrO_surf_conc);
+    end
     
     %% modify relevant lines
 
