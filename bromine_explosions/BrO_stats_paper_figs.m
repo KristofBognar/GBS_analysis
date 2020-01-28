@@ -16,16 +16,16 @@ function BrO_stats_paper_figs()
 presentation_plots=0;
 
 windrose=0;
-plot_box=0;
+plot_box=1;
 plot_box_weather=0;
-bro_dailymean=0;
+bro_dailymean=1;
 plot_pca=0;
-weather_corr=0;
+weather_corr=1;
 o3_aer_wspd=1;
 sens_map=0;
-plot_ssa=0;
+plot_ssa=1;
 
-si_contact_log=0;
+si_contact_log=1;
 plot_log_si=1; % log scale for SI contact axes
 btraj_len='3'; % length of back trajectories
 
@@ -77,6 +77,8 @@ bee_dataset(bee_dataset.times.Year==2015,:)=[];
 % bee_dataset(bee_dataset.bro_col<mean(bee_dataset.bro_col_err)*3,:)=[];
 % 'high' BrO only 
 % bee_dataset(bee_dataset.bro_col<prctile(bee_dataset.bro_col,50),:)=[]; % above Q3
+% bee_dataset(bee_dataset.wspd_ms>6,:)=[];
+% bee_dataset(bee_dataset.o3_surf<=15,:)=[];
 %%%
 
 % setup wdir indices
@@ -191,11 +193,11 @@ if plot_box
     %%%%%%%%%% SSA box plot
     axes(fig_ax(4))
     
-%     plot_yearly_box(plot_data.aer_halfmicron,box_group,a,nbars,c_list,box_lw,box_outlier,0);
-%     ylabel('d_p > 0.5 \mum (cm^{-1})')
+    plot_yearly_box(plot_data.aer_halfmicron,box_group,a,nbars,c_list,box_lw,box_outlier,0);
+    ylabel('d_p > 0.5 \mum (cm^{-1})')
     
-    plot_yearly_box(plot_data.SMPS_100_500,box_group,a,nbars,c_list,box_lw,box_outlier,0);
-    ylabel('0.1 < d_p < 0.5 \mum (cm^{-1})')
+%     plot_yearly_box(plot_data.SMPS_100_500,box_group,a,nbars,c_list,box_lw,box_outlier,0);
+%     ylabel('0.1 < d_p < 0.5 \mum (cm^{-1})')
     
     text(labelx,labely,'d)','color','k','FontWeight','bold','Units','normalized')    
     
@@ -666,10 +668,17 @@ if sens_map
     
     font_correction=0;
     
+% % %     % using EWS wind data
+% % %     load('/home/kristof/work/weather_stations/Eureka/EWS_PTU_and_weather_complete.mat')
+% % %     ews_data=data;
+% % %     wspd_ews=interp1(ews_data.DateTime,ews_data.WindSpdkmh*10/36,bee_fp.mean_time,'nearest','extrap');    
+    
     % index for later: remove 2015, and remove FP runs where all BrO meas
     % have been filtered out
     fp_good=(bee_fp.mean_time.Year~=2015 & ~isnan(bee_fp.bro_mean_col));
 
+    
+    
     % load sensitivity and back trajectory data
     load('/home/kristof/berg/FLEXPART_10.02/BrO_back_runs_v1/BrO_back_runs_v1_3day.mat')
 % % %     latitude=1;
@@ -1055,7 +1064,7 @@ if si_contact_log
     ylb.Position(1)=log(14);
     ylb.Position(2)=bro_lim*1e13/2;
     
-    xlb=xlabel('FYI contact (s)');
+    xlb=xlabel('FYI sensitivity (s)');
     xlb.Position(2)=-11e12;
 
     if plot_log_si
@@ -1077,7 +1086,7 @@ if si_contact_log
 
     ylim([0,bro_lim]*1e13)
     xlim(si_x_lim)    
-    xlb=xlabel('FYI contact (s)');
+    xlb=xlabel('FYI sensitivity (s)');
     xlb.Position(2)=-11e12;
     
     if plot_log_si
@@ -1100,7 +1109,7 @@ if si_contact_log
 
     ylim([0,bro_lim]*1e13)
     xlim(si_x_lim)    
-    xlb=xlabel('FYI contact (s)');
+    xlb=xlabel('FYI sensitivity (s)');
     xlb.Position(2)=-11e12;
     
     if plot_log_si
@@ -1149,8 +1158,11 @@ if si_contact_log
     % Northerly winds only
     axes(fig_ax(4))
     dscatter(plot_x(ind_N_tmp), plot_y(ind_N_tmp),'cmap',c_scale), hold on, box on
+    
+%     ratio=bee_dataset.MYSI_3day./(bee_dataset.FYSI_3day+bee_dataset.MYSI_3day);    
+%     plot(plot_x(ind_N_tmp & ratio>0.9 & bee_dataset.o3_surf<15), plot_y(ind_N_tmp & ratio>0.9 & bee_dataset.o3_surf<15),'y.')
 
-    plot_mean_std(plot_x(ind_N_tmp),plot_y(ind_N_tmp),edges,fig_fs,'N','a',flip_ind)
+    plot_mean_std(plot_x(ind_N_tmp),plot_y(ind_N_tmp),edges,fig_fs,'N','d',flip_ind)
 %     plot_vertical_mean_std(plot_x(ind_N_tmp),plot_y(ind_N_tmp),v_edges)
 %     plot_fit_line(plot_x(ind_N_tmp),plot_y(ind_N_tmp),fig_fs,'N','a')
     
@@ -1160,7 +1172,7 @@ if si_contact_log
     ylb.Position(1)=log(14);
     ylb.Position(2)=bro_lim*1e13/2;
     
-    xlb=xlabel('Total ice contact (s)');
+    xlb=xlabel('Total ice sensitivity (s)');
     xlb.Position(2)=-11e12;
 
     if plot_log_si
@@ -1176,13 +1188,13 @@ if si_contact_log
     axes(fig_ax(5))
     dscatter(plot_x(ind_SE_tmp), plot_y(ind_SE_tmp),'cmap',c_scale), hold on, box on
 
-    plot_mean_std(plot_x(ind_SE_tmp),plot_y(ind_SE_tmp),edges,fig_fs,'SE','b',flip_ind)
+    plot_mean_std(plot_x(ind_SE_tmp),plot_y(ind_SE_tmp),edges,fig_fs,'SE','e',flip_ind)
 %     plot_vertical_mean_std(plot_x(ind_SE_tmp),plot_y(ind_SE_tmp),v_edges)
 %     plot_fit_line(plot_x(ind_SE_tmp),plot_y(ind_SE_tmp),fig_fs,'SE','b')
 
     ylim([0,bro_lim]*1e13)
     xlim(si_x_lim)    
-    xlb=xlabel('Total ice contact (s)');
+    xlb=xlabel('Total ice sensitivity (s)');
     xlb.Position(2)=-11e12;
     
     if plot_log_si
@@ -1199,13 +1211,13 @@ if si_contact_log
     axes(fig_ax(6))
     dscatter(plot_x(ind_other_tmp), plot_y(ind_other_tmp),'cmap',c_scale), hold on, box on
 
-    plot_mean_std(plot_x(ind_other_tmp),plot_y(ind_other_tmp),edges,fig_fs,'other','c',flip_ind)
+    plot_mean_std(plot_x(ind_other_tmp),plot_y(ind_other_tmp),edges,fig_fs,'other','f',flip_ind)
 %     plot_vertical_mean_std(plot_x(ind_other_tmp),plot_y(ind_other_tmp),v_edges)
 %     plot_fit_line(plot_x(ind_other_tmp),plot_y(ind_other_tmp),fig_fs,'other','c')
 
     ylim([0,bro_lim]*1e13)
     xlim(si_x_lim)    
-    xlb=xlabel('Total ice contact (s)');
+    xlb=xlabel('Total ice sensitivity (s)');
     xlb.Position(2)=-11e12;
     
     if plot_log_si
@@ -1267,7 +1279,7 @@ if si_contact_log
 % % 
 % %     ylim([0,bro_lim]*1e13)
 % %     xlim(si_x_lim2)    
-% %     xlb=xlabel('MYSI contact (s)');
+% %     xlb=xlabel('MYSI sensitivity (s)');
 % %     xlb.Position(2)=-1e13;
 % %     ylb=ylabel('BrO part. col. (molec cm^{-2})'); 
 % %     ylb.Position(1)=log(2.3);
@@ -1293,7 +1305,7 @@ if si_contact_log
 % % 
 % %     ylim([0,bro_lim]*1e13)
 % %     xlim(si_x_lim2)    
-% %     xlb=xlabel('MYSI contact (s)');
+% %     xlb=xlabel('MYSI sensitivity (s)');
 % %     xlb.Position(2)=-1e13;
 % %     
 % %     if plot_log_si
@@ -1316,7 +1328,7 @@ if si_contact_log
 % % 
 % %     ylim([0,bro_lim]*1e13)
 % %     xlim(si_x_lim2)    
-% %     xlb=xlabel('MYSI contact (s)');
+% %     xlb=xlabel('MYSI sensitivity (s)');
 % %     xlb.Position(2)=-1e13;
 % %     
 % %     if plot_log_si
@@ -1643,6 +1655,7 @@ function plot_mean_std(xx,yy,edges,text_size,wdir_str,subplot_id,fliplabels)
             'fontsize',text_size,'HorizontalAlignment',x2_align)
     end
 %     tmp=corrcoef(exp(xx),yy);
+%     tmp=corrcoef(xx,yy);
 %     tmp(1,2)^2
     
 end
