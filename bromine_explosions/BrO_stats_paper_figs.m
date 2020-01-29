@@ -16,16 +16,16 @@ function BrO_stats_paper_figs()
 presentation_plots=0;
 
 windrose=0;
-plot_box=1;
+plot_box=0;
 plot_box_weather=0;
-bro_dailymean=1;
+bro_dailymean=0;
 plot_pca=0;
-weather_corr=1;
-o3_aer_wspd=1;
-sens_map=0;
-plot_ssa=1;
+weather_corr=0;
+o3_aer_wspd=0;
+sens_map=1;
+plot_ssa=0;
 
-si_contact_log=1;
+si_contact_log=0;
 plot_log_si=1; % log scale for SI contact axes
 btraj_len='3'; % length of back trajectories
 
@@ -42,8 +42,10 @@ box_lw=1.5;
 box_outlier=4; % outlier size for box plots
     
 % plotting limits for BrO scatter plots 
-bro_lim_full=12.5; %*e13, all data
-bro_lim=8; %*e13, 7 values are above 8e13
+bro_lim_full=16.5; %*e13, all data
+bro_lim=12.5; %*e13, 7 values are above 8e13
+%%% v1 plots with all 1ppt a priori surf conc: bro_lim_full=12.5; bro_lim=8;
+
 
 % plotting aids
 % c_list={'r','g','b','m','c'};
@@ -554,29 +556,6 @@ if weather_corr
     set(findall(gcf,'-property','FontSize'),'FontSize',fig_fs)
     set(findall(gcf,'-property','FontName'),'FontName',fig_font)
 
-    % add arrows to indicate missing data
-    % arrow y coords:
-    arr_y=[7.4,7.8,7.4]*1e13; 
-        
-    axes(fig_ax(1))
-    fill([2.68,2.91,3.14],arr_y,'b','edgecolor','none')
-    text(3.22,mean(arr_y(1:2)),'\times3, ~10e13', 'color','k',...
-        'fontsize',arr_txt_fs,'HorizontalAlignment','left','FontName',fig_font)
-    
-    axes(fig_ax(3))
-    fill([2.03,2.475,2.92],arr_y,'b','edgecolor','none')    
-    text(3,mean(arr_y(1:2)),'\times4, ~9e13', 'color','k',...
-        'fontsize',arr_txt_fs,'HorizontalAlignment','left','FontName',fig_font)
-    
-    axes(fig_ax(4))
-    fill([-30.365,-29.565,-28.765],arr_y,'b','edgecolor','none')
-    text(-28.6,mean(arr_y(1:2)),'\times3, ~10e13', 'color','k',...
-        'fontsize',arr_txt_fs,'HorizontalAlignment','left','FontName',fig_font)
-    
-    axes(fig_ax(6))
-    fill([-35.99,-35.19,-34.39],arr_y,'b','edgecolor','none')    
-    text(-34.2,mean(arr_y(1:2)),'\times4, ~9e13', 'color','k',...
-        'fontsize',arr_txt_fs,'HorizontalAlignment','left','FontName',fig_font)
     
     save_pdf(save_figs, 'BrO_weather')
     
@@ -957,29 +936,6 @@ if plot_ssa
     set(findall(gcf,'-property','FontSize'),'FontSize',fig_fs)
     set(findall(gcf,'-property','FontName'),'FontName',fig_font)
     
-    % add arrows to indicate missing data
-    % arrow y coords:
-    arr_y=[7.4,7.8,7.4]*1e13; 
-    
-    axes(fig_ax(4))
-    fill([4.34,4.425,4.51],arr_y,'b','edgecolor','none')
-    text(3,mean(arr_y(1:2)),'\times3, ~10e13', 'color','k',...
-        'fontsize',arr_txt_fs,'HorizontalAlignment','left','FontName',fig_font)
-    
-    axes(fig_ax(6))
-    fill([2.6,2.765,2.93],arr_y,'b','edgecolor','none')    
-    text(2.93,mean(arr_y(1:2)),'\times4, ~9e13', 'color','k',...
-        'fontsize',arr_txt_fs,'HorizontalAlignment','left','FontName',fig_font)
-    
-    axes(fig_ax(1))
-    fill([0.56,0.775,0.99],arr_y,'b','edgecolor','none')
-    text(-1.2,mean(arr_y(1:2)),'\times3, ~10e13', 'color','k',...
-        'fontsize',arr_txt_fs,'HorizontalAlignment','left','FontName',fig_font)
-    
-    axes(fig_ax(3))
-    fill([-0.15,-0.03,0.09],arr_y,'b','edgecolor','none')    
-    text(-1.75,mean(arr_y(1:2)),'\times4, ~9e13', 'color','k',...
-        'fontsize',arr_txt_fs,'HorizontalAlignment','left','FontName',fig_font)
     
     save_pdf(save_figs, 'aer_corr')
     
@@ -1345,57 +1301,7 @@ if si_contact_log
     set(findall(gcf,'-property','FontName'),'FontName',fig_font)
     
     
-    %%% add arrows to indicate missing data
-    % arrow y coords:
-    arr_y=[7.4,7.8,7.4]*1e13; 
-    
     if plot_log_si
-        
-        %%% FYSI %%%        
-        axes(fig_ax(1))
-        fill([11.71,11.91,12.11],arr_y,'b','edgecolor','none')
-        text(9.1,mean(arr_y(1:2)),'\times3, ~10e13', 'color','k',...
-            'fontsize',arr_txt_fs,'HorizontalAlignment','left','FontName',fig_font)
-
-        axes(fig_ax(2))
-        fill([si_x_lim(1),si_x_lim(1)-0.5,si_x_lim(1)]+0.9,...
-             [1.48,1.925,2.36]*1e13,'b','edgecolor','none')
-        text(4.6,2.5e13,'\times7, ~4.5', 'color','k',...
-            'fontsize',arr_txt_fs,'HorizontalAlignment','left','FontName',fig_font,'rotation',90)
-
-        axes(fig_ax(3))
-        fill([9.7,9.9,10.1],arr_y,'b','edgecolor','none')    
-        text(7.3,mean(arr_y(1:2)),'\times4, ~9e13', 'color','k',...
-            'fontsize',arr_txt_fs,'HorizontalAlignment','left','FontName',fig_font)
-        
-        %%% All SI %%%        
-        axes(fig_ax(4))
-        fill([11.71,11.91,12.11],arr_y,'b','edgecolor','none')
-        text(9.1,mean(arr_y(1:2)),'\times3, ~10e13', 'color','k',...
-            'fontsize',arr_txt_fs,'HorizontalAlignment','left','FontName',fig_font)
-
-        axes(fig_ax(5))
-        fill([si_x_lim(1),si_x_lim(1)-0.5,si_x_lim(1)]+1.2,...
-             [1.45,1.79,2.13]*1e13,'b','edgecolor','none')
-        text(4.75,2e13,'\times4, ~10', 'color','k',...
-            'fontsize',arr_txt_fs,'HorizontalAlignment','left','FontName',fig_font,'rotation',90)
-
-        axes(fig_ax(6))
-        fill([9.7,9.9,10.1],arr_y,'b','edgecolor','none')    
-        text(7.3,mean(arr_y(1:2)),'\times4, ~9e13', 'color','k',...
-            'fontsize',arr_txt_fs,'HorizontalAlignment','left','FontName',fig_font)
-        
-% %         %%% MYSI %%%
-% %         axes(fig_ax(4))
-% %         fill([30.38,30.93,31.48],arr_y,'b','edgecolor','none')
-% %         text(22.9,mean(arr_y(1:2)),'\times3, ~10e13', 'color','k',...
-% %             'fontsize',arr_txt_fs,'HorizontalAlignment','left','FontName',fig_font)
-% % 
-% %         axes(fig_ax(6))
-% %         fill([29.84,30.39,30.94],arr_y,'b','edgecolor','none')    
-% %         text(22.95,mean(arr_y(1:2)),'\times4, ~9e13', 'color','k',...
-% %             'fontsize',arr_txt_fs,'HorizontalAlignment','left','FontName',fig_font)
-
         save_pdf(save_figs, 'SI_contact_log')
     else
         save_pdf(save_figs, 'SI_contact')
@@ -1511,6 +1417,7 @@ function save_pdf(save_figs, fname)
             % bitmap pdf images
             %%% sens_map size: 
             %%% set(gcf, 'Position', [100, 100, 1000, 1000]);
+            %%% AFTER position is set: copy-paste first 4 lines (h=gcf, etc)
             %%% f_out=['/home/kristof/work/documents/paper_bro/figures/sens_map.pdf'];
             f_out=['/home/kristof/work/documents/paper_bro/figures/' fname '.pdf'];
             print(h,f_out,'-dpdf','-r200','-opengl')

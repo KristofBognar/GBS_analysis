@@ -152,6 +152,13 @@ for f=1:5 % back traj length in days
     end
 end
 
+%% add length and mixing layer details for 3day back traj
+load('/home/kristof/work/BEEs/trajectory_details/FP_trajectory_details_3day.mat')
+
+bee_fp.length_3day=traj_details.length;
+bee_fp.mix_height_3day=traj_details.mixing_height;
+bee_fp.frac_in_mix_3day=traj_details.frac_in_mix;   
+
 %% save file
 
 % remove NaNs (FP rauns where all BrO measurements were filtered out)

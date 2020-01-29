@@ -14,18 +14,23 @@ while ~good_input
     if disp_txt
         disp(['Select a priori for BrO data'])
         disp('(1): All BrO a priori surf. conc. at 1 ppt (files replaced with new retrievals)')
-        disp('(5): Some BrO a priori surf. conc. at 1 ppt, some at 5 (original retrieval)')
+        disp('(5): All BrO a priori surf. conc. at 5 ppt (files replaced with new retrievals)')
+        disp('(0): Some BrO a priori surf. conc. at 1 ppt, some at 5 (original retrieval)')
         disp_txt=0;
     end
     tmp=input('','s');
 
     if str2double(tmp)==1
-        use_all_1ppt=1;
+        change_apriori_ppt=1;
         disp('Using all 1 ppt surf. conc.')
         good_input=1;
     elseif str2double(tmp)==5
-        use_all_1ppt=0;
-        disp('Using original retrieval (1 or 5 ppt surf. conc.)')
+        change_apriori_ppt=5;
+        disp('Using all 5 ppt surf. conc.')
+        good_input=1;
+    elseif str2double(tmp)==0
+        change_apriori_ppt=0;
+        disp('Using original retrieval (variable 1 or 5 ppt surf. conc.)')
         good_input=1;
     else
         disp('Please enter 1 or 5')
@@ -49,46 +54,72 @@ prof_aer_err=prof_err;
 info_aer=info;
 
 % replace BrO profiles
-if use_all_1ppt
+if change_apriori_ppt
     
-    % rerun of BrO with all 5 ppt suf conc set to 1
-    load(['/home/kristof/work/profile_retrievals/profile_results/',...
-          'eureka_1_surf_ppt_5to1/tracegas/profiles_1_filt.mat'])
-
-    prof_1_ppt=prof;
-    prof_1_ppt_err=prof_err;
-    prof_nd_1_ppt=prof_nd;
-    prof_nd_1_ppt_err=prof_nd_err;
-    avk_1ppt=avk;
+    if change_apriori_ppt==1
+        % rerun of BrO with all 5 ppt suf conc set to 1
+        load(['/home/kristof/work/profile_retrievals/profile_results/',...
+              'eureka_1_surf_ppt_5to1/tracegas/profiles_1_filt.mat'])
+        old_ppt=5;
+    elseif change_apriori_ppt==5
+        % rerun of BrO with all 1 ppt suf conc set to 5
+        load(['/home/kristof/work/profile_retrievals/profile_results/',...
+              'eureka_1_surf_ppt_1to5/tracegas/profiles_1_filt.mat'])
+        old_ppt=1;
+    end
     
-    info_1_ppt=info;
-    times_1ppt=times;
+    prof_new_ppt=prof;
+    prof_new_ppt_err=prof_err;
+    prof_nd_new_ppt=prof_nd;
+    prof_nd_new_ppt_err=prof_nd_err;
+    avk_new_ppt=avk;
+    
+    info_new_ppt=info;
+    times_new_ppt=times;
     
     % BrO data
     load('/home/kristof/work/profile_retrievals/profile_results/tracegas_profiles_filt_all.mat');
 
-    % filtering by eleva ngles remains correct, just need to replace
+    % round datetimes to nearest second (some times are different by a fraction of a second)
+    times=dateshift(times, 'start', 'second', 'nearest');
+    times_new_ppt=dateshift(times_new_ppt, 'start', 'second', 'nearest');
+    
+    % filtering by elevation agles remains correct, just need to replace
     % profiles that appear in both datasets
-    [~,overwrite,new_ind]=intersect(times, times_1ppt);
+    [~,overwrite,new_ind]=intersect(times, times_new_ppt);
     
     % make sure to remove profiles that are in the original dataset, but
     % not in the 1ppt rerun (retrieval likely failed)
     apriori_orig=get_BrO_apriori(times);
     
-    if isequal(find(apriori_orig.surf_ppt==5),overwrite)
+    if isequal(find(apriori_orig.surf_ppt==old_ppt),overwrite)
         
-        info(overwrite,:)=info_1_ppt(new_ind,:);
+        info(overwrite,:)=info_new_ppt(new_ind,:);
 
-        prof(:,overwrite)=prof_1_ppt(:,new_ind);
-        prof_err(:,overwrite)=prof_1_ppt_err(:,new_ind);
+        prof(:,overwrite)=prof_new_ppt(:,new_ind);
+        prof_err(:,overwrite)=prof_new_ppt_err(:,new_ind);
 
-        prof_nd(:,overwrite)=prof_nd_1_ppt(:,new_ind);
-        prof_nd_err(:,overwrite)=prof_nd_1_ppt_err(:,new_ind);
+        prof_nd(:,overwrite)=prof_nd_new_ppt(:,new_ind);
+        prof_nd_err(:,overwrite)=prof_nd_new_ppt_err(:,new_ind);
 
-        avk(:,:,overwrite)=avk_1ppt(:,:,new_ind);
+        avk(:,:,overwrite)=avk_new_ppt(:,:,new_ind);
         
     else
         error('Deal with extra profiles')
+    end
+    
+    % check for extra profiles in new version
+    % shouldn't really happen, since original times include aer retrievals
+    % as well 
+    % seems to happen at either end of the nighttime gap, where there is a
+    % partial scan -- aer retrieval doesn't finish, original tg retrieval
+    % also doesn't but new version does somehow
+    % double check that all cases are as outlined above (can ignore those
+    % profiles since there's no matching aer data)
+    [~,extra_ind]=setdiff(times_new_ppt,times);
+    if ~isempty(extra_ind)
+        disp('Extra profiles are present:')
+        disp(times_new_ppt(extra_ind))
     end
     
 else
@@ -358,7 +389,7 @@ ptom_P_600=interp1(ptom_time,ptom_P_600_tmp,times,'linear','extrap')*1e-2;
 ptom_P_600_prev=interp1(ptom_time,ptom_P_600_tmp,times-duration(1,0,0),...
                         'linear','extrap')*1e-2;
 
-% sea ice/water/land contact from FLEXPART and sea ice age data
+%%% sea ice/water/land contact from FLEXPART and sea ice age data
 disp('Pairing sea ice contact data')
 
 surfaces={'FYSI', 'MYSI', 'water', 'land'};
@@ -371,17 +402,25 @@ for i=1:4 % surfaces
         if any(i==[1,2]) && any(j==[3])
             % exact calculation is available (sum of mean sensitivity in each cell)
             contact_labels=[contact_labels, {[surfaces{i} '_' num2str(j) 'day']}];
-            contact_all(:,(i-1)*5+j) = retrieve_SI_contact('exact',times,j,surfaces{i},'linear' );
+            contact_all(:,(i-1)*5+j) = retrieve_FP_details('SI_exact',times,j,'linear',surfaces{i});
         else
             % only approximate result was saved (mean sensitivity over all SI areas * n.o. cells)
             contact_labels=[contact_labels, {['approx_' surfaces{i} '_' num2str(j) 'day']}];
-            contact_all(:,(i-1)*5+j) = retrieve_SI_contact('approx',times,j,surfaces{i},'linear' );
+            contact_all(:,(i-1)*5+j) = retrieve_FP_details('SI_approx',times,j,'linear',surfaces{i});
         end
             
     end
 end
 
 contact_all=array2table(contact_all,'variablenames',contact_labels);
+
+% extra trajectory details (3day backtraj only)
+traj_details=table();
+
+traj_details.length_3day=retrieve_FP_details('traj_len',times,3,'linear');
+traj_details.mixing_height_3day=retrieve_FP_details('traj_hmix',times,3,'linear');
+traj_details.frac_in_mix_3day=retrieve_FP_details('traj_fmix',times,3,'linear');
+
 
 %% Create and save table
 disp('Saving results')
@@ -463,6 +502,7 @@ bee_dataset.ptom_P_600=ptom_P_600;
 bee_dataset.ptom_P_600_tend=ptom_P_600-ptom_P_600_prev;
 
 bee_dataset=[bee_dataset,contact_all];
+bee_dataset=[bee_dataset,traj_details];
 
 save('/home/kristof/work/BEEs/BEE_dataset_all.mat','bee_dataset')
 
