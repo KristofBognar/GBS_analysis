@@ -22,10 +22,10 @@ function create_retrieval_files()
 aer=0; % 1 for aerosol, 0 for BrO
 year=2019;
 
+% change a priori surface conc.; !!CHANGE_FOLDER SETTINGS TAKE PRECEDENCE!!
 use_uniform_BrO_surf_conc=5; % 0: use original (1 or 5 pptv)
                              % 1: set all surf. conc. to 1 pptv
                              % 5: set all surf. conc. to 5 pptv
-                             % change_folder setting takes precedence!
 
 % change number of aerosol iteration steps? 
 iter_step=[]; % leave at 5, as in template
@@ -38,11 +38,25 @@ if change_folder
 %     out_folder_name='aer_10iter';
 %     out_folder_name='surf_ppt_5to1'; % resets all 5 ppt suf conc to 1
     out_folder_name='surf_ppt_1to5'; % resets all 1 ppt suf conc to 5
+    rerun_prefix='rerun_'; % prefix for inp files
 else
     out_folder_name='';
     if ~isempty(iter_step), warning('Aer iterations changed, should use different folder'); end
+    rerun_prefix='';
 end
     
+if ~aer && change_folder
+    disp(['Change aerosol folder to ' out_folder_name '?'])
+    disp('(y): yes; (n): keep default ')
+    tmp=input('','s');
+    if strcmp(tmp,'y')
+        change_aer_folder=1;
+    elseif strcmp(tmp,'n')
+        change_aer_folder=0;
+    else
+        error('try again')
+    end
+end
 % start/stop times and BrO a priori are selected manually, and saved
 [dates,daily_times,apriori_BrO] = variable_init(year);
 
@@ -165,7 +179,7 @@ for i=1:length(dates)
         outfile{tmp+2}=apriori_BrO{i,2};
         
         % directory with aerosol results
-        if change_folder
+        if change_folder && change_aer_folder
             tmp=find_in_file(outfile,'Path to the aerosol retrieval results');
             outfile{tmp+3}=['C:\SCIATRAN2\AEROSOL_RETRIEVAL_v-1-2\Campaign\'...
                             out_folder_name '\'];
@@ -236,9 +250,9 @@ for i=1:length(dates)
     if ~exist(fpath,'dir'), mkdir(fpath); end
     
     if aer
-        fname=['aerosol_retrieval_' datestr(dates(i),'yymmdd') '.inp'];
+        fname=[ rerun_prefix 'aerosol_retrieval_' datestr(dates(i),'yymmdd') '.inp'];
     else
-        fname=['tracegas_retrieval_' datestr(dates(i),'yymmdd') '.inp'];
+        fname=[ rerun_prefix 'tracegas_retrieval_' datestr(dates(i),'yymmdd') '.inp'];
     end
     
     file_tmp = fopen([fpath fname],'w');

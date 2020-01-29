@@ -299,6 +299,7 @@ function merge_and_save(f_list, save_name, filter, year)
 
     if filter
 
+        %%% old version, not extra filter
 %         if length(unique(times.Year))==1 % one year only, original filtering works
 %             % filter data 
 %             if year<=2015 % only include full scans for 2015 and before, except 2010

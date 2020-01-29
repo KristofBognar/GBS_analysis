@@ -1,5 +1,6 @@
 
 % plot and save retrieved aerosol and tracegas profiles
+% This code saves results by day, use Merge_profiles.m to create yearly files
 
 %% input parameters
 
@@ -7,7 +8,7 @@
 % 'a' for aerosol, 'tg' for tracegas
 option='tg'; 
 
-% year=2019;
+% year=2018;
 year=1; % for reading tests/rerurns for multiple years
 
 % elevation correction used in the retrieval (to correctly read in number of elevs used)
@@ -26,7 +27,8 @@ default_version_eureka='Retrieval_settings_A';
 % version_eureka=default_version_eureka;
 % version_eureka='aer_10iter';
 % version_eureka='surf_ppt_10'; % for reading a priori test results
-version_eureka='surf_ppt_5to1'; % surf conc = 5 ppt replaced with 1 ppt
+% version_eureka='surf_ppt_5to1'; % surf conc = 5 ppt replaced with 1 ppt
+version_eureka='surf_ppt_1to5'; % surf conc = 1 ppt replaced with 5 ppt
 
 
 
