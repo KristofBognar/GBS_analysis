@@ -1,7 +1,7 @@
 % to plot maxdoas results for PEARL-GBS
 
 
-load('/home/kristof/aurora/ground/eureka/gbs/pearl-gbs/2016/output/maxdoas_d66-131.mat')
+% load('/home/kristof/aurora/ground/eureka/gbs/pearl-gbs/2016/output/maxdoas_d66-131.mat')
 % load('/home/kristof/aurora/ground/eureka/gbs/pearl-gbs/2010/QDOAS_output/maxdoas_d84-151.mat')
 % load('/home/kristof/work/GBS/PEARL-GBS/2018/QDOAS_output/maxdoas_d64-151.mat')
 % load('/home/kristof/work/GBS/PEARL-GBS/2019/QDOAS_output/maxdoas_d64-151.mat')
@@ -20,6 +20,8 @@ subtract=1; % convert to fractional date
 
 day1 = 64; 
 day2 = 152;
+% day1 = 210; 
+% day2 = 285;
 
 
 %% set up the plot
@@ -34,7 +36,7 @@ colors={'r.','g.','b.','y.','m.','c.','k.','ko'};
 legends=cell(1,length(elevs));
 
 % initialize figure
-figure(99)
+figure(98)
 % figure('Position', [100, 100, 1410, 1050])
 set(gcf, 'Position', [100, 100, 900, 600]);
 

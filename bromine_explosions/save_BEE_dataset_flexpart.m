@@ -9,7 +9,8 @@ function save_BEE_dataset_flexpart()
 %% setup
 
 flex_dir='/home/kristof/atmosp_servers/export/data/home/kbognar/FLEXPART_10.02/';
-flex_folder='BrO_back_runs_v1';
+% flex_folder='BrO_back_runs_v1';
+flex_folder='BrO_back_runs_v2';
 
 
 % load BrO dataset

@@ -22,15 +22,15 @@ bro_dailymean=0;
 plot_pca=0;
 weather_corr=0;
 o3_aer_wspd=0;
-sens_map=1;
+sens_map=0;
 plot_ssa=0;
 
-si_contact_log=0;
+si_contact_log=1;
 plot_log_si=1; % log scale for SI contact axes
 btraj_len='3'; % length of back trajectories
 
 % 0 to not save, 1 to save as pdf, 2 to save as jpg
-save_figs=0;
+save_figs=1;
 
 % uniform look
 fig_fs=14; % font size on figures
@@ -81,6 +81,8 @@ bee_dataset(bee_dataset.times.Year==2015,:)=[];
 % bee_dataset(bee_dataset.bro_col<prctile(bee_dataset.bro_col,50),:)=[]; % above Q3
 % bee_dataset(bee_dataset.wspd_ms>6,:)=[];
 % bee_dataset(bee_dataset.o3_surf<=15,:)=[];
+% bee_dataset(bee_dataset.length_3day<=750,:)=[];
+% bee_dataset(bee_dataset.mixing_height_3day>300,:)=[];
 %%%
 
 % setup wdir indices
@@ -327,8 +329,10 @@ if bro_dailymean
     
     % plot figure
     figure
-    set(gcf, 'Position', [100, 100, 1000, 600]);
-    fig_ax = tight_subplot(4,1,[0.065,0.04],[0.12,0.068],[0.088,0.04]);
+%     set(gcf, 'Position', [100, 100, 1000, 600]);
+%     fig_ax = tight_subplot(4,1,[0.065,0.04],[0.12,0.068],[0.088,0.04]);
+    set(gcf, 'Position', [100, 100, 1000, 700]);
+    fig_ax = tight_subplot(4,1,[0.065,0.04],[0.104,0.06],[0.088,0.04]);
     
     box_w=0.7; % box width in days
     
@@ -359,7 +363,7 @@ if bro_dailymean
                   
         end
 
-        grid on
+        grid on;
         ylim([-0.5,bro_lim_full]*1e13)
         xlim([datenum(yr,3,1),datenum(yr,6,2)])
         
@@ -854,7 +858,7 @@ if plot_ssa
     ylim([0,bro_lim]*1e13)
     xlim([0,xlim_end])    
     xlb=xlabel(x_label);
-    xlb.Position(2)=-9e12;
+    xlb.Position(2)=-bro_lim*(9/8)*1e12;
     ylb=ylabel('BrO part. col. (molec cm^{-2})'); 
     ylb.Position(1)=-0.68;
     ylb.Position(2)=bro_lim*1e13/2;
@@ -870,7 +874,7 @@ if plot_ssa
     ylim([0,bro_lim]*1e13)
     xlim([0,xlim_end])    
     xlb=xlabel(x_label);
-    xlb.Position(2)=-9e12;
+    xlb.Position(2)=-bro_lim*(9/8)*1e12;
 
     % all other wind directions
     axes(fig_ax(6))
@@ -882,7 +886,7 @@ if plot_ssa
     ylim([0,bro_lim]*1e13)
     xlim([0,xlim_end])    
     xlb=xlabel(x_label);
-    xlb.Position(2)=-9e12;
+    xlb.Position(2)=-bro_lim*(9/8)*1e12;
 
     
     %%% AOD corr
@@ -1021,7 +1025,7 @@ if si_contact_log
     ylb.Position(2)=bro_lim*1e13/2;
     
     xlb=xlabel('FYI sensitivity (s)');
-    xlb.Position(2)=-11e12;
+    xlb.Position(2)=-bro_lim*(11/8)*1e12;
 
     if plot_log_si
         set(gca,'XTick',log([10,1e2,1e3,1e4,1e5]))
@@ -1043,7 +1047,7 @@ if si_contact_log
     ylim([0,bro_lim]*1e13)
     xlim(si_x_lim)    
     xlb=xlabel('FYI sensitivity (s)');
-    xlb.Position(2)=-11e12;
+    xlb.Position(2)=-bro_lim*(11/8)*1e12;
     
     if plot_log_si
         set(gca,'XTick',log([10,1e2,1e3,1e4,1e5]))
@@ -1066,7 +1070,7 @@ if si_contact_log
     ylim([0,bro_lim]*1e13)
     xlim(si_x_lim)    
     xlb=xlabel('FYI sensitivity (s)');
-    xlb.Position(2)=-11e12;
+    xlb.Position(2)=-bro_lim*(11/8)*1e12;
     
     if plot_log_si
         set(gca,'XTick',log([10,1e2,1e3,1e4,1e5]))
@@ -1129,7 +1133,7 @@ if si_contact_log
     ylb.Position(2)=bro_lim*1e13/2;
     
     xlb=xlabel('Total ice sensitivity (s)');
-    xlb.Position(2)=-11e12;
+    xlb.Position(2)=-bro_lim*(11/8)*1e12;
 
     if plot_log_si
         set(gca,'XTick',log([10,1e2,1e3,1e4,1e5]))
@@ -1151,7 +1155,7 @@ if si_contact_log
     ylim([0,bro_lim]*1e13)
     xlim(si_x_lim)    
     xlb=xlabel('Total ice sensitivity (s)');
-    xlb.Position(2)=-11e12;
+    xlb.Position(2)=-bro_lim*(11/8)*1e12;
     
     if plot_log_si
         set(gca,'XTick',log([10,1e2,1e3,1e4,1e5]))
@@ -1174,7 +1178,7 @@ if si_contact_log
     ylim([0,bro_lim]*1e13)
     xlim(si_x_lim)    
     xlb=xlabel('Total ice sensitivity (s)');
-    xlb.Position(2)=-11e12;
+    xlb.Position(2)=-bro_lim*(11/8)*1e12;
     
     if plot_log_si
         set(gca,'XTick',log([10,1e2,1e3,1e4,1e5]))
@@ -1302,9 +1306,9 @@ if si_contact_log
     
     
     if plot_log_si
-        save_pdf(save_figs, 'SI_contact_log')
+        save_pdf(save_figs, 'SI_sens_log')
     else
-        save_pdf(save_figs, 'SI_contact')
+        save_pdf(save_figs, 'SI_sens')
     end
     
     
