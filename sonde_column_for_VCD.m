@@ -1,8 +1,18 @@
+%%% script to generate ozone column inputs required for VCD retrieval
+%%% code loads ozonesonde data saved by read_ozonesonde.m
+%%%
+%%% change start_year and end_year before running the script
 
-% % load radnom VCD input file (all have sonde data up to 2012 from Cristen/Xiaoyi)
-% load /home/kristof/work/GBS/PEARL-GBS/2017/VCD/vcd_input.mat
+% load old VCD input file 
+if ismac
+    error('Get sample VCD file and set up path')
+elseif isunix
 
-load /home/kristof/work/ozonesonde/Eureka/sonde_for_VCD.mat
+    file_path='/home/kristof/work/ozonesonde/Eureka/';
+    sonde_path='/home/kristof/work/ozonesonde/Eureka/';
+    
+    load([file_path 'sonde_for_VCD.mat'])
+end
 
 clearvars -except sonde
 
@@ -12,11 +22,12 @@ ft=[];
 o3=[];
 
 start_yr=2018;
+end_year=2020;
 
 % load total columns from ozonesonde files
-for year=start_yr:2019
+for year=start_yr:end_year
     
-    load(['/home/kristof/work/ozonesonde/Eureka/o3sonde_' num2str(year) '.mat'])
+    load([sonde_path 'o3sonde_' num2str(year) '.mat'])
     
     % get year, day of year and fractional time
     formstr='yyyy-mm-dd HH:MM:SS';
@@ -53,6 +64,5 @@ sonde=[sonde;sonde2];
 
 clearvars -except sonde
 
-save /home/kristof/work/ozonesonde/Eureka/sonde_for_VCD.mat
-
+save([file_path 'sonde_for_VCD.mat'])
 
