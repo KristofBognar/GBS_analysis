@@ -663,7 +663,7 @@ if sens_map
     
     
     % load sensitivity and back trajectory data
-    load('/home/kristof/berg/FLEXPART_10.02/BrO_back_runs_v1/BrO_back_runs_v1_3day.mat')
+    load('/home/kristof/berg/FLEXPART_10.02/BrO_back_runs_v2/BrO_back_runs_v2_3day.mat')
 % % %     latitude=1;
 % % %     longitude=1;
 % % %     sensitivities=1;
@@ -992,9 +992,9 @@ if si_contact_log
         
         plot_y=bee_fp.bro_mean_col;
         if plot_log_si
-            plot_x=log(bee_fp.fysi_3day);
+            plot_x=log(bee_fp.FYSI_3day);
         else
-            plot_x=bee_fp.fysi_3day;
+            plot_x=bee_fp.FYSI_3day;
         end
         
         ind_fp=(~isnan(plot_x) & plot_x>0 & ~isnan(plot_y)); %skip few zero values
@@ -1106,7 +1106,7 @@ if si_contact_log
     else % plot contact value for each FP run, as a function of the mean BrO column
         
         plot_y=bee_fp.bro_mean_col;
-        plot_x=bee_fp.fysi_3day;
+        plot_x=bee_fp.FYSI_3day;
         
         ind_N_tmp=(bee_fp.wdir==1);
         ind_SE_tmp=(bee_fp.wdir==2);
@@ -1213,7 +1213,7 @@ if si_contact_log
 % %     else % plot using FP runs, with calculated mean BrO for each
 % %         
 % %         plot_y=bee_fp.bro_mean_col;
-% %         plot_x=bee_fp.mysi_3day;
+% %         plot_x=bee_fp.MYSI_3day;
 % %         
 % %         ind_N_tmp=(bee_fp.wdir==1);
 % %         ind_SE_tmp=(bee_fp.wdir==2);

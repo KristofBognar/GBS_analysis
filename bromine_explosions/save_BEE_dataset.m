@@ -4,6 +4,15 @@ function save_BEE_dataset()
 % high frequency observations are averaged for the time coverage of each profile
 % low frequency observations are interpolated to the mean profile time
 
+%% skip 2015
+
+disp(' ')
+fprintf('<strong>Excluding 2015 profiles </strong>\n')
+disp('If needed, modify code, and run flexpart for 2015!')
+disp(' ')
+
+exclude_2015=1;
+
 %% select a priori for BrO data!
     
 good_input=0;
@@ -125,7 +134,7 @@ if change_apriori_ppt
 else
     
     % BrO data
-    load('/home/kristof/work/profile_retrievals/profile_results/tracegas_profiles_filt_all.mat');    
+    load('/home/kristof/work/profile_retrievals/profile_results/tracegas_profiles_filt_all.mat');  
     
 end
 
@@ -135,7 +144,11 @@ load('/home/kristof/work/profile_retrievals/retr_times.mat');
 
 
 %%% Filter BrO profiles
-ind_bad=find( info.DOFS<0.7 | info_aer.DOFS<0.7 | info_aer.col>5);
+if exclude_2015
+    ind_bad=find( info.DOFS<0.7 | info_aer.DOFS<0.7 | info_aer.col>5 | times.Year==2015);
+else
+    ind_bad=find( info.DOFS<0.7 | info_aer.DOFS<0.7 | info_aer.col>5);
+end
 
 times(ind_bad)=[];
 info(ind_bad,:)=[];
@@ -394,20 +407,35 @@ disp('Pairing sea ice contact data')
 
 surfaces={'FYSI', 'MYSI', 'water', 'land'};
 
-contact_all=NaN(length(times),20);
+% contact_all=NaN(length(times),20);
+contact_all=[];
 contact_labels={};
 
 for i=1:4 % surfaces
     for j=1:5 % back traj length in days
-        if any(i==[1,2]) && any(j==[3])
-            % exact calculation is available (sum of mean sensitivity in each cell)
+        
+        % get ice contact
+        tmp=retrieve_FP_details('SI_exact',times,j,'linear',surfaces{i});
+
+        % code returns all NaNs is requred surface+btlen file doesn't
+        % exist; only save if real data is returned
+        if sum(isnan(tmp))~=length(tmp)
+            contact_all=[contact_all,tmp];
             contact_labels=[contact_labels, {[surfaces{i} '_' num2str(j) 'day']}];
-            contact_all(:,(i-1)*5+j) = retrieve_FP_details('SI_exact',times,j,'linear',surfaces{i});
-        else
-            % only approximate result was saved (mean sensitivity over all SI areas * n.o. cells)
-            contact_labels=[contact_labels, {['approx_' surfaces{i} '_' num2str(j) 'day']}];
-            contact_all(:,(i-1)*5+j) = retrieve_FP_details('SI_approx',times,j,'linear',surfaces{i});
         end
+        
+% %     old code for v1 runs where approc calculation was available for all surfaces/bt length   
+%         if any(i==[1,2]) && any(j==[3])
+%             % exact calculation is available (sum of mean sensitivity in each cell)
+%             contact_labels=[contact_labels, {[surfaces{i} '_' num2str(j) 'day']}];
+%             contact_all(:,(i-1)*5+j)=...
+%               retrieve_FP_details('SI_exact',times,j,'linear',surfaces{i});
+%         else
+%             % only approximate result was saved (mean sens over all SI areas * n.o. cells)
+%             contact_labels=[contact_labels, {['approx_' surfaces{i} '_' num2str(j) 'day']}];
+%             contact_all(:,(i-1)*5+j)=...
+%               retrieve_FP_details('SI_approx',times,j,'linear',surfaces{i});
+%         end
             
     end
 end

@@ -112,46 +112,28 @@ bee_fp.dT_mean=run_mean_dT;
 
 %% add ice /water/land contact times
 
-for f=1:5 % back traj length in days
+% change to SI contact output folder
+cur_dir=pwd;
+cd('/home/kristof/work/BEEs/flexpart_SI_contact/');
 
-    if f==3
-        
-        load(['/home/kristof/work/BEEs/flexpart_SI_contact/FP_FYSI_contact_'...
-              num2str(f) 'day.mat'])
-        eval(['bee_fp.fysi_' num2str(f) 'day=FP_SI_contact.contact;']);
+tmp=dir('FP_*');
+f_list = {tmp.name};
 
-        load(['/home/kristof/work/BEEs/flexpart_SI_contact/FP_MYSI_contact_'...
-              num2str(f) 'day.mat'])
-        eval(['bee_fp.mysi_' num2str(f) 'day=FP_SI_contact.contact;']);
-
-        load(['/home/kristof/work/BEEs/flexpart_SI_contact/approximate/FP_water_contact_'...
-              num2str(f) 'day.mat'])
-        eval(['bee_fp.approx_water_' num2str(f) 'day=FP_SI_contact.contact;']);
-
-        load(['/home/kristof/work/BEEs/flexpart_SI_contact/approximate/FP_land_contact_'...
-              num2str(f) 'day.mat'])
-        eval(['bee_fp.approx_land_' num2str(f) 'day=FP_SI_contact.contact;']);
-        
-    else
-        
-        load(['/home/kristof/work/BEEs/flexpart_SI_contact/approximate/FP_FYSI_contact_'...
-              num2str(f) 'day.mat'])
-        eval(['bee_fp.approx_fysi_' num2str(f) 'day=FP_SI_contact.contact;']);
-
-        load(['/home/kristof/work/BEEs/flexpart_SI_contact/approximate/FP_MYSI_contact_'...
-              num2str(f) 'day.mat'])
-        eval(['bee_fp.approx_mysi_' num2str(f) 'day=FP_SI_contact.contact;']);
-
-        load(['/home/kristof/work/BEEs/flexpart_SI_contact/approximate/FP_water_contact_'...
-              num2str(f) 'day.mat'])
-        eval(['bee_fp.approx_water_' num2str(f) 'day=FP_SI_contact.contact;']);
-
-        load(['/home/kristof/work/BEEs/flexpart_SI_contact/approximate/FP_land_contact_'...
-              num2str(f) 'day.mat'])
-        eval(['bee_fp.approx_land_' num2str(f) 'day=FP_SI_contact.contact;']);
+% save only existing surface+bt_len datasets
+for i=1:length(f_list)
     
-    end
+    % get filename for table header
+    tmp=strsplit(char(f_list{i}),'_');
+    
+    %load file
+    load(f_list{i});
+    
+    % save data
+    eval(['bee_fp.' tmp{2} '_' tmp{4}(1:end-4) '=FP_SI_contact.contact;']);
+    
 end
+
+cd(cur_dir);
 
 %% add length and mixing layer details for 3day back traj
 load('/home/kristof/work/BEEs/trajectory_details/FP_trajectory_details_3day.mat')
