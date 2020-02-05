@@ -337,70 +337,70 @@ o3_mean=interp1(surf_o3_hourly.DateTime,surf_o3_hourly.o3_ppb,times,'linear');
 
 
 %%% pTOMCAT data
-disp('Pairing pTOMCAT data')
-
-% 0-4 km column
-ptom_col_bro_out=interp1(ptom_time,ptom_col_bro,times,'linear','extrap');
-
-% surface conc.
-ptom_surf_bro_out=interp1(ptom_time,ptom_prof_bro(1,:),times,'linear','extrap');
-ptom_surf_o3_out=interp1(ptom_time,ptom_prof_o3(1,:),times,'linear','extrap');
-
-% supermicron aerosol profiles (both sea ice sourced and open ocean sourced)
-% from ~1 micron to 10 micron
-sism=sum(ptom_sissa(:,:,14:20),3); 
-oosm=sum(ptom_oossa(:,:,14:20),3); 
-
-% accumulation mode aerosol profiles (both sea ice sourced and open ocean sourced)
-% from ~0.1 micron to 0.5 micron
-sism_accum=sum(ptom_sissa(:,:,7:11),3); 
-oosm_accum=sum(ptom_oossa(:,:,7:11),3); 
-
-% interpolate aerosol to ridge lab altitude
-sism_rl=NaN(1,length(ptom_time_ssa));
-oosm_rl=NaN(1,length(ptom_time_ssa));
-sism_rl_accum=NaN(1,length(ptom_time_ssa));
-oosm_rl_accum=NaN(1,length(ptom_time_ssa));
-
-for i=1:length(ptom_time_ssa)
-    sism_rl(i)=interp1(ptom_alt_ssa(:,i),sism(:,i),610,'linear');
-    oosm_rl(i)=interp1(ptom_alt_ssa(:,i),oosm(:,i),610,'linear');
-    sism_rl_accum(i)=interp1(ptom_alt_ssa(:,i),sism_accum(:,i),610,'linear');
-    oosm_rl_accum(i)=interp1(ptom_alt_ssa(:,i),oosm_accum(:,i),610,'linear');
-end
-
-% interpolate aerosol to BrO profile times
-ptom_sissa=interp1(ptom_time_ssa,sism_rl,times,'linear','extrap');
-ptom_oossa=interp1(ptom_time_ssa,oosm_rl,times,'linear','extrap');
-ptom_sissa_accum=interp1(ptom_time_ssa,sism_rl_accum,times,'linear','extrap');
-ptom_oossa_accum=interp1(ptom_time_ssa,oosm_rl_accum,times,'linear','extrap');
-
-% T and P from pTOMCAT data
-% interpolate to ridge lab altitude
-ptom_T_0_tmp=ptom_T(1,:);
-ptom_T_200_tmp=NaN(1,length(ptom_time));
-ptom_T_600_tmp=NaN(1,length(ptom_time));
-
-ptom_P_0_tmp=ptom_P(1,:);
-ptom_P_600_tmp=NaN(1,length(ptom_time));
-
-for i=1:length(ptom_time)
-    ptom_T_200_tmp(i)=interp1(ptom_alt(:,i),ptom_T(:,i),610,'linear');
-    ptom_T_600_tmp(i)=interp1(ptom_alt(:,i),ptom_T(:,i),610,'linear');
-    ptom_P_600_tmp(i)=interp1(ptom_alt(:,i),ptom_P(:,i),610,'linear');
-end
-
-% interpolate t and P to BrO profile times
-ptom_T_0=interp1(ptom_time,ptom_T_0_tmp,times,'linear','extrap')-273.15;
-ptom_T_200=interp1(ptom_time,ptom_T_200_tmp,times,'linear','extrap')-273.15;
-ptom_T_600=interp1(ptom_time,ptom_T_600_tmp,times,'linear','extrap')-273.15;
-
-ptom_P_0=interp1(ptom_time,ptom_P_0_tmp,times,'linear','extrap')*1e-2;
-ptom_P_0_prev=interp1(ptom_time,ptom_P_0_tmp,times-duration(1,0,0),...
-                      'linear','extrap')*1e-2;
-ptom_P_600=interp1(ptom_time,ptom_P_600_tmp,times,'linear','extrap')*1e-2;
-ptom_P_600_prev=interp1(ptom_time,ptom_P_600_tmp,times-duration(1,0,0),...
-                        'linear','extrap')*1e-2;
+% % disp('Pairing pTOMCAT data')
+% % 
+% % % 0-4 km column
+% % ptom_col_bro_out=interp1(ptom_time,ptom_col_bro,times,'linear','extrap');
+% % 
+% % % surface conc.
+% % ptom_surf_bro_out=interp1(ptom_time,ptom_prof_bro(1,:),times,'linear','extrap');
+% % ptom_surf_o3_out=interp1(ptom_time,ptom_prof_o3(1,:),times,'linear','extrap');
+% % 
+% % % supermicron aerosol profiles (both sea ice sourced and open ocean sourced)
+% % % from ~1 micron to 10 micron
+% % sism=sum(ptom_sissa(:,:,14:20),3); 
+% % oosm=sum(ptom_oossa(:,:,14:20),3); 
+% % 
+% % % accumulation mode aerosol profiles (both sea ice sourced and open ocean sourced)
+% % % from ~0.1 micron to 0.5 micron
+% % sism_accum=sum(ptom_sissa(:,:,7:11),3); 
+% % oosm_accum=sum(ptom_oossa(:,:,7:11),3); 
+% % 
+% % % interpolate aerosol to ridge lab altitude
+% % sism_rl=NaN(1,length(ptom_time_ssa));
+% % oosm_rl=NaN(1,length(ptom_time_ssa));
+% % sism_rl_accum=NaN(1,length(ptom_time_ssa));
+% % oosm_rl_accum=NaN(1,length(ptom_time_ssa));
+% % 
+% % for i=1:length(ptom_time_ssa)
+% %     sism_rl(i)=interp1(ptom_alt_ssa(:,i),sism(:,i),610,'linear');
+% %     oosm_rl(i)=interp1(ptom_alt_ssa(:,i),oosm(:,i),610,'linear');
+% %     sism_rl_accum(i)=interp1(ptom_alt_ssa(:,i),sism_accum(:,i),610,'linear');
+% %     oosm_rl_accum(i)=interp1(ptom_alt_ssa(:,i),oosm_accum(:,i),610,'linear');
+% % end
+% % 
+% % % interpolate aerosol to BrO profile times
+% % ptom_sissa=interp1(ptom_time_ssa,sism_rl,times,'linear','extrap');
+% % ptom_oossa=interp1(ptom_time_ssa,oosm_rl,times,'linear','extrap');
+% % ptom_sissa_accum=interp1(ptom_time_ssa,sism_rl_accum,times,'linear','extrap');
+% % ptom_oossa_accum=interp1(ptom_time_ssa,oosm_rl_accum,times,'linear','extrap');
+% % 
+% % % T and P from pTOMCAT data
+% % % interpolate to ridge lab altitude
+% % ptom_T_0_tmp=ptom_T(1,:);
+% % ptom_T_200_tmp=NaN(1,length(ptom_time));
+% % ptom_T_600_tmp=NaN(1,length(ptom_time));
+% % 
+% % ptom_P_0_tmp=ptom_P(1,:);
+% % ptom_P_600_tmp=NaN(1,length(ptom_time));
+% % 
+% % for i=1:length(ptom_time)
+% %     ptom_T_200_tmp(i)=interp1(ptom_alt(:,i),ptom_T(:,i),610,'linear');
+% %     ptom_T_600_tmp(i)=interp1(ptom_alt(:,i),ptom_T(:,i),610,'linear');
+% %     ptom_P_600_tmp(i)=interp1(ptom_alt(:,i),ptom_P(:,i),610,'linear');
+% % end
+% % 
+% % % interpolate t and P to BrO profile times
+% % ptom_T_0=interp1(ptom_time,ptom_T_0_tmp,times,'linear','extrap')-273.15;
+% % ptom_T_200=interp1(ptom_time,ptom_T_200_tmp,times,'linear','extrap')-273.15;
+% % ptom_T_600=interp1(ptom_time,ptom_T_600_tmp,times,'linear','extrap')-273.15;
+% % 
+% % ptom_P_0=interp1(ptom_time,ptom_P_0_tmp,times,'linear','extrap')*1e-2;
+% % ptom_P_0_prev=interp1(ptom_time,ptom_P_0_tmp,times-duration(1,0,0),...
+% %                       'linear','extrap')*1e-2;
+% % ptom_P_600=interp1(ptom_time,ptom_P_600_tmp,times,'linear','extrap')*1e-2;
+% % ptom_P_600_prev=interp1(ptom_time,ptom_P_600_tmp,times-duration(1,0,0),...
+% %                         'linear','extrap')*1e-2;
 
 %%% sea ice/water/land contact from FLEXPART and sea ice age data
 disp('Pairing sea ice contact data')
@@ -448,6 +448,10 @@ traj_details=table();
 traj_details.length_3day=retrieve_FP_details('traj_len',times,3,'linear');
 traj_details.mixing_height_3day=retrieve_FP_details('traj_hmix',times,3,'linear');
 traj_details.frac_in_mix_3day=retrieve_FP_details('traj_fmix',times,3,'linear');
+
+traj_details.length_5day=retrieve_FP_details('traj_len',times,5,'linear');
+traj_details.mixing_height_5day=retrieve_FP_details('traj_hmix',times,5,'linear');
+traj_details.frac_in_mix_5day=retrieve_FP_details('traj_fmix',times,5,'linear');
 
 
 %% Create and save table
@@ -513,21 +517,21 @@ bee_dataset.SMPS_100_500=smps_mean;
 
 bee_dataset.o3_surf=o3_mean;
 
-bee_dataset.bro_col_ptom=ptom_col_bro_out;
-bee_dataset.bro_surf_ptom=ptom_surf_bro_out;
-bee_dataset.o3_surf_ptom=ptom_surf_o3_out;
-bee_dataset.ptom_supermicron=ptom_sissa+ptom_oossa;
-bee_dataset.ptom_supermicron_si_frac=ptom_sissa./(ptom_sissa+ptom_oossa);
-bee_dataset.ptom_submicron=ptom_sissa_accum+ptom_oossa_accum;
-bee_dataset.ptom_submicron_si_frac=ptom_sissa_accum./(ptom_sissa_accum+ptom_oossa_accum);
-
-bee_dataset.ptom_T_0=ptom_T_0;
-bee_dataset.ptom_T_200=ptom_T_200;
-bee_dataset.ptom_T_600=ptom_T_600;
-bee_dataset.ptom_P_0=ptom_P_0;
-bee_dataset.ptom_P_0_tend=ptom_P_0-ptom_P_0_prev;
-bee_dataset.ptom_P_600=ptom_P_600;
-bee_dataset.ptom_P_600_tend=ptom_P_600-ptom_P_600_prev;
+% % bee_dataset.bro_col_ptom=ptom_col_bro_out;
+% % bee_dataset.bro_surf_ptom=ptom_surf_bro_out;
+% % bee_dataset.o3_surf_ptom=ptom_surf_o3_out;
+% % bee_dataset.ptom_supermicron=ptom_sissa+ptom_oossa;
+% % bee_dataset.ptom_supermicron_si_frac=ptom_sissa./(ptom_sissa+ptom_oossa);
+% % bee_dataset.ptom_submicron=ptom_sissa_accum+ptom_oossa_accum;
+% % bee_dataset.ptom_submicron_si_frac=ptom_sissa_accum./(ptom_sissa_accum+ptom_oossa_accum);
+% % 
+% % bee_dataset.ptom_T_0=ptom_T_0;
+% % bee_dataset.ptom_T_200=ptom_T_200;
+% % bee_dataset.ptom_T_600=ptom_T_600;
+% % bee_dataset.ptom_P_0=ptom_P_0;
+% % bee_dataset.ptom_P_0_tend=ptom_P_0-ptom_P_0_prev;
+% % bee_dataset.ptom_P_600=ptom_P_600;
+% % bee_dataset.ptom_P_600_tend=ptom_P_600-ptom_P_600_prev;
 
 bee_dataset=[bee_dataset,contact_all];
 bee_dataset=[bee_dataset,traj_details];
@@ -538,7 +542,7 @@ save('/home/kristof/work/BEEs/BEE_dataset_all.mat','bee_dataset')
 disp('Updating FLEXPART dataset')
 save_BEE_dataset_flexpart()
 
-try delete('/home/kristof/work/documents/paper_bro/data/daily_mean_BrO.mat'); end
+% try delete('/home/kristof/work/documents/paper_bro/data/daily_mean_BrO.mat'); end
 
 disp('Done')
 
