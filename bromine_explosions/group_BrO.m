@@ -108,32 +108,32 @@ for i=1:length(run_start)
             
         case 'wspd'
             % get mean column in selected period
-            mean_tmp=mean(tmp.wspd_ms);
+            mean_tmp=nanmean(tmp.wspd_ms);
             do_sort=1;
 
         case 'bro'
             % get mean column in selected period
-            mean_tmp=mean(tmp.bro_col);
+            mean_tmp=nanmean(tmp.bro_col);
             do_sort=1;
             
         case 'ssa_hm'
             % get mean aer concetration for sizes half micron and up
-            mean_tmp=mean(tmp.aer_halfmicron);
+            mean_tmp=nanmean(tmp.aer_halfmicron);
             do_sort=1;
 
         case 'ssa_sm'
             % get mean aer concetration for supermicron particles
-            mean_tmp=mean(tmp.aer_supermicron);
+            mean_tmp=nanmean(tmp.aer_supermicron);
             do_sort=1;
             
         case 'o3'
             % get mean surface ozone
-            mean_tmp=mean(tmp.o3_surf);
+            mean_tmp=nanmean(tmp.o3_surf);
             do_sort=1;
 
         case 'inv'
             % get mean T inversion between surface and lab
-            mean_tmp=mean(tmp.sonde_dT);
+            mean_tmp=nanmean(tmp.sonde_dT);
             do_sort=1;
             
     end
