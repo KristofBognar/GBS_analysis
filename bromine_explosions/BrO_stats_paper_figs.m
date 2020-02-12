@@ -20,17 +20,17 @@ plot_box=0;
 plot_box_weather=0;
 bro_dailymean=0;
 plot_pca=0;
-weather_corr=0;
+weather_corr=1;
 o3_aer_wspd=0;
 sens_map=0;
 plot_ssa=0;
 
-si_contact_log=1;
+si_contact_log=0;
 plot_log_si=1; % log scale for SI contact axes
 btraj_len='3'; % length of back trajectories
 
 % 0 to not save, 1 to save as pdf, 2 to save as jpg
-save_figs=1;
+save_figs=0;
 
 % uniform look
 fig_fs=14; % font size on figures
@@ -79,7 +79,7 @@ bee_dataset(bee_dataset.times.Year==2015,:)=[];
 % bee_dataset(bee_dataset.bro_col<mean(bee_dataset.bro_col_err)*3,:)=[];
 % 'high' BrO only 
 % bee_dataset(bee_dataset.bro_col<prctile(bee_dataset.bro_col,50),:)=[]; % above Q3
-% bee_dataset(bee_dataset.wspd_ms>6,:)=[];
+% bee_dataset(bee_dataset.wspd_ms<8,:)=[];
 % bee_dataset(bee_dataset.o3_surf<=15,:)=[];
 % bee_dataset(bee_dataset.length_3day<=750,:)=[];
 % bee_dataset(bee_dataset.mixing_height_3day>300,:)=[];
@@ -320,8 +320,7 @@ if bro_dailymean
         dmean_bro=array2table(dmean_bro,'variablenames',{'mean','std','min','max'}); 
         dmean_bro.DateTime=datetime(unique_days)+hours(12);
         
-        save('/home/kristof/work/documents/paper_bro/data/daily_mean_BrO.mat','dmean_bro')
-        
+%         save('/home/kristof/work/documents/paper_bro/data/daily_mean_BrO.mat','dmean_bro')
 %     else
 %         % if already saved 
 %         load('/home/kristof/work/documents/paper_bro/data/daily_mean_BrO.mat')
@@ -613,8 +612,11 @@ if o3_aer_wspd
     xlim([0,15.9])
     ylim(log([0.007,5.1]))
 
-    set(gca,'YTick',log([0.01,0.1,1]))
-    set(gca,'YTickLabel',{'10^{-2}','10^{-1}','10^{0}'})
+    h = gca;
+    set(h,'YTick',log([0.01,0.1,1]))
+    set(h,'YTickLabel',{'10^{-2}','10^{-1}','10^{0}'})
+    h.YAxis.MinorTick = 'on'; 
+    h.YAxis.MinorTickValues=log([[1e-3:1e-3:9e-3],[1e-2:1e-2:9e-2],[0.1:0.1:0.9],[1:1:9]]); 
     
     xlabel('Wind speed (m s^{-1})')
     ylabel('AOD')
@@ -628,8 +630,11 @@ if o3_aer_wspd
     xlim([0,15.9])
     ylim(log([0.007,5.1]))
 
-    set(gca,'YTick',log([0.01,0.1,1]))
-    set(gca,'YTickLabel',{'10^{-2}','10^{-1}','10^{0}'})
+    h = gca;
+    set(h,'YTick',log([0.01,0.1,1]))
+    set(h,'YTickLabel',{'10^{-2}','10^{-1}','10^{0}'})
+    h.YAxis.MinorTick = 'on'; 
+    h.YAxis.MinorTickValues=log([[1e-3:1e-3:9e-3],[1e-2:1e-2:9e-2],[0.1:0.1:0.9],[1:1:9]]); 
     
     xlabel('Wind speed (m s^{-1})')
     ylb=ylabel('d_p > 0.5 \mum (cm^{-1})');
@@ -959,11 +964,22 @@ if si_contact_log
     labelmult_y=-0.4*1e13;
 
     if plot_log_si
-%         si_x_lim=log([2e7,1.02e14]);
-%         si_x_lim=log([3e9,1.02e14]);
-        si_x_lim=log([50,8.1e5]);
+
+        if strcmp(btraj_len,'3')
+            lim_si=[50,9.4e5];
+        elseif strcmp(btraj_len,'5')
+            lim_si=[2e3,1.5e6];
+        end
+        
+        si_x_lim=log(lim_si);
         edges=1;
         flip_ind=3;
+        
+        xtick_pos=log([10,1e2,1e3,1e4,1e5,1e6]);
+        xtickm_pos=log([[10:10:90],[1e2:1e2:9e2],[1e3:1e3:9e3],...
+                        [1e4:1e4:9e4],[1e5:1e5:9e5],[1e6:1e6:9e6]]);
+        xtick_label={'10','10^{2}','10^{3}','10^{4}','10^{5}','10^{6}'};
+        
     else
         si_x_lim=[10,8.1e5];
         edges=[0:13]*1e13;   
@@ -1017,19 +1033,22 @@ if si_contact_log
     plot_mean_std(plot_x(ind_N_tmp),plot_y(ind_N_tmp),edges,fig_fs,'N','a',flip_ind)
 %     plot_vertical_mean_std(plot_x(ind_N_tmp),plot_y(ind_N_tmp),v_edges)
 %     plot_fit_line(plot_x(ind_N_tmp),plot_y(ind_N_tmp),fig_fs,'N','a')
-    
+
     ylim([0,bro_lim]*1e13)
     xlim(si_x_lim)    
     ylb=ylabel('BrO part. col. (molec cm^{-2})'); 
-    ylb.Position(1)=log(14);
+    ylb.Position(1)=log(lim_si(1))-0.1313315*log(lim_si(2)/lim_si(1));
     ylb.Position(2)=bro_lim*1e13/2;
     
     xlb=xlabel('FYI sensitivity (s)');
     xlb.Position(2)=-bro_lim*(11/8)*1e12;
 
     if plot_log_si
-        set(gca,'XTick',log([10,1e2,1e3,1e4,1e5]))
-        set(gca,'XTickLabel',{'10','10^{2}','10^{3}','10^{4}','10^{5}'})
+        h = gca;
+        set(h,'XTick',xtick_pos)
+        set(h,'XTickLabel',xtick_label)
+        h.XAxis.MinorTick = 'on'; 
+        h.XAxis.MinorTickValues=xtickm_pos; 
     else
 %         set(gca,'Xtick',[0,2,4,6,8]*1e13)
 %         set(gca,'XtickLabel',[0,2,4,6,8])
@@ -1050,8 +1069,11 @@ if si_contact_log
     xlb.Position(2)=-bro_lim*(11/8)*1e12;
     
     if plot_log_si
-        set(gca,'XTick',log([10,1e2,1e3,1e4,1e5]))
-        set(gca,'XTickLabel',{'10','10^{2}','10^{3}','10^{4}','10^{5}'})
+        h = gca;
+        set(h,'XTick',xtick_pos)
+        set(h,'XTickLabel',xtick_label)
+        h.XAxis.MinorTick = 'on'; 
+        h.XAxis.MinorTickValues=xtickm_pos; 
     else
 %         set(gca,'Xtick',[0,2,4,6,8]*1e13)
 %         set(gca,'XtickLabel',[0,2,4,6,8])
@@ -1073,8 +1095,11 @@ if si_contact_log
     xlb.Position(2)=-bro_lim*(11/8)*1e12;
     
     if plot_log_si
-        set(gca,'XTick',log([10,1e2,1e3,1e4,1e5]))
-        set(gca,'XTickLabel',{'10','10^{2}','10^{3}','10^{4}','10^{5}'})
+        h = gca;
+        set(h,'XTick',xtick_pos)
+        set(h,'XTickLabel',xtick_label)
+        h.XAxis.MinorTick = 'on'; 
+        h.XAxis.MinorTickValues=xtickm_pos; 
     else
 %         set(gca,'Xtick',[0,2,4,6,8]*1e13)
 %         set(gca,'XtickLabel',[0,2,4,6,8])
@@ -1129,15 +1154,18 @@ if si_contact_log
     ylim([0,bro_lim]*1e13)
     xlim(si_x_lim)    
     ylb=ylabel('BrO part. col. (molec cm^{-2})'); 
-    ylb.Position(1)=log(14);
+    ylb.Position(1)=log(lim_si(1))-0.1313315*log(lim_si(2)/lim_si(1));
     ylb.Position(2)=bro_lim*1e13/2;
     
     xlb=xlabel('Total ice sensitivity (s)');
     xlb.Position(2)=-bro_lim*(11/8)*1e12;
 
     if plot_log_si
-        set(gca,'XTick',log([10,1e2,1e3,1e4,1e5]))
-        set(gca,'XTickLabel',{'10','10^{2}','10^{3}','10^{4}','10^{5}'})
+        h = gca;
+        set(h,'XTick',xtick_pos)
+        set(h,'XTickLabel',xtick_label)
+        h.XAxis.MinorTick = 'on'; 
+        h.XAxis.MinorTickValues=xtickm_pos; 
     else
 %         set(gca,'Xtick',[0,2,4,6,8]*1e13)
 %         set(gca,'XtickLabel',[0,2,4,6,8])
@@ -1158,8 +1186,11 @@ if si_contact_log
     xlb.Position(2)=-bro_lim*(11/8)*1e12;
     
     if plot_log_si
-        set(gca,'XTick',log([10,1e2,1e3,1e4,1e5]))
-        set(gca,'XTickLabel',{'10','10^{2}','10^{3}','10^{4}','10^{5}'})
+        h = gca;
+        set(h,'XTick',xtick_pos)
+        set(h,'XTickLabel',xtick_label)
+        h.XAxis.MinorTick = 'on'; 
+        h.XAxis.MinorTickValues=xtickm_pos; 
     else
 %         set(gca,'Xtick',[0,2,4,6,8]*1e13)
 %         set(gca,'XtickLabel',[0,2,4,6,8])
@@ -1181,8 +1212,11 @@ if si_contact_log
     xlb.Position(2)=-bro_lim*(11/8)*1e12;
     
     if plot_log_si
-        set(gca,'XTick',log([10,1e2,1e3,1e4,1e5]))
-        set(gca,'XTickLabel',{'10','10^{2}','10^{3}','10^{4}','10^{5}'})
+        h = gca;
+        set(h,'XTick',xtick_pos)
+        set(h,'XTickLabel',xtick_label)
+        h.XAxis.MinorTick = 'on'; 
+        h.XAxis.MinorTickValues=xtickm_pos; 
     else
 %         set(gca,'Xtick',[0,2,4,6,8]*1e13)
 %         set(gca,'XtickLabel',[0,2,4,6,8])

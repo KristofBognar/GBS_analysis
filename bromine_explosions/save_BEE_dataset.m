@@ -442,16 +442,24 @@ end
 
 contact_all=array2table(contact_all,'variablenames',contact_labels);
 
-% extra trajectory details (3day backtraj only)
+% extra trajectory details 
 traj_details=table();
 
-traj_details.length_3day=retrieve_FP_details('traj_len',times,3,'linear');
-traj_details.mixing_height_3day=retrieve_FP_details('traj_hmix',times,3,'linear');
-traj_details.frac_in_mix_3day=retrieve_FP_details('traj_fmix',times,3,'linear');
+for i=1:5
 
-traj_details.length_5day=retrieve_FP_details('traj_len',times,5,'linear');
-traj_details.mixing_height_5day=retrieve_FP_details('traj_hmix',times,5,'linear');
-traj_details.frac_in_mix_5day=retrieve_FP_details('traj_fmix',times,5,'linear');
+    % trajectory length
+    tmp=retrieve_FP_details('traj_len',times,5,'linear');
+    eval(['traj_details.length_' num2str(i) 'day=tmp;']);
+
+    % mixing layer height
+    tmp=retrieve_FP_details('traj_hmix',times,5,'linear');
+    eval(['traj_details.mixing_height_' num2str(i) 'day=tmp;']);
+
+    % fraction of particles in mixing layer
+    tmp=retrieve_FP_details('traj_fmix',times,5,'linear');
+    eval(['traj_details.frac_in_mix_' num2str(i) 'day=tmp;']);
+
+end
 
 
 %% Create and save table

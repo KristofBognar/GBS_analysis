@@ -135,12 +135,18 @@ end
 
 cd(cur_dir);
 
-%% add length and mixing layer details for 3day back traj
-load('/home/kristof/work/BEEs/trajectory_details/FP_trajectory_details_3day.mat')
+%% add length and mixing layer details 
 
-bee_fp.length_3day=traj_details.length;
-bee_fp.mix_height_3day=traj_details.mixing_height;
-bee_fp.frac_in_mix_3day=traj_details.frac_in_mix;   
+for i=1:5
+
+    load(['/home/kristof/work/BEEs/trajectory_details/FP_trajectory_details_' ...
+          num2str(i) 'day.mat'])
+
+    eval(['bee_fp.length_' num2str(i) 'day=traj_details.length;']);
+    eval(['bee_fp.mix_height_' num2str(i) 'day=traj_details.mixing_height;']);
+    eval(['bee_fp.frac_in_mix_' num2str(i) 'day=traj_details.frac_in_mix;']);
+
+end
 
 %% save file
 
