@@ -20,7 +20,7 @@ function create_retrieval_files()
 %% setup
 
 aer=0; % 1 for aerosol, 0 for BrO
-year=2019;
+year=2018;
 
 % change a priori surface conc.; !!CHANGE_FOLDER SETTINGS TAKE PRECEDENCE!!
 use_uniform_BrO_surf_conc=5; % 0: use original (1 or 5 pptv)
@@ -37,8 +37,9 @@ change_folder=1;
 if change_folder
 %     out_folder_name='aer_10iter';
 %     out_folder_name='surf_ppt_5to1'; % resets all 5 ppt suf conc to 1
-    out_folder_name='surf_ppt_1to5'; % resets all 1 ppt suf conc to 5
-    rerun_prefix='rerun_'; % prefix for inp files
+%     out_folder_name='surf_ppt_1to5'; % resets all 1 ppt suf conc to 5
+    out_folder_name='det_lim_test'; % 2018 august, no BrO, profiles for detection limit
+    rerun_prefix='test_'; % prefix for inp files
 else
     out_folder_name='';
     if ~isempty(iter_step), warning('Aer iterations changed, should use different folder'); end
@@ -117,6 +118,20 @@ for i=1:length(dates)
         end
     end
 
+    % init files for August 2018 only, for detection limit test runs
+    if strcmp(out_folder_name,'det_lim_test')
+        
+		if year==2018
+        	error('Temporarily modify day range in variable_init subfunction')
+		else
+        	error('Use August 2018 data')
+		end
+
+        if ~strcmp(daily_times{i,4}(1:2),'08')
+            continue
+        end
+    end
+    
     % regular files: set BrO a priori surf conc to required value
     if ~change_folder && use_uniform_BrO_surf_conc > 0 && ~aer
         apriori_BrO{i,1}=num2str(use_uniform_BrO_surf_conc);
@@ -296,10 +311,11 @@ function [dates,daily_times,apriori_BrO] = variable_init(year)
 
         % day range 
         doy_range=[64:151]; 
+%         doy_range=[64:151,213:216,218:221,233,234]; 
 
         % remove missing days
         doy_range(doy_range==133)=[]; 
-
+        
         % dates
         dates=ft_to_date(doy_range-1,year);
 
