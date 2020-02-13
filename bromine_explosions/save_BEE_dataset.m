@@ -448,15 +448,15 @@ traj_details=table();
 for i=1:5
 
     % trajectory length
-    tmp=retrieve_FP_details('traj_len',times,5,'linear');
+    tmp=retrieve_FP_details('traj_len',times,i,'linear');
     eval(['traj_details.length_' num2str(i) 'day=tmp;']);
 
     % mixing layer height
-    tmp=retrieve_FP_details('traj_hmix',times,5,'linear');
+    tmp=retrieve_FP_details('traj_hmix',times,i,'linear');
     eval(['traj_details.mixing_height_' num2str(i) 'day=tmp;']);
 
     % fraction of particles in mixing layer
-    tmp=retrieve_FP_details('traj_fmix',times,5,'linear');
+    tmp=retrieve_FP_details('traj_fmix',times,i,'linear');
     eval(['traj_details.frac_in_mix_' num2str(i) 'day=tmp;']);
 
 end
