@@ -20,14 +20,14 @@ plot_box=0;
 plot_box_weather=0;
 bro_dailymean=0;
 plot_pca=0;
-weather_corr=1;
+weather_corr=0;
 o3_aer_wspd=0;
 sens_map=0;
 plot_ssa=0;
 
-si_contact_log=0;
+si_contact_log=1;
 plot_log_si=1; % log scale for SI contact axes
-btraj_len='3'; % length of back trajectories
+btraj_len='5'; % length of back trajectories
 
 % 0 to not save, 1 to save as pdf, 2 to save as jpg
 save_figs=0;
@@ -967,6 +967,8 @@ if si_contact_log
 
         if strcmp(btraj_len,'3')
             lim_si=[50,9.4e5];
+        elseif strcmp(btraj_len,'4')
+            lim_si=[4e2,1.4e6];
         elseif strcmp(btraj_len,'5')
             lim_si=[2e3,1.5e6];
         end
@@ -1601,7 +1603,7 @@ function plot_mean_std(xx,yy,edges,text_size,wdir_str,subplot_id,fliplabels)
     end
 %     tmp=corrcoef(exp(xx),yy);
 %     tmp=corrcoef(xx,yy);
-%     tmp(1,2)^2
+%     disp(tmp(1,2)^2)
     
 end
 

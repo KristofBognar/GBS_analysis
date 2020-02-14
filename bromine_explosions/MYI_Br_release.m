@@ -6,7 +6,8 @@ bee_dataset(bee_dataset.times.Year==2015,:)=[];
 
 frac_myi=bee_dataset.MYSI_5day./(bee_dataset.FYSI_5day+bee_dataset.MYSI_5day);
 
-ind_myi=(frac_myi>0.8 & bee_dataset.N_SE_rest==1);
+% ind_myi=(frac_myi>0.9 & bee_dataset.N_SE_rest==1);
+ind_myi=(frac_myi>0.9);
 ind_fyi=(frac_myi<0.1);
 
 figure

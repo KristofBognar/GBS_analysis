@@ -1,17 +1,21 @@
 % plot yearly results form MAX-DOAS profile retrievals
 
-plot_monthly=1;
+plot_monthly=1; % 1 for monthly box plots, 0 for yearly box plots
 
 plot_bro=0;
 plot_aod=0;
 plot_dT=0;
 plot_T_10=0;
-plot_ws_dT=1;
+plot_ws_dT=0;
 plot_BL=0;
 plot_ssa=0;
 plot_fysi=0;
 plot_o3=0;
 
+% not monthly/yearly box plots:
+plot_dT_prob=1;
+
+if any([plot_dT_prob]==1), plot_monthly=3; end
 
 %% load/filter BEE dataset
 load('/home/kristof/work/BEEs/BEE_dataset_all.mat')
@@ -28,7 +32,13 @@ bee_dataset(filt_ind,:)=[];
 c={'r','g','b','m','c'};
 m_names={'March','April','May'};
 
+plot_x=bee_dataset.times;
+
 if plot_bro
+%     tmp=(bee_dataset.wspd_ms_EWS<2 & bee_dataset.o3_surf<15 & bee_dataset.sonde_dT<7);
+%     plot_y=bee_dataset.bro_col(tmp);
+%     plot_x=plot_x(tmp);
+    
     plot_y=bee_dataset.bro_col;
     y_label='BrO VCD (molec/cm^2)';
     yscale='linear';
@@ -41,8 +51,6 @@ if plot_aod
     yscale='log';
     ymin=0.01;
 end
-
-plot_x=bee_dataset.times;
 
 if plot_dT
     t_sonde=[];
@@ -131,7 +139,7 @@ if plot_o3
 end
 
 %% plot monthly stats
-if plot_monthly
+if plot_monthly==1
     
     figure
     set(gcf, 'Position', [100, 100, 1000, 500]);
@@ -167,7 +175,7 @@ if plot_monthly
     %     
     % end
     
-else
+elseif plot_monthly==0
    
     figure
     set(gcf, 'Position', [100, 100, 1200, 650]);
@@ -201,6 +209,45 @@ else
         
         set(findall(gcf,'-property','FontSize'),'FontSize',17)
 
+    end
+    
+else
+    
+    if plot_dT_prob
+        % get change of probability of inversion strength <2C when
+        % comparing winds above and below 8 m/s
+        
+        dT_stats=table;
+        
+        ind_pws1=bee_dataset.wspd_ms<8;
+        ind_pws2=bee_dataset.wspd_ms>=8;
+        ind_ews1=bee_dataset.wspd_ms_EWS<8;
+        ind_ews2=bee_dataset.wspd_ms_EWS>=8;
+
+        bins_edges=-4:6:20;
+        
+        
+        for i=0:3
+            
+            if i==0
+                tmp=true(size(bee_dataset.N_SE_rest));
+            else
+                tmp=bee_dataset.N_SE_rest==i;
+            end
+            
+            pws1=histcounts(bee_dataset.sonde_dT(ind_pws1 & tmp),bins_edges,'normalization','probability');
+            pws2=histcounts(bee_dataset.sonde_dT(ind_pws2 & tmp),bins_edges,'normalization','probability');
+
+            ews1=histcounts(bee_dataset.sonde_dT(ind_ews1 & tmp),bins_edges,'normalization','probability');
+            ews2=histcounts(bee_dataset.sonde_dT(ind_ews2 & tmp),bins_edges,'normalization','probability');
+            
+            pws_up=((pws2(1)/pws1(1))-1)*100;
+            ews_up=((ews2(1)/ews1(1))-1)*100;
+            
+            disp(['PWS and EWS p increase (%), i=' num2str(i)])
+            disp([pws_up,ews_up])
+            
+        end
     end
     
 end

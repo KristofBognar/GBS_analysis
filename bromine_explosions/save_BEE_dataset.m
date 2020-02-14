@@ -458,7 +458,7 @@ for i=1:5
     % fraction of particles in mixing layer
     tmp=retrieve_FP_details('traj_fmix',times,i,'linear');
     eval(['traj_details.frac_in_mix_' num2str(i) 'day=tmp;']);
-
+    
 end
 
 

@@ -7,7 +7,8 @@ wspd_corr=0;
 wdir_corr=0;
 T_rl_corr=0;
 T_ews_corr=0;
-sonde_dT_corr=1;
+sonde_dT_corr=0;
+sonde_dT_o3=1;
 ssa_corr=0;
 smps_corr=0;
 o3_corr=0;
@@ -38,7 +39,7 @@ plot_column=1;
 load('/home/kristof/work/BEEs/BEE_dataset_all.mat');
 bee_dataset(bee_dataset.times.Year==2015,:)=[];
 % bee_dataset(bee_dataset.bro_col<prctile(bee_dataset.bro_col,90),:)=[];
-    
+% bee_dataset(bee_dataset.sonde_dT<7,:)=[];
 
 
 % setup plotting indices
@@ -70,9 +71,9 @@ if wspd_corr
     % all winds
     figure
     subplot(221), hold on, box on
-    ind=(~isnan(bee_dataset.wspd_ms) & ~isnan(plot_var));
-    dscatter(bee_dataset.wspd_ms(ind), plot_var(ind))
-    plot_mean_std(bee_dataset.wspd_ms(ind),plot_var(ind),edges,plot_column)
+    ind=(~isnan(bee_dataset.wspd_ms_EWS) & ~isnan(plot_var));
+    dscatter(bee_dataset.wspd_ms_EWS(ind), plot_var(ind))
+    plot_mean_std(bee_dataset.wspd_ms_EWS(ind),plot_var(ind),edges,plot_column)
 
     text(0.95,txt_pos,'Wind: 0-360°', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
@@ -87,8 +88,8 @@ if wspd_corr
     % northerly winds, mean: 354 deg from gaussian fit, +-30 deg
     subplot(222), hold on, box on
 
-    dscatter(bee_dataset.wspd_ms(ind_N), plot_var(ind_N))
-    plot_mean_std(bee_dataset.wspd_ms(ind_N),plot_var(ind_N),edges,plot_column)
+    dscatter(bee_dataset.wspd_ms_EWS(ind_N), plot_var(ind_N))
+    plot_mean_std(bee_dataset.wspd_ms_EWS(ind_N),plot_var(ind_N),edges,plot_column)
     
     text(0.95,txt_pos,'Wind: 354° \pm 30°', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
@@ -98,8 +99,8 @@ if wspd_corr
     % southeasterly winds, mean: 123 deg from gaussian fit, +-30 deg  
     subplot(223), hold on, box on
 
-    dscatter(bee_dataset.wspd_ms(ind_SE), plot_var(ind_SE))
-    plot_mean_std(bee_dataset.wspd_ms(ind_SE),plot_var(ind_SE),edges,plot_column)
+    dscatter(bee_dataset.wspd_ms_EWS(ind_SE), plot_var(ind_SE))
+    plot_mean_std(bee_dataset.wspd_ms_EWS(ind_SE),plot_var(ind_SE),edges,plot_column)
     
     text(0.95,txt_pos,'Wind: 123° \pm 30°', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
@@ -115,8 +116,8 @@ if wspd_corr
     % everything else
     subplot(224), hold on, box on
 
-    dscatter(bee_dataset.wspd_ms(ind_rest), plot_var(ind_rest))
-    plot_mean_std(bee_dataset.wspd_ms(ind_rest),plot_var(ind_rest),edges,plot_column)
+    dscatter(bee_dataset.wspd_ms_EWS(ind_rest), plot_var(ind_rest))
+    plot_mean_std(bee_dataset.wspd_ms_EWS(ind_rest),plot_var(ind_rest),edges,plot_column)
     
     text(0.95,txt_pos,'Wind: other', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
@@ -207,6 +208,74 @@ if sonde_dT_corr
     if plot_column, ylim([0,16]*1e13), else ylim([0.17,1]), end
     xlim([-5.88,24])    
     ylim([0,8]*1e13)
+    xlabel('Sonde dT (°C)')
+
+    text(0.95,txt_pos,'Wind: other', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    
+    
+end
+
+if sonde_dT_o3
+    
+    plot_var=bee_dataset.o3_surf;
+    
+    figure
+    txt_pos=0.92;
+    edges=-5:2:25;
+
+    % all data
+    subplot(221), hold on, box on
+    ind=~isnan(plot_var);
+    dscatter(bee_dataset.sonde_dT(ind), plot_var(ind))
+    
+    plot_mean_std(bee_dataset.sonde_dT(ind),plot_var(ind),edges,plot_column)
+    
+    ylim([0,50])
+    xlim([-5.88,24])    
+    ylabel('surf O_3')
+
+    text(0.95,txt_pos,'Wind: 0-360°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    
+    % Northerly winds only
+    txt_pos=0.92;
+    subplot(222), hold on, box on
+    ind=(ind_N & ~isnan(plot_var));
+    dscatter(bee_dataset.sonde_dT(ind), plot_var(ind))
+    
+    plot_mean_std(bee_dataset.sonde_dT(ind),plot_var(ind),edges,plot_column)
+    
+    ylim([0,50])
+    xlim([-5.88,24])    
+
+    text(0.95,txt_pos,'Wind: 354° \pm 30°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    
+    % Southeasterly winds only
+    subplot(223), hold on, box on
+    ind=(ind_SE & ~isnan(plot_var));
+    dscatter(bee_dataset.sonde_dT(ind), plot_var(ind))
+    
+    plot_mean_std(bee_dataset.sonde_dT(ind),plot_var(ind),edges,plot_column)
+    
+    ylim([0,50])
+    xlim([-5.88,24])    
+    ylabel('surf O_3')
+    xlabel('Sonde dT (°C)')
+
+    text(0.95,txt_pos,'Wind: 123° \pm 30°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    
+    % all other wind directions
+    subplot(224), hold on, box on
+    ind=(ind_rest & ~isnan(plot_var));
+    dscatter(bee_dataset.sonde_dT(ind), plot_var(ind))
+    
+    plot_mean_std(bee_dataset.sonde_dT(ind),plot_var(ind),edges,plot_column)
+    
+    ylim([0,50])
+    xlim([-5.88,24])    
     xlabel('Sonde dT (°C)')
 
     text(0.95,txt_pos,'Wind: other', 'color','k','Units','normalized',...
