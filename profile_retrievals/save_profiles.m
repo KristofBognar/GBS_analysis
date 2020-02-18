@@ -28,7 +28,8 @@ default_version_eureka='Retrieval_settings_A';
 % version_eureka='aer_10iter';
 % version_eureka='surf_ppt_10'; % for reading a priori test results
 % version_eureka='surf_ppt_5to1'; % surf conc = 5 ppt replaced with 1 ppt
-version_eureka='surf_ppt_1to5'; % surf conc = 1 ppt replaced with 5 ppt
+% version_eureka='surf_ppt_1to5'; % surf conc = 1 ppt replaced with 5 ppt
+version_eureka='det_lim_test'; % august 2018, for detection limit
 
 
 
