@@ -19,13 +19,13 @@ windrose=0;
 plot_box=0;
 plot_box_weather=0;
 bro_dailymean=0;
-plot_pca=0;
+plot_pca=1;
 weather_corr=0;
 o3_aer_wspd=0;
 sens_map=0;
 plot_ssa=0;
 
-si_contact_log=1;
+si_contact_log=0;
 plot_log_si=1; % log scale for SI contact axes
 btraj_len='5'; % length of back trajectories
 
@@ -1742,7 +1742,13 @@ end
 
 function [vars,coeffs,tot_var]=calc_pca(bee_dataset,ind)
 
-    vars={'BrO','AOD','Aer','V','T','\DeltaT_{200m}','\DeltaT_{610m}','PBLH','P','\DeltaP',...
+%     vars={'BrO','AOD','Aer','V','T','\DeltaT_{200m}','\DeltaT_{610m}','PBLH','P','\DeltaP',...
+%           'FYI','MYI'};
+%%%   add PBLH if necessary -- calculations are not great for new GRAW
+%%%   sondes (2019 data)
+%%%   can add pressure tendency as well -- not correlated with anything
+
+    vars={'BrO','AOD','Aer','V','T','\DeltaT_{200m}','\DeltaT_{610m}','P',...
           'FYI','MYI'};
 
     % create data arrays for pca
@@ -1753,9 +1759,7 @@ function [vars,coeffs,tot_var]=calc_pca(bee_dataset,ind)
              bee_dataset.T_PWS(ind),...
              bee_dataset.sonde_dT(ind),...
              bee_dataset.sonde_T_200(ind)-bee_dataset.sonde_T_0(ind),...
-             bee_dataset.bl_height(ind),...
              bee_dataset.P_PWS(ind),...
-             bee_dataset.P_PWS_tend(ind),...
              bee_dataset.FYSI_3day(ind),...
              bee_dataset.MYSI_3day(ind),...
              ];
@@ -1802,7 +1806,7 @@ function barplot_pca(coeffs,cutoff,tot_var,c_list)
 
 %         b1.FaceAlpha = 0.5;
 
-        ylim([-0.65,0.65])
+        ylim([-0.7,0.7])
         xlim([0.5,size(coeffs,1)+0.5])
 
         % add percent of variance explained to plot
