@@ -3,16 +3,16 @@
 %% control variables
 
 %instrument
-% instr='UT-GBS';
-instr='PEARL-GBS';
+instr='UT-GBS';
+% instr='PEARL-GBS';
 
 % trace gas (1: ozone, 2: NO2, 3: NO2 UV)
-tg=3;
+tg=2;
 tgstr={'O3','NO2','NO2_UV'};
 
 % year
 % year='2019'; % set to empty string to include all files
-year=''; % set to empty string to include all files
+year='2020'; % set to empty string to include all files
 
 % filters
 do_filter=true;
@@ -23,8 +23,8 @@ do_cams_filter=true;
 % VCD directory
 % vcd_dir='/home/kristof/work/GBS/VCD_results/UT-GBS_reanalysis_old_err_budget/';
 % vcd_dir='/home/kristof/work/GBS/VCD_results/PEARL-GBS_reanalysis_old_err_budget/';
-vcd_dir='/home/kristof/work/GBS/VCD_results/';
-% vcd_dir='/home/kristof/work/GBS/VCD_results/NDACC_RD/';
+% vcd_dir='/home/kristof/work/GBS/VCD_results/';
+vcd_dir='/home/kristof/work/GBS/VCD_results/NDACC_RD/';
 
 % output file name (remove file if already exists)
 fname=[vcd_dir instr '_' tgstr{tg} '_VCD_' year 'all.mat'];

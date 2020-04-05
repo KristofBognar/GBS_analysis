@@ -16,21 +16,21 @@ function BrO_stats_paper_figs()
 presentation_plots=0;
 
 windrose=0;
-plot_box=0;
+plot_box=1;
 plot_box_weather=0;
-bro_dailymean=0;
-plot_pca=1;
-weather_corr=0;
-o3_aer_wspd=0;
+bro_dailymean=1;
+plot_pca=0;
+weather_corr=1;
+o3_aer_wspd=1;
 sens_map=0;
-plot_ssa=0;
+plot_ssa=1;
 
-si_contact_log=0;
+si_contact_log=1;
 plot_log_si=1; % log scale for SI contact axes
-btraj_len='5'; % length of back trajectories
+btraj_len='3'; % length of back trajectories
 
 % 0 to not save, 1 to save as pdf, 2 to save as jpg
-save_figs=0;
+save_figs=2;
 
 % uniform look
 fig_fs=14; % font size on figures
