@@ -1,9 +1,11 @@
-function prof_len=match_prof_length(times)
+function [prof_len, ap_surf, ap_h] = match_prof_length(times)
 %prof_len=match_prof_length(times): takes time of BrO profile, and returns
 %corresponding time interval (total time of the corresponding elevation
 %scan)
 
     prof_len=NaN(size(times));
+    ap_surf=NaN(size(times));
+    ap_h=NaN(size(times));
     x=datestr(times,'mmdd');
     
     yr=times(1).Year-1;
@@ -17,6 +19,8 @@ function prof_len=match_prof_length(times)
         end
         
         prof_len(i)=str2double(daily_times{find_in_cell(daily_times(:,4),x(i,:)),3});
+        ap_surf(i)=str2double(apriori_BrO{find_in_cell(apriori_BrO(:,3),x(i,:)),1});
+        ap_h(i)=str2double(apriori_BrO{find_in_cell(apriori_BrO(:,3),x(i,:)),2});
     end
     
 end
