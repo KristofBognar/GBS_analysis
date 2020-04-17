@@ -13,6 +13,11 @@ disp(' ')
 
 exclude_2015=1;
 
+%% Save BrO and aerosol data in NetCDF
+
+save_and_quit=0; % save BrO and aer data only
+save_all=1; % include paired variables
+
 %% select a priori for BrO data!
     
 good_input=0;
@@ -61,6 +66,8 @@ load('/home/kristof/work/profile_retrievals/profile_results/aerosol_profiles_fil
 prof_aer=prof;
 prof_aer_err=prof_err;
 info_aer=info;
+avk_aer=avk;
+avk_col_aer=avk_col;
 
 % replace BrO profiles
 if change_apriori_ppt
@@ -82,6 +89,7 @@ if change_apriori_ppt
     prof_nd_new_ppt=prof_nd;
     prof_nd_new_ppt_err=prof_nd_err;
     avk_new_ppt=avk;
+    avk_col_new_ppt=avk_col;
     
     info_new_ppt=info;
     times_new_ppt=times;
@@ -112,6 +120,7 @@ if change_apriori_ppt
         prof_nd_err(:,overwrite)=prof_nd_new_ppt_err(:,new_ind);
 
         avk(:,:,overwrite)=avk_new_ppt(:,:,new_ind);
+        avk_col(:,overwrite)=avk_col_new_ppt(:,new_ind);
         
     else
         error('Deal with extra profiles')
@@ -140,7 +149,7 @@ end
 
 
 % BrO a priori info
-load('/home/kristof/work/profile_retrievals/retr_times.mat');
+% load('/home/kristof/work/profile_retrievals/retr_times.mat');
 
 
 %%% Filter BrO profiles
@@ -164,6 +173,7 @@ prof_aer(:,ind_bad)=[];
 prof_aer_err(:,ind_bad)=[];
 
 avk(:,:,ind_bad)=[];
+avk_col(:,ind_bad)=[];
 
 % get partial columns
 part_prof=prof_nd*20000; % layers are 200m thick
@@ -175,13 +185,22 @@ top=4; % 600m layer, includes lab
 below_lab=sum(part_prof(1:top,:))';
 above_lab=sum(part_prof(top+1:end,:))';
 
-% find daily time window used in profile retrieval
-
-prof_len=match_prof_length(times);
+% find daily time window and a priori settings used in profile retrieval
+[prof_len, ap_surf, ap_h] = match_prof_length(times);
 
 prof_len=prof_len/2; % +- minutes around mean time
 
+%% write netCDF files
 
+if save_and_quit
+    
+    save_nc(change_apriori_ppt,old_ppt,prof_len,ap_surf,ap_h,times,alt,...
+            info,prof,prof_err,prof_nd,prof_nd_err,avk,avk_col,...
+            info_aer,prof_aer,prof_aer_err,avk_aer,avk_col_aer);
+
+    return
+    
+end
 
 %% Load other data
 
@@ -552,12 +571,72 @@ save_BEE_dataset_flexpart()
 
 % try delete('/home/kristof/work/documents/paper_bro/data/daily_mean_BrO.mat'); end
 
+
+%% save profile data with paired weather/aer/etc data
+
+if save_all
+    
+    disp('Writing data to netCDF files')
+
+    % assign PWS variables
+    info.temperature=bee_dataset.T_PWS+273.15; % C, convert to K
+    info.pressure=bee_dataset.P_PWS.*100; % mb, convert to Pa
+    info.wind_speed=bee_dataset.wspd_ms;
+    info.wind_dir=bee_dataset.wdir;
+    
+    % set missing values
+    info.temperature(isnan(info.temperature))=-9999;
+    info.pressure(isnan(info.pressure))=-9999;
+    info.wind_dir(isnan(info.wind_speed))=-9999;
+    info.wind_speed(isnan(info.wind_speed))=-9999;
+
+    info_aer.temperature=info.temperature;
+    info_aer.pressure=info.pressure;
+    info_aer.wind_dir=info.wind_dir;
+    info_aer.wind_speed=info.wind_speed;
+
+    save_nc(change_apriori_ppt,old_ppt,prof_len,ap_surf,ap_h,times,alt,...
+            info,prof,prof_err,prof_nd,prof_nd_err,avk,avk_col,...
+            info_aer,prof_aer,prof_aer_err,avk_aer,avk_col_aer);
+            
+end
+
+
 disp('Done')
 
 
 end
 
 
+function save_nc(change_apriori_ppt,old_ppt,prof_len,ap_surf,ap_h,times,alt,...
+                 info,prof,prof_err,prof_nd,prof_nd_err,avk,avk_col,...
+                 info_aer,prof_aer,prof_aer_err,avk_aer,avk_col_aer)
 
+    if change_apriori_ppt
+        ap_surf(ap_surf==old_ppt)=change_apriori_ppt;
+    end
+        
+    info.prof_len=prof_len*2; % total scan length in minutes
+    info_aer.prof_len=prof_len*2; % total scan length in minutes
+    
+    info.ap_surf=ap_surf;
+    info_aer.ap_surf=ones(size(ap_surf))*0.05;
+    
+    info.ap_h=ap_h;
+    info_aer.ap_h=ones(size(ap_h))*2;
+    
+    for yr=unique(times.Year)'
+
+        ind=find(times.Year==yr);
+
+        write_profiles_nc('tg', times(ind), alt, prof(:,ind), prof_err(:,ind), info(ind,:),...
+                          avk(:,:,ind),avk_col(:,ind),prof_nd(:,ind),prof_nd_err(:,ind));
+
+        write_profiles_nc('aer', times(ind), alt, prof_aer(:,ind), prof_aer_err(:,ind),...
+                          info_aer(ind,:),avk_aer(:,:,ind),avk_col_aer(:,ind));
+
+    end
+
+end
 
 
