@@ -10,7 +10,7 @@
 
 %% control variables
 x_date=1;
-plot_o4=1;
+plot_o4=0;
 
 msize=16;
 
@@ -18,8 +18,8 @@ msize=16;
 % subtract=59; % 59 for non-leap years since data is in day of year
 subtract=1; % convert to fractional date
 
-day1 = 64; 
-day2 = 152;
+day1 = 83; 
+day2 = 107;
 % day1 = 210; 
 % day2 = 285;
 
