@@ -13,10 +13,14 @@ disp(' ')
 
 exclude_2015=1;
 
+%% add pTOMCAt data?
+
+add_ptom=0;
+
 %% Save BrO and aerosol data in NetCDF
 
-save_and_quit=0; % save BrO and aer data only
-save_all=1; % include paired variables
+save_and_quit=1; % save BrO and aer data only
+save_all=0; % include paired variables
 
 %% select a priori for BrO data!
     
@@ -191,12 +195,45 @@ above_lab=sum(part_prof(top+1:end,:))';
 prof_len=prof_len/2; % +- minutes around mean time
 
 %% write netCDF files
-
 if save_and_quit
     
+    disp('Writing data to netCDF files')
+    load('/home/kristof/work/BEEs/BEE_dataset_all.mat')
+    % assign PWS variables and remove NaNs
+    info.temperature=bee_dataset.T_PWS+273.15; % C, convert to K
+    info.temperature(isnan(info.temperature))=-9999;
+    
+    info.pressure=bee_dataset.P_PWS.*100; % mb, convert to Pa
+    info.pressure(isnan(info.pressure))=-9999;
+
+    info.wind_speed=bee_dataset.wspd_ms;    
+    info.wind_dir=bee_dataset.wdir;
+    
+    info.wind_dir(isnan(info.wind_speed))=-9999; % use swpd, wdir is 0, not NaN    
+    info.wind_speed(isnan(info.wind_speed))=-9999;
+
+    % assign in situ aerosol data
+    info.aer_coarse=bee_dataset.aer_halfmicron;
+    info.aer_coarse(isnan(info.aer_coarse))=-9999;
+    
+    info.aer_accum=bee_dataset.SMPS_100_500;
+    info.aer_accum(isnan(info.aer_accum))=-9999;
+    
+    % assign to aer table as well
+    info_aer.temperature=info.temperature;
+    info_aer.pressure=info.pressure;
+    info_aer.wind_dir=info.wind_dir;
+    info_aer.wind_speed=info.wind_speed;
+    info_aer.aer_coarse=info.aer_coarse;
+    info_aer.aer_accum=info.aer_accum;
+
     save_nc(change_apriori_ppt,old_ppt,prof_len,ap_surf,ap_h,times,alt,...
             info,prof,prof_err,prof_nd,prof_nd_err,avk,avk_col,...
             info_aer,prof_aer,prof_aer_err,avk_aer,avk_col_aer);
+    
+% %     save_nc(change_apriori_ppt,old_ppt,prof_len,ap_surf,ap_h,times,alt,...
+% %             info,prof,prof_err,prof_nd,prof_nd_err,avk,avk_col,...
+% %             info_aer,prof_aer,prof_aer_err,avk_aer,avk_col_aer);
 
     return
     
@@ -224,11 +261,12 @@ load('/home/kristof/work/surface_ozone/surf_o3_hourly_all.mat');
 % surf_o3((month(surf_o3.DateTime)>5 | month(surf_o3.DateTime)<3),:)=[];
 
 % pTOMCAT data
-load('/home/kristof/work/models/pTOMCAT/pTOMCAT_ssa_all.mat');
-ptom_time_ssa=ptom_time;
-ptom_alt_ssa=ptom_alt;
-load('/home/kristof/work/models/pTOMCAT/pTOMCAT_tg_all.mat');
-
+if add_ptom
+    load('/home/kristof/work/models/pTOMCAT/pTOMCAT_ssa_all.mat');
+    ptom_time_ssa=ptom_time;
+    ptom_alt_ssa=ptom_alt;
+    load('/home/kristof/work/models/pTOMCAT/pTOMCAT_tg_all.mat');
+end
 
 %% Pair all variables to the BrO profiles
 
@@ -356,70 +394,74 @@ o3_mean=interp1(surf_o3_hourly.DateTime,surf_o3_hourly.o3_ppb,times,'linear');
 
 
 %%% pTOMCAT data
-% % disp('Pairing pTOMCAT data')
-% % 
-% % % 0-4 km column
-% % ptom_col_bro_out=interp1(ptom_time,ptom_col_bro,times,'linear','extrap');
-% % 
-% % % surface conc.
-% % ptom_surf_bro_out=interp1(ptom_time,ptom_prof_bro(1,:),times,'linear','extrap');
-% % ptom_surf_o3_out=interp1(ptom_time,ptom_prof_o3(1,:),times,'linear','extrap');
-% % 
-% % % supermicron aerosol profiles (both sea ice sourced and open ocean sourced)
-% % % from ~1 micron to 10 micron
-% % sism=sum(ptom_sissa(:,:,14:20),3); 
-% % oosm=sum(ptom_oossa(:,:,14:20),3); 
-% % 
-% % % accumulation mode aerosol profiles (both sea ice sourced and open ocean sourced)
-% % % from ~0.1 micron to 0.5 micron
-% % sism_accum=sum(ptom_sissa(:,:,7:11),3); 
-% % oosm_accum=sum(ptom_oossa(:,:,7:11),3); 
-% % 
-% % % interpolate aerosol to ridge lab altitude
-% % sism_rl=NaN(1,length(ptom_time_ssa));
-% % oosm_rl=NaN(1,length(ptom_time_ssa));
-% % sism_rl_accum=NaN(1,length(ptom_time_ssa));
-% % oosm_rl_accum=NaN(1,length(ptom_time_ssa));
-% % 
-% % for i=1:length(ptom_time_ssa)
-% %     sism_rl(i)=interp1(ptom_alt_ssa(:,i),sism(:,i),610,'linear');
-% %     oosm_rl(i)=interp1(ptom_alt_ssa(:,i),oosm(:,i),610,'linear');
-% %     sism_rl_accum(i)=interp1(ptom_alt_ssa(:,i),sism_accum(:,i),610,'linear');
-% %     oosm_rl_accum(i)=interp1(ptom_alt_ssa(:,i),oosm_accum(:,i),610,'linear');
-% % end
-% % 
-% % % interpolate aerosol to BrO profile times
-% % ptom_sissa=interp1(ptom_time_ssa,sism_rl,times,'linear','extrap');
-% % ptom_oossa=interp1(ptom_time_ssa,oosm_rl,times,'linear','extrap');
-% % ptom_sissa_accum=interp1(ptom_time_ssa,sism_rl_accum,times,'linear','extrap');
-% % ptom_oossa_accum=interp1(ptom_time_ssa,oosm_rl_accum,times,'linear','extrap');
-% % 
-% % % T and P from pTOMCAT data
-% % % interpolate to ridge lab altitude
-% % ptom_T_0_tmp=ptom_T(1,:);
-% % ptom_T_200_tmp=NaN(1,length(ptom_time));
-% % ptom_T_600_tmp=NaN(1,length(ptom_time));
-% % 
-% % ptom_P_0_tmp=ptom_P(1,:);
-% % ptom_P_600_tmp=NaN(1,length(ptom_time));
-% % 
-% % for i=1:length(ptom_time)
-% %     ptom_T_200_tmp(i)=interp1(ptom_alt(:,i),ptom_T(:,i),610,'linear');
-% %     ptom_T_600_tmp(i)=interp1(ptom_alt(:,i),ptom_T(:,i),610,'linear');
-% %     ptom_P_600_tmp(i)=interp1(ptom_alt(:,i),ptom_P(:,i),610,'linear');
-% % end
-% % 
-% % % interpolate t and P to BrO profile times
-% % ptom_T_0=interp1(ptom_time,ptom_T_0_tmp,times,'linear','extrap')-273.15;
-% % ptom_T_200=interp1(ptom_time,ptom_T_200_tmp,times,'linear','extrap')-273.15;
-% % ptom_T_600=interp1(ptom_time,ptom_T_600_tmp,times,'linear','extrap')-273.15;
-% % 
-% % ptom_P_0=interp1(ptom_time,ptom_P_0_tmp,times,'linear','extrap')*1e-2;
-% % ptom_P_0_prev=interp1(ptom_time,ptom_P_0_tmp,times-duration(1,0,0),...
-% %                       'linear','extrap')*1e-2;
-% % ptom_P_600=interp1(ptom_time,ptom_P_600_tmp,times,'linear','extrap')*1e-2;
-% % ptom_P_600_prev=interp1(ptom_time,ptom_P_600_tmp,times-duration(1,0,0),...
-% %                         'linear','extrap')*1e-2;
+if add_ptom
+    
+    disp('Pairing pTOMCAT data')
+
+    % 0-4 km column
+    ptom_col_bro_out=interp1(ptom_time,ptom_col_bro,times,'linear','extrap');
+
+    % surface conc.
+    ptom_surf_bro_out=interp1(ptom_time,ptom_prof_bro(1,:),times,'linear','extrap');
+    ptom_surf_o3_out=interp1(ptom_time,ptom_prof_o3(1,:),times,'linear','extrap');
+
+    % supermicron aerosol profiles (both sea ice sourced and open ocean sourced)
+    % from ~1 micron to 10 micron
+    sism=sum(ptom_sissa(:,:,14:20),3); 
+    oosm=sum(ptom_oossa(:,:,14:20),3); 
+
+    % accumulation mode aerosol profiles (both sea ice sourced and open ocean sourced)
+    % from ~0.1 micron to 0.5 micron
+    sism_accum=sum(ptom_sissa(:,:,7:11),3); 
+    oosm_accum=sum(ptom_oossa(:,:,7:11),3); 
+
+    % interpolate aerosol to ridge lab altitude
+    sism_rl=NaN(1,length(ptom_time_ssa));
+    oosm_rl=NaN(1,length(ptom_time_ssa));
+    sism_rl_accum=NaN(1,length(ptom_time_ssa));
+    oosm_rl_accum=NaN(1,length(ptom_time_ssa));
+
+    for i=1:length(ptom_time_ssa)
+        sism_rl(i)=interp1(ptom_alt_ssa(:,i),sism(:,i),610,'linear');
+        oosm_rl(i)=interp1(ptom_alt_ssa(:,i),oosm(:,i),610,'linear');
+        sism_rl_accum(i)=interp1(ptom_alt_ssa(:,i),sism_accum(:,i),610,'linear');
+        oosm_rl_accum(i)=interp1(ptom_alt_ssa(:,i),oosm_accum(:,i),610,'linear');
+    end
+
+    % interpolate aerosol to BrO profile times
+    ptom_sissa=interp1(ptom_time_ssa,sism_rl,times,'linear','extrap');
+    ptom_oossa=interp1(ptom_time_ssa,oosm_rl,times,'linear','extrap');
+    ptom_sissa_accum=interp1(ptom_time_ssa,sism_rl_accum,times,'linear','extrap');
+    ptom_oossa_accum=interp1(ptom_time_ssa,oosm_rl_accum,times,'linear','extrap');
+
+    % T and P from pTOMCAT data
+    % interpolate to ridge lab altitude
+    ptom_T_0_tmp=ptom_T(1,:);
+    ptom_T_200_tmp=NaN(1,length(ptom_time));
+    ptom_T_600_tmp=NaN(1,length(ptom_time));
+
+    ptom_P_0_tmp=ptom_P(1,:);
+    ptom_P_600_tmp=NaN(1,length(ptom_time));
+
+    for i=1:length(ptom_time)
+        ptom_T_200_tmp(i)=interp1(ptom_alt(:,i),ptom_T(:,i),610,'linear');
+        ptom_T_600_tmp(i)=interp1(ptom_alt(:,i),ptom_T(:,i),610,'linear');
+        ptom_P_600_tmp(i)=interp1(ptom_alt(:,i),ptom_P(:,i),610,'linear');
+    end
+
+    % interpolate t and P to BrO profile times
+    ptom_T_0=interp1(ptom_time,ptom_T_0_tmp,times,'linear','extrap')-273.15;
+    ptom_T_200=interp1(ptom_time,ptom_T_200_tmp,times,'linear','extrap')-273.15;
+    ptom_T_600=interp1(ptom_time,ptom_T_600_tmp,times,'linear','extrap')-273.15;
+
+    ptom_P_0=interp1(ptom_time,ptom_P_0_tmp,times,'linear','extrap')*1e-2;
+    ptom_P_0_prev=interp1(ptom_time,ptom_P_0_tmp,times-duration(1,0,0),...
+                          'linear','extrap')*1e-2;
+    ptom_P_600=interp1(ptom_time,ptom_P_600_tmp,times,'linear','extrap')*1e-2;
+    ptom_P_600_prev=interp1(ptom_time,ptom_P_600_tmp,times-duration(1,0,0),...
+                            'linear','extrap')*1e-2;
+
+end
 
 %%% sea ice/water/land contact from FLEXPART and sea ice age data
 disp('Pairing sea ice contact data')
@@ -544,21 +586,23 @@ bee_dataset.SMPS_100_500=smps_mean;
 
 bee_dataset.o3_surf=o3_mean;
 
-% % bee_dataset.bro_col_ptom=ptom_col_bro_out;
-% % bee_dataset.bro_surf_ptom=ptom_surf_bro_out;
-% % bee_dataset.o3_surf_ptom=ptom_surf_o3_out;
-% % bee_dataset.ptom_supermicron=ptom_sissa+ptom_oossa;
-% % bee_dataset.ptom_supermicron_si_frac=ptom_sissa./(ptom_sissa+ptom_oossa);
-% % bee_dataset.ptom_submicron=ptom_sissa_accum+ptom_oossa_accum;
-% % bee_dataset.ptom_submicron_si_frac=ptom_sissa_accum./(ptom_sissa_accum+ptom_oossa_accum);
-% % 
-% % bee_dataset.ptom_T_0=ptom_T_0;
-% % bee_dataset.ptom_T_200=ptom_T_200;
-% % bee_dataset.ptom_T_600=ptom_T_600;
-% % bee_dataset.ptom_P_0=ptom_P_0;
-% % bee_dataset.ptom_P_0_tend=ptom_P_0-ptom_P_0_prev;
-% % bee_dataset.ptom_P_600=ptom_P_600;
-% % bee_dataset.ptom_P_600_tend=ptom_P_600-ptom_P_600_prev;
+if add_ptom
+    bee_dataset.bro_col_ptom=ptom_col_bro_out;
+    bee_dataset.bro_surf_ptom=ptom_surf_bro_out;
+    bee_dataset.o3_surf_ptom=ptom_surf_o3_out;
+    bee_dataset.ptom_supermicron=ptom_sissa+ptom_oossa;
+    bee_dataset.ptom_supermicron_si_frac=ptom_sissa./(ptom_sissa+ptom_oossa);
+    bee_dataset.ptom_submicron=ptom_sissa_accum+ptom_oossa_accum;
+    bee_dataset.ptom_submicron_si_frac=ptom_sissa_accum./(ptom_sissa_accum+ptom_oossa_accum);
+
+    bee_dataset.ptom_T_0=ptom_T_0;
+    bee_dataset.ptom_T_200=ptom_T_200;
+    bee_dataset.ptom_T_600=ptom_T_600;
+    bee_dataset.ptom_P_0=ptom_P_0;
+    bee_dataset.ptom_P_0_tend=ptom_P_0-ptom_P_0_prev;
+    bee_dataset.ptom_P_600=ptom_P_600;
+    bee_dataset.ptom_P_600_tend=ptom_P_600-ptom_P_600_prev;
+end
 
 bee_dataset=[bee_dataset,contact_all];
 bee_dataset=[bee_dataset,traj_details];
@@ -574,26 +618,37 @@ save_BEE_dataset_flexpart()
 
 %% save profile data with paired weather/aer/etc data
 
-if save_all
+if save_all    
     
     disp('Writing data to netCDF files')
 
-    % assign PWS variables
+    % assign PWS variables and remove NaNs
     info.temperature=bee_dataset.T_PWS+273.15; % C, convert to K
+    info.temperature(isnan(info.temperature))=-9999;
+    
     info.pressure=bee_dataset.P_PWS.*100; % mb, convert to Pa
-    info.wind_speed=bee_dataset.wspd_ms;
+    info.pressure(isnan(info.pressure))=-9999;
+
+    info.wind_speed=bee_dataset.wspd_ms;    
     info.wind_dir=bee_dataset.wdir;
     
-    % set missing values
-    info.temperature(isnan(info.temperature))=-9999;
-    info.pressure(isnan(info.pressure))=-9999;
-    info.wind_dir(isnan(info.wind_speed))=-9999;
+    info.wind_dir(isnan(info.wind_speed))=-9999; % use swpd, wdir is 0, not NaN    
     info.wind_speed(isnan(info.wind_speed))=-9999;
 
+    % assign in situ aerosol data
+    info.aer_coarse=bee_dataset.aer_halfmicron;
+    info.aer_coarse(isnan(info.aer_coarse))=-9999;
+    
+    info.aer_accum=bee_dataset.SMPS_100_500;
+    info.aer_accum(isnan(info.aer_accum))=-9999;
+    
+    % assign to aer table as well
     info_aer.temperature=info.temperature;
     info_aer.pressure=info.pressure;
     info_aer.wind_dir=info.wind_dir;
     info_aer.wind_speed=info.wind_speed;
+    info_aer.aer_coarse=info.aer_coarse;
+    info_aer.aer_accum=info.aer_accum;
 
     save_nc(change_apriori_ppt,old_ppt,prof_len,ap_surf,ap_h,times,alt,...
             info,prof,prof_err,prof_nd,prof_nd_err,avk,avk_col,...

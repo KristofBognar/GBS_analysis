@@ -65,7 +65,8 @@ nccreate(f_out, 'column','Dimensions',{'Time',length(ft)});
 nccreate(f_out, 'column_error','Dimensions',{'Time',length(ft)});
 nccreate(f_out, 'dofs','Dimensions',{'Time',length(ft)});
 nccreate(f_out, 'avk_col','Dimensions',{'Altitude',length(alt),'Time',length(ft)});
-nccreate(f_out, 'avk','Dimensions',{'Altitude',length(alt),'Altitude',length(alt),'Time',length(ft)});
+nccreate(f_out, 'avk','Dimensions',...
+    {'Altitude',length(alt),'Altitude',length(alt),'Time',length(ft)});
 
 nccreate(f_out, 'scan_length','Dimensions',{'Time',length(ft)});
 nccreate(f_out, 'apriori_surf','Dimensions',{'Time',length(ft)});
@@ -74,36 +75,42 @@ nccreate(f_out, 'apriori_h','Dimensions',{'Time',length(ft)});
 
 % add global attributes
 ncwriteatt(f_out,'/','summary',['MAX-DOAS profiles of '...
-                                species_str ' using the HEIPro retrievl algorithm']);
-ncwriteatt(f_out,'/','instrument','PEARL-GBS');
-% ncwriteatt(f_out,'/','elevation_angles','90,30,15,10,5,2,1,-1');
+                                species_str ' retrieved using optimal estimation']);
+ncwriteatt(f_out,'/','instrument',...
+    'PEARL-GBS (Polar Environment Atmospheric Research Laboratory Ground-Based Spectrometer)');
+ncwriteatt(f_out,'/','elevation angles used in each scan','90,30,15,10,5,2,1,-1');
 ncwriteatt(f_out,'/','retrieval_wavelength','360.8 nm');
+ncwriteatt(f_out,'/','retrieval_code','HeiPRO (Friess et al., 2011)');
 ncwriteatt(f_out,'/','location','PEARL Ridge Lab, Eureka, Nunavut, Canada');
-ncwriteatt(f_out,'/','location_lat','80.053');
-ncwriteatt(f_out,'/','location_lon','-86.416');
-ncwriteatt(f_out,'/','location_alt','0.610');
+ncwriteatt(f_out,'/','location_lat','80.053 N');
+ncwriteatt(f_out,'/','location_lon','86.416 W');
+ncwriteatt(f_out,'/','location_alt','610 m');
 ncwriteatt(f_out,'/','start_date',datestr(ft_to_date(ft(1),year),'yyyymmddTHHMMSSZ'));
 ncwriteatt(f_out,'/','end_date',datestr(ft_to_date(ft(end),year),'yyyymmddTHHMMSSZ'));
 ncwriteatt(f_out,'/','creation_date',datestr(datetime('now','timezone','utc'),...
                                              'yyyymmddTHHMMSSZ'));
 ncwriteatt(f_out,'/','creator_name','Kristof Bognar');
+ncwriteatt(f_out,'/','creator_email','kbognar@atmosp.physics.utoronto.ca');
 ncwriteatt(f_out,'/','institution','Department of Physics, University of Toronto');
-ncwriteatt(f_out,'/','project_PI','Kimberly Strong');
+ncwriteatt(f_out,'/','PI_name','Kimberly Strong');
+ncwriteatt(f_out,'/','PI_address','60 St. George Street, Toronto, ON, Canada, M5S1A7');
+ncwriteatt(f_out,'/','PI_email','strong@atmosp.physics.utoronto.ca');
 
 % add variable attributes
 ncwriteatt(f_out,'/altitude','units','km');
-ncwriteatt(f_out,'/time','units','mjd2k, days since 00:00, Jan. 1, 2000 (UTC) (12:00, Jan. 1, 2000 = 0.5)');
-ncwriteatt(f_out,'/time','description','mean time of each profile');
+ncwriteatt(f_out,'/time','units',...
+    'mjd2k, days since 00:00, Jan. 1, 2000 (UTC) (12:00, Jan. 1, 2000 = 0.5)');
+ncwriteatt(f_out,'/time','description','mean time of each profile (UTC)');
 
 if strcmp(option,'tg');
-    ncwriteatt(f_out,'/profile_vmr','units','parts per trillion (ppt)');
-    ncwriteatt(f_out,'/profile_vmr_error','units','parts per trillion (ppt)');
-    ncwriteatt(f_out,'/profile_nd','units','molecules per cm^3');
-    ncwriteatt(f_out,'/profile_nd_error','units','molecules per cm^3');
-    ncwriteatt(f_out,'/column','units','molecules per cm^2');
-    ncwriteatt(f_out,'/column_error','units','molecules per cm^2');
+    ncwriteatt(f_out,'/profile_vmr','units','parts per trillion by volume (pptv)');
+    ncwriteatt(f_out,'/profile_vmr_error','units','parts per trillion by volume (pptv)');
+    ncwriteatt(f_out,'/profile_nd','units','molecules cm^-3');
+    ncwriteatt(f_out,'/profile_nd_error','units','molecules cm^-3');
+    ncwriteatt(f_out,'/column','units','molecules cm^-2');
+    ncwriteatt(f_out,'/column_error','units','molecules cm^-2');
     
-    ncwriteatt(f_out,'/apriori_surf','units','parts per trillion (ppt)');
+    ncwriteatt(f_out,'/apriori_surf','units','parts per trillion by volume (pptv)');
 
 elseif strcmp(option,'aer');
     ncwriteatt(f_out,'/profile','units','extinction, km^-1');
@@ -117,13 +124,16 @@ end
 
 ncwriteatt(f_out,'/dofs','description','degrees of freedom for signal for each profile');
 ncwriteatt(f_out,'/avk_col','description','column averaging kernel');
-ncwriteatt(f_out,'/avk','description','full averaging kernel, altitude x altitude specific avk x time');
+ncwriteatt(f_out,'/avk','description',...
+    'full averaging kernel, altitude x altitude specific avk x time');
 
-ncwriteatt(f_out,'/apriori_surf','description','surface value of the exponential a priori profile');
+ncwriteatt(f_out,'/apriori_surf','description',...
+    'surface value of the exponential a priori profile');
 ncwriteatt(f_out,'/apriori_h','units','km');
 ncwriteatt(f_out,'/apriori_h','description','scale height of the exponential a priori profile');
 ncwriteatt(f_out,'/scan_length','units','minutes');
-ncwriteatt(f_out,'/scan_length','description','total duration of each profile (duration of the corresponding MAX-DOAS scan)');
+ncwriteatt(f_out,'/scan_length','description',...
+    'total duration of each profile (duration of the corresponding MAX-DOAS scan)');
 
 
 
@@ -156,35 +166,75 @@ ncwrite(f_out, 'apriori_h',info.ap_h);
 if ismember('temperature', info.Properties.VariableNames)
     nccreate(f_out, 'temperature','Dimensions',{'Time',length(ft)});
     ncwriteatt(f_out,'/temperature','units','K');
-    ncwriteatt(f_out,'/temperature','description','mean temperature for the profile duration (measured at the PEARL Ridge Lab)');
     ncwriteatt(f_out,'/temperature','fill_value','-9999');
+    ncwriteatt(f_out,'/temperature','description','mean temperature for the profile duration');
     ncwrite(f_out, 'temperature',info.temperature);
 end
 
 if ismember('pressure', info.Properties.VariableNames)
     nccreate(f_out, 'pressure','Dimensions',{'Time',length(ft)});
     ncwriteatt(f_out,'/pressure','units','Pa');
-    ncwriteatt(f_out,'/pressure','description','mean pressure for the profile duration (measured at the PEARL Ridge Lab)');
     ncwriteatt(f_out,'/pressure','fill_value','-9999');
+    ncwriteatt(f_out,'/pressure','description','mean pressure for the profile duration');
     ncwrite(f_out, 'pressure',info.pressure);
 end
 
 if ismember('wind_speed', info.Properties.VariableNames)
     nccreate(f_out, 'wind_speed','Dimensions',{'Time',length(ft)});
     ncwriteatt(f_out,'/wind_speed','units','m s^-1');
-    ncwriteatt(f_out,'/wind_speed','description','mean wind speed for the profile duration (measured at the PEARL Ridge Lab)');
     ncwriteatt(f_out,'/wind_speed','fill_value','-9999');
+    ncwriteatt(f_out,'/wind_speed','description','mean wind speed for the profile duration');
     ncwrite(f_out, 'wind_speed',info.wind_speed);
 end
 
 if ismember('wind_dir', info.Properties.VariableNames)
     nccreate(f_out, 'wind_dir','Dimensions',{'Time',length(ft)});
     ncwriteatt(f_out,'/wind_dir','units','degrees, N=0, E=90');
-    ncwriteatt(f_out,'/wind_dir','description','mean wind direction for the profile duration (measured at the PEARL Ridge Lab)');
     ncwriteatt(f_out,'/wind_dir','fill_value','-9999');
+    ncwriteatt(f_out,'/wind_dir','description','mean wind direction for the profile duration');
     ncwrite(f_out, 'wind_dir',info.wind_dir);
 end
     
+if ismember('aer_coarse', info.Properties.VariableNames)
+    nccreate(f_out, 'aer_coarse','Dimensions',{'Time',length(ft)});
+    ncwriteatt(f_out,'/aer_coarse','units','cm^-3');
+    ncwriteatt(f_out,'/aer_coarse','fill_value','-9999');    
+    ncwriteatt(f_out,'/aer_coarse','description',...
+        'integrated coarse mode aerosol number concentrations (particle diameters > 0.5 microns)');
+
+    if year==2019
+        ncwriteatt(f_out,'/aer_coarse','instrument','Aerodynamic Particle Sizer (APS)');
+    else
+        ncwriteatt(f_out,'/aer_coarse','instrument','Optical Particle Counter (OPC)');
+    end
+    
+    ncwriteatt(f_out,'/aer_coarse','instrument_location','PEARL Ridge Lab');
+    ncwriteatt(f_out,'/aer_coarse','instrument_PI','Patrick Hayes, Rachel Chang');
+    ncwriteatt(f_out,'/aer_coarse','instrument_PI_email',...
+        'patrick.hayes@umontreal.ca, Rachel.Chang@dal.ca');
+    ncwriteatt(f_out,'/aer_coarse','data_usage',...
+        ['Please contact the instrument PIs (Patrick Hayes and Rachel Chang) ' ...
+         'if you intend to use the data in a publication or for a public presentation']);
+    ncwrite(f_out, 'aer_coarse',info.aer_coarse);
+end
+
+if ismember('aer_accum', info.Properties.VariableNames)
+    nccreate(f_out, 'aer_accum','Dimensions',{'Time',length(ft)});
+    ncwriteatt(f_out,'/aer_accum','units','cm^-3');
+    ncwriteatt(f_out,'/aer_accum','fill_value','-9999');    
+    ncwriteatt(f_out,'/aer_accum','description',...
+        ['integrated accumulation mode aerosol number concentrations '...
+         '(particle diameters between 0.1 and 0.5 microns)']);
+    ncwriteatt(f_out,'/aer_accum','instrument','Scanning Mobility Particle Sizer (SMPS)');
+    ncwriteatt(f_out,'/aer_accum','instrument_location','PEARL Ridge Lab');
+    ncwriteatt(f_out,'/aer_accum','instrument_PI','Patrick Hayes, Rachel Chang');
+    ncwriteatt(f_out,'/aer_accum','instrument_PI_email',...
+        'patrick.hayes@umontreal.ca, Rachel.Chang@dal.ca');
+    ncwriteatt(f_out,'/aer_accum','data_usage',...
+        ['Please contact the instrument PIs (Patrick Hayes and Rachel Chang) ' ...
+         'if you intend to use the data in a publication or for a public presentation']);
+    ncwrite(f_out, 'aer_accum',info.aer_accum);
+end
 
 end
 
