@@ -16,21 +16,21 @@ function BrO_stats_paper_figs()
 presentation_plots=0;
 
 windrose=0;
-plot_box=1;
+plot_box=0;
 plot_box_weather=0;
-bro_dailymean=1;
+bro_dailymean=0;
 plot_pca=0;
-weather_corr=1;
-o3_aer_wspd=1;
-sens_map=0;
-plot_ssa=1;
+weather_corr=0;
+o3_aer_wspd=0;
+sens_map=1;
+plot_ssa=0;
 
-si_contact_log=1;
+si_contact_log=0;
 plot_log_si=1; % log scale for SI contact axes
 btraj_len='3'; % length of back trajectories
 
 % 0 to not save, 1 to save as pdf, 2 to save as jpg
-save_figs=2;
+save_figs=0;
 
 % uniform look
 fig_fs=14; % font size on figures
@@ -198,10 +198,10 @@ if plot_box
     axes(fig_ax(4))
     
     plot_yearly_box(plot_data.aer_halfmicron,box_group,a,nbars,c_list,box_lw,box_outlier,0);
-    ylabel('d_p > 0.5 \mum (cm^{-1})')
+    ylabel('d_p > 0.5 \mum (cm^{-3})')
     
 %     plot_yearly_box(plot_data.SMPS_100_500,box_group,a,nbars,c_list,box_lw,box_outlier,0);
-%     ylabel('0.1 < d_p < 0.5 \mum (cm^{-1})')
+%     ylabel('0.1 < d_p < 0.5 \mum (cm^{-3})')
     
     text(labelx,labely,'d)','color','k','FontWeight','bold','Units','normalized')    
     
@@ -637,7 +637,7 @@ if o3_aer_wspd
     h.YAxis.MinorTickValues=log([[1e-3:1e-3:9e-3],[1e-2:1e-2:9e-2],[0.1:0.1:0.9],[1:1:9]]); 
     
     xlabel('Wind speed (m s^{-1})')
-    ylb=ylabel('d_p > 0.5 \mum (cm^{-1})');
+    ylb=ylabel('d_p > 0.5 \mum (cm^{-3})');
     ylb.Position(1)=-2.6;
     
     
@@ -1393,7 +1393,7 @@ if presentation_plots
     ylim([0,5])
 
     xlabel('Wind speed (m s^{-1})')
-    ylabel('d_p > 0.5 \mum (cm^{-1})')
+    ylabel('d_p > 0.5 \mum (cm^{-3})')
 
     set(findall(gcf,'-property','FontSize'),'FontSize',fig_fs)
     set(findall(gcf,'-property','FontName'),'FontName',fig_font)
@@ -1418,7 +1418,7 @@ if presentation_plots
     set(gca,'YTickLabel',{'10^{-2}','10^{-1}','10^{0}'})
     
     xlabel('Wind speed (m s^{-1})')
-    ylabel('d_p > 0.5 \mum (cm^{-1})')
+    ylabel('d_p > 0.5 \mum (cm^{-3})')
 
     set(findall(gcf,'-property','FontSize'),'FontSize',fig_fs)
     set(findall(gcf,'-property','FontName'),'FontName',fig_font)

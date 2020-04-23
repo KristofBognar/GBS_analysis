@@ -8,8 +8,9 @@ wdir_corr=0;
 T_rl_corr=0;
 T_ews_corr=0;
 sonde_dT_corr=0;
-sonde_dT_o3=1;
+sonde_dT_o3=0;
 ssa_corr=0;
+ssa_corr_oneplot=1;
 smps_corr=0;
 o3_corr=0;
 
@@ -610,7 +611,7 @@ if ssa_corr
     
     txt_pos=0.92;
 
-    plot_type='sm';
+    plot_type='hm';
     
     switch plot_type
         case 'sm'
@@ -682,6 +683,52 @@ if ssa_corr
     
     set(findall(gcf,'-property','FontSize'),'FontSize',17)
     
+end
+
+if ssa_corr_oneplot
+
+    figure
+    set(gcf, 'Position', [100, 100, 300, 225]);
+    fig_ax = tight_subplot(1,1,[0.1,0.07],[0.15,0.09],[0.12,0.07]);
+    
+    txt_pos=0.92;
+
+    plot_type='hm';
+    
+    switch plot_type
+        case 'sm'
+            plot_data=bee_dataset.aer_supermicron;
+            xlim_end=1;
+            x_label='D_P > 1 \mum (cm^{-3})';
+            ind_ssa=(bee_dataset.aer_halfmicron <= 100);
+        case 'hm'
+            plot_data=bee_dataset.aer_halfmicron;
+            xlim_end=6;
+            x_label='D_P > 0.5 \mum (cm^{-3})';
+            ind_ssa=(bee_dataset.aer_halfmicron <= 100);
+    end
+    
+    % all aer data
+    axes(fig_ax(1))
+    dscatter(plot_data(ind_ssa), plot_var(ind_ssa)), hold on, box on
+    
+    plot_fit_line(plot_data(ind_ssa),plot_var(ind_ssa),text_size,'')
+    
+    ylim([0,12]*1e13)
+    xlim([0,xlim_end])    
+    set(gca,'YTickLabel',[]);
+    set(gca,'XTickLabel',[]);
+    ylabel('BrO')
+    xlabel('Aer')
+
+%     text(0.95,txt_pos,'Wind: \bf{all}', 'color','k','Units','normalized',...
+%         'fontsize',text_size,'HorizontalAlignment','right')
+        
+    set(findall(gcf,'-property','FontSize'),'FontSize',11)
+    
+    lines = findobj(gcf,'Type','Line');
+    lines(1).LineWidth = 2.0;
+
 end
 
 if smps_corr
@@ -1227,6 +1274,9 @@ function plot_fit_line(xx,yy,text_size,loc)
 
         text(0.95,0.85,sprintf('m=%.2g', slope(1)),'color','k','Units','normalized',...
             'fontsize',text_size,'HorizontalAlignment','right')
+        
+    else
+        % no text
     end
     
 end
