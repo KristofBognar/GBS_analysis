@@ -19,10 +19,11 @@ windrose=0;
 plot_box=0;
 plot_box_weather=0;
 bro_dailymean=0;
+bro_dailymean_o3=1;
 plot_pca=0;
 weather_corr=0;
 o3_aer_wspd=0;
-sens_map=1;
+sens_map=0;
 plot_ssa=0;
 
 si_contact_log=0;
@@ -30,7 +31,7 @@ plot_log_si=1; % log scale for SI contact axes
 btraj_len='3'; % length of back trajectories
 
 % 0 to not save, 1 to save as pdf, 2 to save as jpg
-save_figs=0;
+save_figs=2;
 
 % uniform look
 fig_fs=14; % font size on figures
@@ -396,6 +397,143 @@ if bro_dailymean
     
 end
 
+if bro_dailymean_o3
+    
+        % find unique days
+        unique_days=unique(...
+            [bee_dataset.times.Year,bee_dataset.times.Month,bee_dataset.times.Day],'rows');
+
+        dmean_bro=NaN(size(unique_days,1),4);
+        dmean_o3=NaN(size(unique_days,1),4);
+
+        % loop over unique days
+        for i=1:size(unique_days,1)
+
+            tmp=bee_dataset.bro_col( bee_dataset.times.Year==unique_days(i,1) & ...
+                                     bee_dataset.times.Month==unique_days(i,2) & ...
+                                     bee_dataset.times.Day==unique_days(i,3)          );
+
+            dmean_bro(i,1)=mean(tmp);
+            dmean_bro(i,2)=std(tmp);
+            dmean_bro(i,3)=min(tmp);
+            dmean_bro(i,4)=max(tmp);
+
+            tmp=bee_dataset.o3_surf( bee_dataset.times.Year==unique_days(i,1) & ...
+                                     bee_dataset.times.Month==unique_days(i,2) & ...
+                                     bee_dataset.times.Day==unique_days(i,3)          );
+            dmean_o3(i,1)=mean(tmp);
+            dmean_o3(i,2)=std(tmp);
+            dmean_o3(i,3)=min(tmp);
+            dmean_o3(i,4)=max(tmp);
+            
+        end
+
+        % save results in a table
+        dmean_bro=array2table(dmean_bro,'variablenames',{'mean','std','min','max'}); 
+        dmean_bro.DateTime=datetime(unique_days)+hours(12);
+        
+        dmean_o3=dmean_o3.*0.5e13; % scale to BrO
+        dmean_o3=array2table(dmean_o3,'variablenames',{'mean','std','min','max'}); 
+        dmean_o3.DateTime=datetime(unique_days)+hours(12);
+        
+    
+    % plot figure
+    figure
+    set(gcf, 'Position', [100, 100, 1000, 700]);
+    fig_ax = tight_subplot(4,1,[0.065,0.04],[0.104,0.06],[0.088,0.1]);
+    
+    box_w=0.7; % box width in days
+    
+    for yr=2016:2019
+    
+        axes(fig_ax(yr-2015))
+        
+        ind=(dmean_bro.DateTime.Year==yr);
+
+        plot_x=datenum(dmean_bro.DateTime(ind));
+        plot_mean=dmean_bro.mean(ind);
+        plot_min=dmean_bro.min(ind);
+        plot_max=dmean_bro.max(ind);
+
+        plot_mean_o3=dmean_o3.mean(ind);
+        plot_min_o3=dmean_o3.min(ind);
+        plot_max_o3=dmean_o3.max(ind);
+        
+        plot(1,1), hold on % need to have something plotted before turning hold on,
+                           % tight_subplot removes ylabels otherwise...
+
+        for dy=1:length(plot_x)
+            
+            % draw rectangle for each day, with min and max BrO columns as
+            % the top and bottom edges
+            % position is [x,y,w,h] (bottom left corner)
+            
+            % plot o3 data first
+            if ~isnan(plot_mean_o3)
+                rectangle('position',...
+                          [plot_x(dy)-box_w/2,plot_min_o3(dy),box_w,plot_max_o3(dy)-plot_min_o3(dy)],...
+                          'facecolor','none','edgecolor',[.55 .55 .55])
+                rectangle('position',...
+                          [plot_x(dy)-box_w/2,plot_mean_o3(dy),box_w,1e12],...
+                          'facecolor',[.4 .4 .4],'edgecolor',[.4 .4 .4])
+            end
+            
+            rectangle('position',...
+                      [plot_x(dy)-box_w/2,plot_min(dy),box_w,plot_max(dy)-plot_min(dy)],...
+                      'facecolor',c_list(2,:),'edgecolor',c_list(2,:))
+            rectangle('position',...
+                      [plot_x(dy)-box_w/2,plot_mean(dy),box_w,1e12],...
+                      'facecolor','k','edgecolor','k')
+                                    
+        end
+
+        grid on;
+        ylim([-0.5,23]*1e13)
+        xlim([datenum(yr,3,1),datenum(yr,6,2)])
+                
+        set(gca, 'XTick', datenum([[yr,3,1];[yr,3,15];[yr,4,1];[yr,4,15];...
+                                   [yr,5,1];[yr,5,15];[yr,6,1]]))
+        set(gca, 'XTicklabel', {'01/03','15/03','01/04','15/04','01/05','15/05','01/06'})
+        
+        if yr~=2019
+            set(gca,'xticklabel',[])
+        else
+            xlabel('Date (dd/mm, UTC)')
+        end
+        
+        if yr==2017
+            ylb=ylabel('BrO part. col. (molec cm^{-2})'); 
+            ylb.Position(1)=ylb.Position(1)-1;
+            ylb.Position(2)=ylb.Position(2)-max(dmean_bro.mean);
+            
+            text(datenum([yr,6,8]),-3e13,'Surface O_3 (ppbv)', 'color','k',...
+            'fontsize',fig_fs,'horizontalalignment','center','rotation',90)
+
+        end
+        
+        text(0.9,0.8,num2str(yr), 'color','k','Units','normalized',...
+        'fontsize',fig_fs,'fontweight','bold')
+
+        % create o3 data axes on right side
+        text(datenum([yr,6,3]),20e13,'40', 'color','k',...
+        'fontsize',fig_fs,'horizontalalignment','left')
+        text(datenum([yr,6,3]),10e13,'20', 'color','k',...
+        'fontsize',fig_fs,'horizontalalignment','left')
+        text(datenum([yr,6,3]),0e13,'0', 'color','k',...
+        'fontsize',fig_fs,'horizontalalignment','left')
+
+%         set(gca, 'YMinorTick','on', 'YMinorGrid','on')    
+        
+    end
+    
+    
+    
+    set(findall(gcf,'-property','FontSize'),'FontSize',fig_fs)
+    set(findall(gcf,'-property','FontName'),'FontName',fig_font)
+
+    save_pdf(save_figs, 'BrO_o3_dmean')
+    
+end
 
 %% pca results
 if plot_pca
@@ -1449,7 +1587,7 @@ function save_pdf(save_figs, fname)
         elseif save_figs==2
             % jpg images
             f_out=['/home/kristof/work/documents/paper_bro/figures/' fname '.jpg'];
-            print(h,f_out,'-djpeg','-r400','-opengl')
+            print(h,f_out,'-djpeg','-r200','-opengl')
 %             % png images
 %             f_out=['/home/kristof/work/documents/paper_bro/figures/' fname '.png'];
 %             print(h,f_out,'-dpng','-r400','-opengl')
