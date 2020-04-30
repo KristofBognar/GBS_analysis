@@ -19,7 +19,7 @@ windrose=0;
 plot_box=0;
 plot_box_weather=0;
 bro_dailymean=0;
-bro_dailymean_o3=1;
+bro_dailymean_o3=0;
 plot_pca=0;
 weather_corr=0;
 o3_aer_wspd=0;
@@ -31,7 +31,7 @@ plot_log_si=1; % log scale for SI contact axes
 btraj_len='3'; % length of back trajectories
 
 % 0 to not save, 1 to save as pdf, 2 to save as jpg
-save_figs=2;
+save_figs=0;
 
 % uniform look
 fig_fs=14; % font size on figures
@@ -399,42 +399,44 @@ end
 
 if bro_dailymean_o3
     
-        % find unique days
-        unique_days=unique(...
-            [bee_dataset.times.Year,bee_dataset.times.Month,bee_dataset.times.Day],'rows');
-
-        dmean_bro=NaN(size(unique_days,1),4);
-        dmean_o3=NaN(size(unique_days,1),4);
-
-        % loop over unique days
-        for i=1:size(unique_days,1)
-
-            tmp=bee_dataset.bro_col( bee_dataset.times.Year==unique_days(i,1) & ...
-                                     bee_dataset.times.Month==unique_days(i,2) & ...
-                                     bee_dataset.times.Day==unique_days(i,3)          );
-
-            dmean_bro(i,1)=mean(tmp);
-            dmean_bro(i,2)=std(tmp);
-            dmean_bro(i,3)=min(tmp);
-            dmean_bro(i,4)=max(tmp);
-
-            tmp=bee_dataset.o3_surf( bee_dataset.times.Year==unique_days(i,1) & ...
-                                     bee_dataset.times.Month==unique_days(i,2) & ...
-                                     bee_dataset.times.Day==unique_days(i,3)          );
-            dmean_o3(i,1)=mean(tmp);
-            dmean_o3(i,2)=std(tmp);
-            dmean_o3(i,3)=min(tmp);
-            dmean_o3(i,4)=max(tmp);
-            
-        end
-
-        % save results in a table
-        dmean_bro=array2table(dmean_bro,'variablenames',{'mean','std','min','max'}); 
-        dmean_bro.DateTime=datetime(unique_days)+hours(12);
+    o3_scale=(1/3)*1e13;
         
-        dmean_o3=dmean_o3.*0.5e13; % scale to BrO
-        dmean_o3=array2table(dmean_o3,'variablenames',{'mean','std','min','max'}); 
-        dmean_o3.DateTime=datetime(unique_days)+hours(12);
+    % find unique days
+    unique_days=unique(...
+        [bee_dataset.times.Year,bee_dataset.times.Month,bee_dataset.times.Day],'rows');
+
+    dmean_bro=NaN(size(unique_days,1),4);
+    dmean_o3=NaN(size(unique_days,1),4);
+
+    % loop over unique days
+    for i=1:size(unique_days,1)
+
+        tmp=bee_dataset.bro_col( bee_dataset.times.Year==unique_days(i,1) & ...
+                                 bee_dataset.times.Month==unique_days(i,2) & ...
+                                 bee_dataset.times.Day==unique_days(i,3)          );
+
+        dmean_bro(i,1)=mean(tmp);
+        dmean_bro(i,2)=std(tmp);
+        dmean_bro(i,3)=min(tmp);
+        dmean_bro(i,4)=max(tmp);
+
+        tmp=bee_dataset.o3_surf( bee_dataset.times.Year==unique_days(i,1) & ...
+                                 bee_dataset.times.Month==unique_days(i,2) & ...
+                                 bee_dataset.times.Day==unique_days(i,3)          );
+        dmean_o3(i,1)=mean(tmp);
+        dmean_o3(i,2)=std(tmp);
+        dmean_o3(i,3)=min(tmp);
+        dmean_o3(i,4)=max(tmp);
+
+    end
+
+    % save results in a table
+    dmean_bro=array2table(dmean_bro,'variablenames',{'mean','std','min','max'}); 
+    dmean_bro.DateTime=datetime(unique_days)+hours(12);
+
+    dmean_o3=dmean_o3.*o3_scale; % scale to BrO
+    dmean_o3=array2table(dmean_o3,'variablenames',{'mean','std','min','max'}); 
+    dmean_o3.DateTime=datetime(unique_days)+hours(12);
         
     
     % plot figure
@@ -488,7 +490,7 @@ if bro_dailymean_o3
         end
 
         grid on;
-        ylim([-0.5,23]*1e13)
+        ylim([-0.5,bro_lim_full]*1e13)
         xlim([datenum(yr,3,1),datenum(yr,6,2)])
                 
         set(gca, 'XTick', datenum([[yr,3,1];[yr,3,15];[yr,4,1];[yr,4,15];...
@@ -515,9 +517,11 @@ if bro_dailymean_o3
         'fontsize',fig_fs,'fontweight','bold')
 
         % create o3 data axes on right side
-        text(datenum([yr,6,3]),20e13,'40', 'color','k',...
+        text(datenum([yr,6,3]),15e13,'45', 'color','k',...
         'fontsize',fig_fs,'horizontalalignment','left')
-        text(datenum([yr,6,3]),10e13,'20', 'color','k',...
+        text(datenum([yr,6,3]),10e13,'30', 'color','k',...
+        'fontsize',fig_fs,'horizontalalignment','left')
+        text(datenum([yr,6,3]),5e13,'15', 'color','k',...
         'fontsize',fig_fs,'horizontalalignment','left')
         text(datenum([yr,6,3]),0e13,'0', 'color','k',...
         'fontsize',fig_fs,'horizontalalignment','left')
