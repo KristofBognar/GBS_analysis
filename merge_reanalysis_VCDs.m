@@ -1,33 +1,44 @@
+function merge_reanalysis_VCDs(instr, tg, year, is_rd, do_filter)
+% merge_reanalysis_VCDs(instr, tg, year, is_rd, do_filter)
 % merge and filter yearly VCD values
 
-%% control variables
+if nargin==4, do_filter=1; end
+
+%% setup
 
 %instrument
-instr='UT-GBS';
+% instr='UT-GBS';
 % instr='PEARL-GBS';
 
 % trace gas (1: ozone, 2: NO2, 3: NO2 UV)
-tg=2;
+% tg=2;
 tgstr={'O3','NO2','NO2_UV'};
 
 % year
 % year='2019'; % set to empty string to include all files
-year='2020'; % set to empty string to include all files
 
 % filters
-do_filter=true;
+% do_filter=true;
 
 addRCDerr=true;
 do_cams_filter=true;
 
+%% output
+
 % VCD directory
-% vcd_dir='/home/kristof/work/GBS/VCD_results/UT-GBS_reanalysis_old_err_budget/';
-% vcd_dir='/home/kristof/work/GBS/VCD_results/PEARL-GBS_reanalysis_old_err_budget/';
-% vcd_dir='/home/kristof/work/GBS/VCD_results/';
-vcd_dir='/home/kristof/work/GBS/VCD_results/NDACC_RD/';
+if ~is_rd
+    vcd_dir='/home/kristof/work/GBS/VCD_results/';
+else
+    vcd_dir='/home/kristof/work/GBS/VCD_results/NDACC_RD/';
+end
 
 % output file name (remove file if already exists)
-fname=[vcd_dir instr '_' tgstr{tg} '_VCD_' year 'all.mat'];
+
+if do_filter % regular merged files, with bad values filtered out
+    fname=[vcd_dir instr '_' tgstr{tg} '_VCD_' year 'all.mat'];
+else % unfiltered data for DMP input
+    fname=[vcd_dir instr '_' tgstr{tg} '_VCD_' year '_unfiltered.mat'];
+end
 if exist(fname,'file'), delete(fname), end
 
 %% find files
@@ -48,6 +59,10 @@ cd(vcd_dir)
 
 for file=f_list
     
+    % skip merged files if they are included in the list (of files to be merged)
+    if ~isempty(strfind(file{1},'all')), continue, end
+    if ~isempty(strfind(file{1},'unfiltered')), continue, end
+
     load(file{1})
 
     if do_filter
@@ -73,7 +88,7 @@ reanalysis.mjd2k=ft_to_mjd2k(reanalysis.fd-1,reanalysis.year);
 reanalysis.fractional_time=reanalysis.fd-1;
 
 %% save file
-
+reanalysis=sortrows(reanalysis,'fd');
 save(fname,'reanalysis');
 
 clearvars
