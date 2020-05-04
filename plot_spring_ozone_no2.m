@@ -5,13 +5,13 @@ du=2.687e16;
 
 curr_yr=2020;
 
-o3_only=1;
+o3_only=0;
 
 instr='UT-GBS';
 % instr='PEARL-GBS';
 
 highlight=[2000,2005,2007,2011,2020];
-x_lim=[50,112];
+x_lim=[50,120];
 
 plot_colors=flipud([[1 0 0];...
              [0 0 1];...
@@ -119,7 +119,7 @@ if ~o3_only
 
     axes(fig_ax(1))
     grid on
-    set(gca,'XTick',[61,70,80,92,101,111])
+    set(gca,'XTick',[61,70,80,92,101,111,122])
     title('GBS vertical columns from the PEARL Ridge Lab (Eureka, Canada, 80°N)')
     ylim([180,600])
 
@@ -128,7 +128,7 @@ if ~o3_only
 
     axes(fig_ax(2))
     grid on
-    set(gca,'XTick',[61,70,80,92,101,111])
+    set(gca,'XTick',[61,70,80,92,101,111,122])
 
     text(0.02,0.93,'Preliminary Results, Kristof Bognar, Ramina Alwarda, Kimberly Strong, UofT',...
          'units','normalized','fontsize',8,'fontweight','bold')

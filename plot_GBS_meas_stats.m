@@ -3,9 +3,9 @@
 
 %% load raw QDOAS files
 
-year=2019;
-% instr='UT-GBS';
-instr='PEARL-GBS';
+year=2020;
+instr='UT-GBS';
+% instr='PEARL-GBS';
 
 cur_dir=pwd();
 qdoas_dir='/home/kristof/work/GBS/QDOAS_results/NDACC_RD_tables/';
