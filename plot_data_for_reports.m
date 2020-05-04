@@ -11,14 +11,15 @@ vcd_dir_loc='/home/kristof/work/GBS/VCD_results/';
 
 % VCD processing state (1: final yearly data, 0: RD results)
 % ordered as [UT_O3, UT_NO2, PEARL_NO2]
-final_data=[0,1,1];
+final_data=[0,0,0];
 
 % year
-year='2019'; % set to empty string to include all files
+year='2020'; % set to empty string to include all files
 
 % save details
-save_figs=1; % 0: don't save 1: save as pdf, 2: save as jpg
-savedir='/home/kristof/work/campaigns/campaign_2019/report/';
+save_figs=2; % 0: don't save 1: save as pdf, 2: save as jpg
+% savedir='/home/kristof/work/campaigns/campaign_2019/report/';
+savedir='/home/kristof/work/campaigns/campaign_2020/post_campaign/';
 
 %% plotting
 plot_symbols={'.','o'};
@@ -76,6 +77,15 @@ for plot_num=1:2
         plot(dates(ind_pm),reanalysis.mean_vcd(ind_pm),...
              ['r' plot_symbols{i}],'markersize',plot_msize(i))
         
+        
+        if i==1
+            x_min=min(dates);
+            x_max=max(dates);
+        else
+            x_min=min(x_min,min(dates));
+            x_max=max(x_max,max(dates));
+        end
+         
     end
     
     % finalize plot
@@ -91,8 +101,8 @@ for plot_num=1:2
                'location',no2_legend_loc)
     end
     
-    margin=(dates(end)-dates(1))/20;
-    xlim([datenum(min(dates)-margin),datenum(max(dates)+margin)])
+    margin=(x_max-x_min)/20;
+    xlim([datenum(x_min-margin),datenum(x_max+margin)])
     
     
     set(findall(gcf,'-property','FontSize'),'FontSize',15)
