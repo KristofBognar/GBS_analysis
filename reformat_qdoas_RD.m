@@ -1,30 +1,67 @@
-function data = reformat_qdoas_RD(instr,batch)
+function data = reformat_qdoas_RD(instr,batch, year)
+% data = reformat_qdoas_RD(instr,batch,year)
+%
+% read in QDOAS output for CAMS RD processing, and save as matlab table
+%
+% QDOAS files must be in the QDOAS_outout/ folder, and must have the name
+% <instrument>_<year>_<batch_num>.ASC, where the instrument is UT-GBS or
+% PEARL-GBS, and the batch number identifies the current chunk of data 
+%
+% !!! QDOAS file format is hard-coded !!!
+%
+% INPUT: instr: 'u' for the UT-GBS or 'p' for the PEARL-GBS
+%        batch: integer batch number
+%        year: optinal, current year is assumed for RD data
+%
+% OUTPUT: data: QDOAS data in table format
+%         The results are also saved under QDOAS_results/NDACC_RD_tables/
+%
+% @Kristof Bognar
 
-year=datetime(now,'convertfrom','datenum').Year;
+% assign year
+if nargin==2
+    year=datetime(now,'convertfrom','datenum').Year;
+end
+
+% input numbers as string
 year=num2str(year);
-
 batch_str=num2str(batch);
 
-switch instr
-    case 'u'
-        filename=['/home/kristof/work/GBS/UT-GBS/' year '/QDOAS_output/UT-GBS_'...
-                  year '_' batch_str '.ASC'];
-        
-        data = import_ut(filename);
-        
-        save(['/home/kristof/work/GBS/QDOAS_results/NDACC_RD_tables/UT-GBS_'...
-              year '_' batch_str '.mat'],'data')
-        
-    case 'p'
-        filename=['/home/kristof/work/GBS/PEARL-GBS/' year '/QDOAS_output/PEARL-GBS_'...
-                  year '_' batch_str '.ASC'];
-              
-        data = import_p(filename);
-              
-        save(['/home/kristof/work/GBS/QDOAS_results/NDACC_RD_tables/PEARL-GBS_'...
-              year '_' batch_str '.mat'],'data')
-          
+% load and save data
+if ismac 
+    % Ramina's system
+    
+    error('Set file paths')
+    
+    % copy-paste the section under the isunix contirion, and update both
+    % filename variables and both save function calls with the actual path
+    % on your system
+    
+elseif isunix
+    % Kristof's system
+    switch instr
+        case 'u'
+            filename=['/home/kristof/work/GBS/UT-GBS/' year '/QDOAS_output/UT-GBS_'...
+                      year '_' batch_str '.ASC'];
+
+            data = import_ut(filename);
+
+            save(['/home/kristof/work/GBS/QDOAS_results/NDACC_RD_tables/UT-GBS_'...
+                  year '_' batch_str '.mat'],'data')
+
+        case 'p'
+            filename=['/home/kristof/work/GBS/PEARL-GBS/' year '/QDOAS_output/PEARL-GBS_'...
+                      year '_' batch_str '.ASC'];
+
+            data = import_p(filename);
+
+            save(['/home/kristof/work/GBS/QDOAS_results/NDACC_RD_tables/PEARL-GBS_'...
+                  year '_' batch_str '.mat'],'data')
+
+    end
 end
+
+
 end
 
 

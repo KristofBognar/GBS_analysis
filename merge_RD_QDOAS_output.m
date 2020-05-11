@@ -3,16 +3,21 @@ function data=merge_RD_QDOAS_output( instrument, year )
 %single yearly file, to be used in yearly VCD retrieval
 %
 % instrument = 'UT-GBS' or 'PEARL-GBS'
+% year = integer year number
 % 
-% RD files saved as .mat in /home/kristof/work/GBS/QDOAS_results/NDACC_RD_tables
+% input: RD files saved as .mat in folder specified in rd_dir
 %
-% yearly files saved as .mat in /home/kristof/work/GBS/QDOAS_results/yearly_tables
+% output: yearly files saved as .mat in folder specified in yearly_dir
 %
 
 %% setup
 
-rd_dir='/home/kristof/work/GBS/QDOAS_results/NDACC_RD_tables';
-yearly_dir='/home/kristof/work/GBS/QDOAS_results/yearly_tables';
+if ismac
+    error('Set file paths')
+elseif isunix
+    rd_dir='/home/kristof/work/GBS/QDOAS_results/NDACC_RD_tables';
+    yearly_dir='/home/kristof/work/GBS/QDOAS_results/yearly_tables';
+end
 
 data_all=[];
 
