@@ -5,8 +5,8 @@ du=2.687e16;
 
 curr_yr=2020;
 
-vcd_plot=1; % 1: plot ozone and NO2, 2: ozone only
-no2_diffs=0;
+vcd_plot=0; % 1: plot ozone and NO2, 2: ozone only
+no2_diffs=1;
 
 instr='UT-GBS';
 % instr='PEARL-GBS';
@@ -343,7 +343,7 @@ if no2_diffs
     set(gca,'XTick',xlim_arr)
     set(gca,'XTickLabel',cellstr(ft_to_date(xlim_arr,0),'MMM dd'))
     title('GBS Vis and UV data: diurnal variation of NO_2 (sunset minus sunrise, 5-day mean)')
-    ylabel('\DeltaNO_2 (molec/cm^2)')
+    ylabel('\DeltaNO_2-Vis (molec/cm^2)')
 
 %     text(0.02,0.93,'Visible measurements (NDACC)',...
 %          'units','normalized','fontsize',8,'fontweight','bold')
