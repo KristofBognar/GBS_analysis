@@ -88,7 +88,7 @@ reanalysis.mjd2k=ft_to_mjd2k(reanalysis.fd-1,reanalysis.year);
 reanalysis.fractional_time=reanalysis.fd-1;
 
 %% save file
-reanalysis=sortrows(reanalysis,'fd');
+reanalysis=sortrows(reanalysis,'mjd2k');
 save(fname,'reanalysis');
 
 clearvars
