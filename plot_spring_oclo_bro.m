@@ -12,7 +12,7 @@ plot_gray=[.65 .65 .65];
 
 x_lim=[50,112];
 
-if 1
+if 0
     %% load data
     % quickly reprocessed 2011 data, with updated QDOAS project (includes BrO)
     load('/home/kristof/work/GBS/PEARL-GBS/2011_tmp_for_telecon/avg_twilight_for_oclo/oclo_2011.mat')
@@ -157,7 +157,7 @@ for yr=[2011,2020]
 
     xx=ft_to_date(data_new.Fractionalday-1,data_new.Year);
     xx.Year=0;
-    yy=data_new.OClOSlColoclo;
+    yy=data_new.BrOSlColbro;
             
     plot(xx(ind),yy(ind),'s','color',plot_c,'linewidth',1.2), hold on
     
