@@ -5,14 +5,14 @@ du=2.687e16;
 
 curr_yr=2020;
 
-vcd_plot=0; % 1: plot ozone and NO2, 2: ozone only
-no2_diffs=1;
+vcd_plot=1; % 1: plot ozone and NO2, 2: ozone only
+no2_diffs=0;
 
 instr='UT-GBS';
 % instr='PEARL-GBS';
 
 highlight=[2000,2005,2007,2011,2014,2015,2020];
-x_lim=[50,122];
+x_lim=[50,140];
 
 % plot_colors=flipud([[1 0 0];...
 %              [0 0 .6];...
@@ -176,18 +176,20 @@ if vcd_plot==1
 
     axes(fig_ax(1))
     grid on
-    set(gca,'XTick',[61,70,80,92,101,111,122])
+    set(gca,'XTick',[61,70,80,92,101,111,122,131,141])
 %     title('GBS vertical columns from the PEARL Ridge Lab (Eureka, Canada, 80°N)')
     title('GBS-Vis data: vertical columns of O_3 and NO_2')
     ylim([180,600])
-
+    xlim(x_lim+3)
+    
 %     text(0.02,0.93,'Preliminary Results, Kristof Bognar, Ramina Alwarda, Kimberly Strong, UofT',...
 %          'units','normalized','fontsize',8,'fontweight','bold')
 
     axes(fig_ax(2))
     grid on
-    set(gca,'XTick',[61,70,80,92,101,111,122])
-
+    set(gca,'XTick',[61,70,80,92,101,111,122,131,141])
+    xlim(x_lim+3)
+    
 %     text(0.02,0.93,'Preliminary Results, Kristof Bognar, Ramina Alwarda, Kimberly Strong, UofT',...
 %          'units','normalized','fontsize',8,'fontweight','bold')
 
