@@ -1,7 +1,7 @@
-%%% script to generate ozone column inputs required for VCD retrieval
+function sonde_column_for_VCD(start_yr, end_year)
+%%% function to generate ozone column inputs required for VCD retrieval
 %%% code loads ozonesonde data saved by read_ozonesonde.m
 %%%
-%%% change start_year and end_year before running the script
 
 % load old VCD input file 
 if ismac
@@ -14,15 +14,13 @@ elseif isunix
     load([file_path 'sonde_for_VCD.mat'])
 end
 
-clearvars -except sonde
-
 yr=[];
 doy=[];
 ft=[];
 o3=[];
 
-start_yr=2018;
-end_year=2020;
+% start_yr=2018;
+% end_year=2020;
 
 % load total columns from ozonesonde files
 for year=start_yr:end_year
@@ -46,6 +44,13 @@ for year=start_yr:end_year
         o3=[o3;tot_col_DU(i)];
     end
     
+    % check for overlaping year in sonde file
+    % don't overwrite anything, ask user to handle issue
+    if sum(sonde(:,1)==year)>0,
+        error(['Data from ' num2str(year) ' already present in sonde file:\n%s'],...
+              'Adjust start year or delete partial year from the saved file')
+    end
+    
 end
 
 % convert fractional time to hours
@@ -62,7 +67,6 @@ sonde(sonde(:,1)==2012,:)=[];
 
 sonde=[sonde;sonde2];
 
-clearvars -except sonde
+save([file_path 'sonde_for_VCD.mat'],'sonde')
 
-save([file_path 'sonde_for_VCD.mat'])
-
+end
