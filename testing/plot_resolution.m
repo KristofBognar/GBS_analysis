@@ -26,18 +26,19 @@ condition='U';
 if condition=='P'
     
     %2019: exclude peaks not in last year's plots (neon peaks are problematic)
-    ne_600_450_xpk(1:2)=[];
-    ne_600_450_fwhm(1:2)=[];
-    ne_1200_350_xpk(4:5)=[];
-    ne_1200_350_fwhm(4:5)=[];
+%     ne_600_450_xpk(1:2)=[];
+%     ne_600_450_fwhm(1:2)=[];
+%      ne_1200_350_xpk(4:5)=[];
+%      ne_1200_350_fwhm(4:5)=[];
     
     % Plot 1200 grating
     figure(1)
     plot(hg_1200_350_xpk, hg_1200_350_fwhm.*0.043,'bx'),hold on
-    plot(ne_1200_350_xpk, ne_1200_350_fwhm.*0.043,'bx'),hold on
-    plot(xe_1200_350_xpk, xe_1200_350_fwhm.*0.043,'bx'),hold on
+    plot(ne_1200_350_xpk, ne_1200_350_fwhm.*0.043,'kx'),hold on
+    plot(xe_1200_350_xpk, xe_1200_350_fwhm.*0.043,'mx'),hold on
     grid on
     
+    legend('Hg', 'Ne', 'Xe')
     xlim([0,2048])
     ylim([0,1])
     xlabel('CCD Pixels')
@@ -46,10 +47,11 @@ if condition=='P'
     % Plot 600 grating
     figure(2)
     plot(hg_600_450_xpk, hg_600_450_fwhm.*0.107,'bx'),hold on
-    plot(ne_600_450_xpk, ne_600_450_fwhm.*0.107,'bx'),hold on
-    plot(xe_600_450_xpk, xe_600_450_fwhm.*0.107,'bx'),hold on
+    plot(ne_600_450_xpk, ne_600_450_fwhm.*0.107,'kx'),hold on
+    plot(xe_600_450_xpk, xe_600_450_fwhm.*0.107,'mx'),hold on
     grid on
-
+    
+    legend('Hg', 'Ne', 'Xe')
     xlim([0,2048])
     ylim([0,3])
     xlabel('CCD Pixels')
@@ -58,12 +60,13 @@ if condition=='P'
     % Plot 300 grating
     figure(3)
     plot(hg_300_450_xpk, hg_300_450_fwhm.*0.208,'bx'),hold on
-    plot(ne_300_450_xpk, ne_300_450_fwhm.*0.208,'bx'),hold on
-    plot(xe_300_450_xpk, xe_300_450_fwhm.*0.208,'bx'),hold on
+    %plot(ne_300_450_xpk, ne_300_450_fwhm.*0.208,'kx'),hold on
+    plot(xe_300_450_xpk, xe_300_450_fwhm.*0.208,'mx'),hold on
     grid on
 
+    legend('Hg', 'Xe')
     xlim([0,2048])
-    ylim([0,3])
+    ylim([0,4])
     xlabel('CCD Pixels')
     ylabel('FWHM (nm)')
     
@@ -96,9 +99,9 @@ elseif condition=='U'
 %     Plot 1800 grating
     figure(1)
     plot(hg_1800_350_xpk, hg_1800_350_fwhm.*0.03,'bx'),hold on
-    plot(ne_1800_350_xpk, ne_1800_350_fwhm.*0.03,'bx'),hold on
+    plot(ne_1800_350_xpk, ne_1800_350_fwhm.*0.03,'kx'),hold on
     grid on
-    
+    legend('Hg', 'Ne', 'Xe')
     xlim([0,2048])
     ylim([0,3])
     xlabel('CCD Pixels')
@@ -107,10 +110,10 @@ elseif condition=='U'
 %     Plot 600 grating
     figure(2)
     plot(hg_600_450_xpk, hg_600_450_fwhm.*0.12,'bx'),hold on
-    plot(ne_600_450_xpk, ne_600_450_fwhm.*0.12,'bx'),hold on
-    plot(xe_600_450_xpk, xe_600_450_fwhm.*0.12,'bx'),hold on
+    plot(ne_600_450_xpk, ne_600_450_fwhm.*0.12,'kx'),hold on
+    plot(xe_600_450_xpk, xe_600_450_fwhm.*0.12,'mx'),hold on
     grid on
-
+    legend('Hg', 'Ne', 'Xe')
     xlim([0,2048])
     ylim([0,3])
     xlabel('CCD Pixels')
@@ -119,8 +122,9 @@ elseif condition=='U'
 %     Plot 400 grating
     figure(3)
     plot(hg_400_450_xpk, hg_400_450_fwhm.*0.16,'bx'),hold on
-    plot(ne_400_450_xpk, ne_400_450_fwhm.*0.16,'bx'),hold on
-    plot(xe_400_450_xpk, xe_400_450_fwhm.*0.16,'bx'),hold on
+    plot(ne_400_450_xpk, ne_400_450_fwhm.*0.16,'kx'),hold on
+    plot(xe_400_450_xpk, xe_400_450_fwhm.*0.16,'mx'),hold on
+    legend('Hg', 'Ne', 'Xe')
     grid on
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

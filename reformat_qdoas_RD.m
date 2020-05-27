@@ -31,12 +31,25 @@ batch_str=num2str(batch);
 if ismac 
     % Ramina's system
     
-    error('Set file paths')
-    
-    % copy-paste the section under the isunix contirion, and update both
-    % filename variables and both save function calls with the actual path
-    % on your system
-    
+    switch instr
+        case 'u'
+            filename=['/Users/raminaalwarda/Desktop/PhysicsPhD/GBSdata/UT-GBSdata/UTGBS_' year '/QDOAS_output/UT-GBS_'...
+                      year '_' batch_str '.ASC'];
+
+            data = import_ut(filename);
+
+            save(['/Users/raminaalwarda/Desktop/PhysicsPhD/GBSdata/QDOAS_results/NDACC_RD_tables/UT-GBS_'...
+                  year '_' batch_str '.mat'],'data')
+
+        case 'p'
+            filename=['/Users/raminaalwarda/Desktop/PhysicsPhD/GBSdata/PEARL-GBSdata/PGBS_' year '/QDOAS_output/PEARL-GBS_'...
+                      year '_' batch_str '.ASC'];
+
+            data = import_p(filename);
+
+            save(['/Users/raminaalwarda/Desktop/PhysicsPhD/GBSdata/QDOAS_results/NDACC_RD_tables/PEARL-GBS_'...
+                  year '_' batch_str '.mat'],'data')
+    end
 elseif isunix
     % Kristof's system
     switch instr

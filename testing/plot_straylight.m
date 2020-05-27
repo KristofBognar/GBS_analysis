@@ -69,18 +69,35 @@ function plot_straylight()
 % redtime='2:38:35';
 
 % PGBS Eureka 2019
-specfile='02031916.csv';
-spectime='4:45:49';
-dcfile='01031921.csv';
-dctime='9:12:17';
+% specfile='02031916.csv';
+% spectime='4:45:49';
+% dcfile='01031921.csv';
+% dctime='9:12:17';
+% redfile=specfile;
+% redtime='4:54:30';
+
+% PGBS Eureka 2020
+specfile='27022019.csv';
+spectime='7:43:11';
+dcfile='27022019.csv';
+dctime='7:49:59';
 redfile=specfile;
-redtime='4:54:30';
+redtime='7:45:27';
+
+% UTGBS Eureka 2020
+specfile='02032018.csv';
+spectime='6:26:21';
+dcfile='02032020.csv';
+dctime='8:09:44';
+redfile=specfile;
+redtime='6:34:26';
 
 
-path='/home/kristof/work/GBS/PEARL-GBS/2019/testing_Eureka/csv/';
+path='/Users/raminaalwarda/Desktop/PhysicsPhD/GBSdata/UT-GBSdata/UTGBS_2020/testing_Eureka/csv/'
 
 spec=get_spectrum_v2([path specfile],spectime);
 dc=get_spectrum_v2([path dcfile],dctime);
+
 red=get_spectrum_v2([path redfile],redtime);
 
 % load straylight.mat
