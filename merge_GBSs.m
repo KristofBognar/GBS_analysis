@@ -1,14 +1,17 @@
-function merge_GBSs()
+function merge_GBSs(vcd_dir,save_dir)
 %merge_GBSs merge VIS o3, no2, and UV no2 datasets from GBSs
 %   
 
-merge_o3=0;
-merge_no2=0;
+merge_o3=1;
+merge_no2=1;
 merge_no2uv=1;
 
 % directories
-vcd_dir='/home/kristof/work/GBS/VCD_results/';
-save_dir='/home/kristof/work/satellite_validation/';
+% vcd_dir='/home/kristof/work/GBS/VCD_results/';
+% save_dir='/home/kristof/work/satellite_validation/';
+
+if vcd_dir(end)~='/',vcd_dir=[vcd_dir '/']; end
+if save_dir(end)~='/',save_dir=[save_dir '/']; end
 
 %% merge VIS ozone
 
