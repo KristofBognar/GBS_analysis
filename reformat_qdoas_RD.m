@@ -431,7 +431,11 @@ function data=import_ut(filename)
     data.Fluxes500 = cell2mat(rawNumericColumns(:, 242));
     data.Fluxes532 = cell2mat(rawNumericColumns(:, 243));
     data.Fluxes550 = cell2mat(rawNumericColumns(:, 244));
-
+    
+    % For Ramina's version of QDOAS, this line will remove the output for
+    % reference spectrum.
+    data = data(round(data.SZA,3) ~= data.O3RefZm, :);
+    
     % For code requiring serial dates (datenum) instead of datetime, uncomment
     % the following line(s) below to return the imported dates as datenum(s).
 

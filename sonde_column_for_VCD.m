@@ -4,7 +4,7 @@ function sonde_column_for_VCD(start_yr, end_year)
 %%%
 
 % load old VCD input file 
-if ismac
+if ismac %****
     error('Get sample VCD file and set up path')
 elseif isunix
 
