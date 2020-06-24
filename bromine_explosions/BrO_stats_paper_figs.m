@@ -16,7 +16,7 @@ function BrO_stats_paper_figs()
 presentation_plots=0;
 
 windrose=0;
-plot_box=0;
+plot_box=1;
 plot_box_weather=0;
 bro_dailymean=0;
 bro_dailymean_o3=0;
@@ -30,10 +30,18 @@ si_contact_log=0;
 plot_log_si=1; % log scale for SI contact axes
 btraj_len='3'; % length of back trajectories
 
-% 0 to not save, 1 to save as pdf, 2 to save as jpg
+% supplement
+dscd_avk=0;
+o3_bro_box=0;
+si_maps=0;
+accum_pax=0;
+
+%%% 0 to not save, 1 to save as pdf, 2 to save as jpg
 save_figs=0;
 
 % uniform look
+major_grid=0; % major grid on correlation plots
+minor_grid=0; % monir grid on correlation plots, only if major_grid==1
 fig_fs=14; % font size on figures
 arr_txt_fs=9;
 fig_font='Arial'; % font for plotting
@@ -86,6 +94,10 @@ bee_dataset(bee_dataset.times.Year==2015,:)=[];
 % bee_dataset(bee_dataset.mixing_height_3day>300,:)=[];
 %%%
 
+% calculate approximate blowingsnow threshold
+% bs_PWS=9.43+0.18*bee_dataset.T_PWS+0.0033*bee_dataset.T_PWS.^2;
+% bee_dataset=bee_dataset(bee_dataset.wspd_ms>bs_PWS,:);
+
 % setup wdir indices
 % could fill NaNs with EWS data, but actual wdir is different from PWS ~70%
 % of the time (even though the wind rose looks similar)
@@ -93,9 +105,9 @@ ind_N=bee_dataset.N_SE_rest==1;
 ind_SE=bee_dataset.N_SE_rest==2;
 ind_rest=bee_dataset.N_SE_rest==3;
 
+
 % load data grouped for flexpart
 load('/home/kristof/work/BEEs/BEE_dataset_flexpart.mat')
-
 % filter dataset later (sensitivities are saved in a way that all runs must
 % be included in the indexing)
 
@@ -130,6 +142,8 @@ if plot_box
     labelx=0.78;
     labely=0.93;
 
+    grp_labels={'March','April','May'};
+    
     % set up figure
     figure
     set(gcf, 'Position', [100, 100, 1000, 600]);
@@ -161,7 +175,7 @@ if plot_box
     a=0.2; % controls width of each group
     nbars=4; % number of bars in each group 
     
-    ll=plot_yearly_box(plot_data.bro_col,box_group,a,nbars,c_list,box_lw,box_outlier,1);
+    ll=plot_box_by_grp(plot_data.bro_col,box_group,a,nbars,grp_labels,c_list,box_lw,box_outlier,1);
     
     ll.Position(1)=0.36;
     ll.Position(2)=0.92;
@@ -178,7 +192,7 @@ if plot_box
     %%%%%%%%%% AOD box plot
     axes(fig_ax(2))
     
-    plot_yearly_box(plot_data.aer_ext,box_group,a,nbars,c_list,box_lw,box_outlier,0);
+    plot_box_by_grp(plot_data.aer_ext,box_group,a,nbars,grp_labels,c_list,box_lw,box_outlier,0);
     
     set(gca, 'YScale', 'log')
     ylb=ylabel('AOD');
@@ -189,19 +203,19 @@ if plot_box
     %%%%%%%%%% ozone box plot
     axes(fig_ax(3))
     
-    plot_yearly_box(plot_data.o3_surf,box_group,a,nbars,c_list,box_lw,box_outlier,0);
+    plot_box_by_grp(plot_data.o3_surf,box_group,a,nbars,grp_labels,c_list,box_lw,box_outlier,0);
     
-    ylabel('O_3 (ppbv)')
+    ylabel('Surface ozone (ppbv)')
     
     text(labelx,labely,'c)','color','k','FontWeight','bold','Units','normalized')
     
     %%%%%%%%%% SSA box plot
     axes(fig_ax(4))
     
-    plot_yearly_box(plot_data.aer_halfmicron,box_group,a,nbars,c_list,box_lw,box_outlier,0);
+    plot_box_by_grp(plot_data.aer_halfmicron,box_group,a,nbars,grp_labels,c_list,box_lw,box_outlier,0);
     ylabel('d_p > 0.5 \mum (cm^{-3})')
     
-%     plot_yearly_box(plot_data.SMPS_100_500,box_group,a,nbars,c_list,box_lw,box_outlier,0);
+%     plot_box_by_grp(plot_data.SMPS_100_500,box_group,a,nbars,grp_labels,c_list,box_lw,box_outlier,0);
 %     ylabel('0.1 < d_p < 0.5 \mum (cm^{-3})')
     
     text(labelx,labely,'d)','color','k','FontWeight','bold','Units','normalized')    
@@ -223,6 +237,8 @@ if plot_box_weather
     labelx=0.78;
     labely=0.93;
 
+    grp_labels={'March','April','May'};
+    
     % set up figure
     figure
     set(gcf, 'Position', [100, 100, 1000, 600]);
@@ -252,7 +268,7 @@ if plot_box_weather
     %%%%%%%%%% RL T box plot
     axes(fig_ax(1))
     
-    ll=plot_yearly_box(plot_data.T_PWS,box_group,a,nbars,c_list,box_lw,box_outlier,1);
+    ll=plot_box_by_grp(plot_data.T_PWS,box_group,a,nbars,grp_labels,c_list,box_lw,box_outlier,1);
     
     ll.Position(1)=0.118;
     ll.Position(2)=0.92;
@@ -267,7 +283,7 @@ if plot_box_weather
     %%%%%%%%%% dT
     axes(fig_ax(3))
     
-    plot_yearly_box(plot_data.sonde_dT,box_group,a,nbars,c_list,box_lw,box_outlier,0);
+    plot_box_by_grp(plot_data.sonde_dT,box_group,a,nbars,grp_labels,c_list,box_lw,box_outlier,0);
     
     ylabel('Inversion strength (°C)')
     
@@ -276,7 +292,7 @@ if plot_box_weather
     %%%%%%%%%% SSA box plot
     axes(fig_ax(4))
     
-    plot_yearly_box(plot_data.wspd_ms,box_group,a,nbars,c_list,box_lw,box_outlier,0);
+    plot_box_by_grp(plot_data.wspd_ms,box_group,a,nbars,grp_labels,c_list,box_lw,box_outlier,0);
     
     ylabel('Wind speed (m s^{-1})')
     
@@ -444,7 +460,9 @@ if bro_dailymean_o3
     set(gcf, 'Position', [100, 100, 1000, 700]);
     fig_ax = tight_subplot(4,1,[0.065,0.04],[0.104,0.06],[0.088,0.1]);
     
-    box_w=0.7; % box width in days
+    box_w=0.55; % box width in days
+    box_w_o3=0.9; % box width in days
+%     box_w=0.32; % box width in days
     
     for yr=2016:2019
     
@@ -457,12 +475,18 @@ if bro_dailymean_o3
         plot_min=dmean_bro.min(ind);
         plot_max=dmean_bro.max(ind);
 
+        plot_x_o3=datenum(dmean_o3.DateTime(ind));
         plot_mean_o3=dmean_o3.mean(ind);
         plot_min_o3=dmean_o3.min(ind);
         plot_max_o3=dmean_o3.max(ind);
         
-        plot(1,1), hold on % need to have something plotted before turning hold on,
-                           % tight_subplot removes ylabels otherwise...
+        % need to have something plotted before turning hold on,
+        % tight_subplot removes ylabels otherwise...
+        % use for legend entries (rectangle is not assigned a legend entry)
+        plot(1,1,'s','color',c_list(2,:),'markerfacecolor',c_list(2,:),'markersize',9); hold on 
+        plot(1,1,'s','color',[.55 .55 .55],'markersize',9);
+        plot(1,1,'k-','linewidth',1.2);
+                           
 
         for dy=1:length(plot_x)
             
@@ -471,15 +495,17 @@ if bro_dailymean_o3
             % position is [x,y,w,h] (bottom left corner)
             
             % plot o3 data first
-            if ~isnan(plot_mean_o3)
+            if ~isnan(plot_mean_o3) % skips 2016, no NaNs after
                 rectangle('position',...
-                          [plot_x(dy)-box_w/2,plot_min_o3(dy),box_w,plot_max_o3(dy)-plot_min_o3(dy)],...
+                          [plot_x_o3(dy)-box_w_o3/2,plot_min_o3(dy),...
+                           box_w_o3,plot_max_o3(dy)-plot_min_o3(dy)],...
                           'facecolor','none','edgecolor',[.55 .55 .55])
                 rectangle('position',...
-                          [plot_x(dy)-box_w/2,plot_mean_o3(dy),box_w,1e12],...
+                          [plot_x_o3(dy)-box_w_o3/2,plot_mean_o3(dy),box_w_o3,1e12],...
                           'facecolor',[.4 .4 .4],'edgecolor',[.4 .4 .4])
             end
             
+            % plot BrO data
             rectangle('position',...
                       [plot_x(dy)-box_w/2,plot_min(dy),box_w,plot_max(dy)-plot_min(dy)],...
                       'facecolor',c_list(2,:),'edgecolor',c_list(2,:))
@@ -489,6 +515,27 @@ if bro_dailymean_o3
                                     
         end
 
+        % add legend
+        if yr==2016
+%             [ll,icons] = legend('BrO','Ozone','Mean values','orientation','horizontal',...
+%                                'location','north');
+            ll = legend('BrO','Ozone','Mean values','orientation','horizontal',...
+                               'location','north');
+            
+            % change label positions to reduce gap between symbol and label
+            % icons(1:n_legend_elements) is the position of each label
+%             for i=1:3
+%                 tmp = icons(i).Position;
+%                 icons(i).Position = [tmp(1)-0.04 tmp(2) tmp(3)];
+%             end
+%             
+%             % change line length for 'mean' symbol
+%             % after labels, icons contains 2 line elements per label. First
+%             % one of each pair is the position of the symbol
+%             tmp=icons(8).XData;
+%             icons(8).XData=[tmp(1)+0.02,tmp(2)-0.05];
+        end
+        
         grid on;
         ylim([-0.5,bro_lim_full]*1e13)
         xlim([datenum(yr,3,1),datenum(yr,6,2)])
@@ -499,8 +546,12 @@ if bro_dailymean_o3
         
         if yr~=2019
             set(gca,'xticklabel',[])
+            text(0.9,0.78,num2str(yr), 'color','k','Units','normalized',...
+                 'fontsize',fig_fs,'fontweight','bold')
         else
             xlabel('Date (dd/mm, UTC)')
+            text(0.835,0.78,num2str(yr), 'color','k','Units','normalized',...
+                 'fontsize',fig_fs,'fontweight','bold')
         end
         
         if yr==2017
@@ -508,14 +559,11 @@ if bro_dailymean_o3
             ylb.Position(1)=ylb.Position(1)-1;
             ylb.Position(2)=ylb.Position(2)-max(dmean_bro.mean);
             
-            text(datenum([yr,6,8]),-3e13,'Surface O_3 (ppbv)', 'color','k',...
+            text(datenum([yr,6,8]),-3e13,'Surface ozone (ppbv)', 'color','k',...
             'fontsize',fig_fs,'horizontalalignment','center','rotation',90)
 
         end
         
-        text(0.9,0.8,num2str(yr), 'color','k','Units','normalized',...
-        'fontsize',fig_fs,'fontweight','bold')
-
         % create o3 data axes on right side
         text(datenum([yr,6,3]),15e13,'45', 'color','k',...
         'fontsize',fig_fs,'horizontalalignment','left')
@@ -534,7 +582,7 @@ if bro_dailymean_o3
     
     set(findall(gcf,'-property','FontSize'),'FontSize',fig_fs)
     set(findall(gcf,'-property','FontName'),'FontName',fig_font)
-
+    
     save_pdf(save_figs, 'BrO_o3_dmean')
     
 end
@@ -701,6 +749,10 @@ if weather_corr
     set(findall(gcf,'-property','FontSize'),'FontSize',fig_fs)
     set(findall(gcf,'-property','FontName'),'FontName',fig_font)
 
+    if major_grid
+        arrayfun(@(x) grid(x,'on'), findobj(gcf,'Type','axes'))
+        if minor_grid, arrayfun(@(x) grid(x,'minor'), findobj(gcf,'Type','axes')); end
+    end
     
     save_pdf(save_figs, 'BrO_weather')
     
@@ -731,7 +783,8 @@ if o3_aer_wspd
 % % %     ews_data=data;
 % % %     load('/home/kristof/work/surface_ozone/surf_o3_hourly_all.mat');
 % % %     
-% % %     wspd_ews=interp1(ews_data.DateTime,ews_data.WindSpdkmh*10/36,surf_o3_hourly.DateTime,'nearest','extrap');    
+% % %     wspd_ews=interp1(ews_data.DateTime,ews_data.WindSpdkmh*10/36,surf_o3_hourly.DateTime,...
+% % %     'nearest','extrap');    
 % % %     ind=(~isnan(wspd_ews) & ~isnan(surf_o3_hourly.o3_ppb));
 % % %     
 % % %     dscatter(wspd_ews(ind),surf_o3_hourly.o3_ppb(ind),'cmap',c_scale), hold on, box on
@@ -749,7 +802,8 @@ if o3_aer_wspd
     axes(fig_ax(2))
 
     ind=~isnan(bee_dataset.N_SE_rest);
-    dscatter(bee_dataset.wspd_ms(ind),log(bee_dataset.aer_ext(ind)),'cmap',c_scale), hold on, box on
+    dscatter(bee_dataset.wspd_ms(ind),log(bee_dataset.aer_ext(ind)),'cmap',c_scale)
+    hold on, box on
     plot_mean_std(bee_dataset.wspd_ms(ind),log(bee_dataset.aer_ext(ind)),edges,fig_fs,'','b')
     xlim([0,15.9])
     ylim(log([0.007,5.1]))
@@ -767,7 +821,8 @@ if o3_aer_wspd
     axes(fig_ax(3))
 
     ind=(~isnan(bee_dataset.aer_halfmicron) & ~isnan(bee_dataset.N_SE_rest));
-    dscatter(bee_dataset.wspd_ms(ind),log(bee_dataset.aer_halfmicron(ind)),'cmap',c_scale), hold on, box on
+    dscatter(bee_dataset.wspd_ms(ind),log(bee_dataset.aer_halfmicron(ind)),'cmap',c_scale)
+    hold on, box on
     plot_mean_std(bee_dataset.wspd_ms(ind),log(bee_dataset.aer_halfmicron(ind)),edges,fig_fs,'','c')
     xlim([0,15.9])
     ylim(log([0.007,5.1]))
@@ -787,6 +842,11 @@ if o3_aer_wspd
     set(findall(gcf,'-property','FontSize'),'FontSize',fig_fs)
     set(findall(gcf,'-property','FontName'),'FontName',fig_font)
     
+    if major_grid
+        arrayfun(@(x) grid(x,'on'), findobj(gcf,'Type','axes'))
+        if minor_grid, arrayfun(@(x) grid(x,'minor'), findobj(gcf,'Type','axes')); end
+    end
+    
     save_pdf(save_figs, 'o3_aer_wspd')
     
 end
@@ -801,7 +861,8 @@ if sens_map
 % % %     % using EWS wind data
 % % %     load('/home/kristof/work/weather_stations/Eureka/EWS_PTU_and_weather_complete.mat')
 % % %     ews_data=data;
-% % %     wspd_ews=interp1(ews_data.DateTime,ews_data.WindSpdkmh*10/36,bee_fp.mean_time,'nearest','extrap');    
+% % %     wspd_ews=interp1(ews_data.DateTime,ews_data.WindSpdkmh*10/36,bee_fp.mean_time,...
+% % %                      'nearest','extrap');    
     
     % index for later: remove 2015, and remove FP runs where all BrO meas
     % have been filtered out
@@ -1038,15 +1099,13 @@ if plot_ssa
     
     %%% AOD corr
     
-     
-%     set(gca,'XTick',log([0.01,0.1,1]))
-%     set(gca,'XMinorTick','on')%log([[0.01:0.01:0.09],[0.1:0.1:0.9],[1:1:2]]))
-%     tmp=gca;
-%     tmp.XAxis.MinorTickValues = log([[0.007,0.008,0.009],[0.01:0.01:0.09],[0.1:0.1:0.9],[1:1:7]]);
-%     set(gca,'XTickLabel',{'10^{-2}','10^{-1}','10^{0}'})
-    
+    xtick_pos=log([0.01,0.1,1]);
+    xtick_label={'10^{-2}','10^{-1}','10^{0}'};
+    xtickm_pos=log([[0.007,0.008,0.009],[0.01:0.01:0.09],[0.1:0.1:0.9],[1:1:7]]);
+
     axes(fig_ax(1))
-    dscatter(log(bee_dataset.aer_ext(ind_N)),bee_dataset.bro_col(ind_N),'cmap',c_scale);hold on, box on
+    dscatter(log(bee_dataset.aer_ext(ind_N)),bee_dataset.bro_col(ind_N),'cmap',c_scale),
+    hold on, box on
     plot_mean_std(log(bee_dataset.aer_ext(ind_N)),bee_dataset.bro_col(ind_N),1,fig_fs,'N','a')
     xlb=xlabel('AOD');
 %     xlb.Position(2)=-11e12;
@@ -1055,38 +1114,53 @@ if plot_ssa
     ylb.Position(2)=bro_lim*1e13/2;
     
     ylim([0,bro_lim]*1e13)
-    xlim([-4.8,2])
+    xlim([-4.8,2]) % log of AOD
 
-    set(gca,'XTick',log([0.01,0.1,1]))
-    set(gca,'XTickLabel',{'10^{-2}','10^{-1}','10^{0}'})
-    
+    h = gca;
+    set(h,'XTick',xtick_pos)
+    set(h,'XTickLabel',xtick_label)
+    h.XAxis.MinorTick = 'on'; 
+    h.XAxis.MinorTickValues=xtickm_pos; 
+     
     axes(fig_ax(2))
-    dscatter(log(bee_dataset.aer_ext(ind_SE)),bee_dataset.bro_col(ind_SE),'cmap',c_scale);hold on, box on
+    dscatter(log(bee_dataset.aer_ext(ind_SE)),bee_dataset.bro_col(ind_SE),'cmap',c_scale)
+    hold on, box on
     plot_mean_std(log(bee_dataset.aer_ext(ind_SE)),bee_dataset.bro_col(ind_SE),1,fig_fs,'SE','b')
     xlb=xlabel('AOD');
 %     xlb.Position(2)=-11e12;
     ylim([0,bro_lim]*1e13)
     xlim([-4.8,2])
 
-    set(gca,'XTick',log([0.01,0.1,1]))
-    set(gca,'XTickLabel',{'10^{-2}','10^{-1}','10^{0}'})
+    h = gca;
+    set(h,'XTick',xtick_pos)
+    set(h,'XTickLabel',xtick_label)
+    h.XAxis.MinorTick = 'on'; 
+    h.XAxis.MinorTickValues=xtickm_pos; 
     
     axes(fig_ax(3))
-    dscatter(log(bee_dataset.aer_ext(ind_rest)),bee_dataset.bro_col(ind_rest),'cmap',c_scale);hold on, box on
+    dscatter(log(bee_dataset.aer_ext(ind_rest)),bee_dataset.bro_col(ind_rest),'cmap',c_scale)
+    hold on, box on
     plot_mean_std(log(bee_dataset.aer_ext(ind_rest)),bee_dataset.bro_col(ind_rest),1,fig_fs,'other','c')
     xlb=xlabel('AOD');
 %     xlb.Position(2)=-11e12;
     ylim([0,bro_lim]*1e13)
     xlim([-4.8,2])
    
-    set(gca,'XTick',log([0.01,0.1,1]))
-    set(gca,'XTickLabel',{'10^{-2}','10^{-1}','10^{0}'})
+    h = gca;
+    set(h,'XTick',xtick_pos)
+    set(h,'XTickLabel',xtick_label)
+    h.XAxis.MinorTick = 'on'; 
+    h.XAxis.MinorTickValues=xtickm_pos; 
     
     
     
     set(findall(gcf,'-property','FontSize'),'FontSize',fig_fs)
     set(findall(gcf,'-property','FontName'),'FontName',fig_font)
     
+    if major_grid
+        arrayfun(@(x) grid(x,'on'), findobj(gcf,'Type','axes'))
+        if minor_grid, arrayfun(@(x) grid(x,'minor'), findobj(gcf,'Type','axes')); end
+    end
     
     save_pdf(save_figs, 'aer_corr')
     
@@ -1289,7 +1363,8 @@ if si_contact_log
     dscatter(plot_x(ind_N_tmp), plot_y(ind_N_tmp),'cmap',c_scale), hold on, box on
     
 %     ratio=bee_dataset.MYSI_3day./(bee_dataset.FYSI_3day+bee_dataset.MYSI_3day);    
-%     plot(plot_x(ind_N_tmp & ratio>0.9 & bee_dataset.o3_surf<15), plot_y(ind_N_tmp & ratio>0.9 & bee_dataset.o3_surf<15),'y.')
+%     plot(plot_x(ind_N_tmp & ratio>0.9 & bee_dataset.o3_surf<15),...
+%     plot_y(ind_N_tmp & ratio>0.9 & bee_dataset.o3_surf<15),'y.')
 
     plot_mean_std(plot_x(ind_N_tmp),plot_y(ind_N_tmp),edges,fig_fs,'N','d',flip_ind)
 %     plot_vertical_mean_std(plot_x(ind_N_tmp),plot_y(ind_N_tmp),v_edges)
@@ -1482,6 +1557,10 @@ if si_contact_log
     set(findall(gcf,'-property','FontSize'),'FontSize',fig_fs)
     set(findall(gcf,'-property','FontName'),'FontName',fig_font)
     
+    if major_grid
+        arrayfun(@(x) grid(x,'on'), findobj(gcf,'Type','axes'))
+        if minor_grid, arrayfun(@(x) grid(x,'minor'), findobj(gcf,'Type','axes')); end
+    end
     
     if plot_log_si
         save_pdf(save_figs, 'SI_sens_log')
@@ -1494,6 +1573,337 @@ if si_contact_log
    
     
 end
+
+if dscd_avk
+    
+    % get dSCDs for may 9-10, 2018 (May 9th in local time)
+    % get AVKs for profile at May 10, 2018, 01:57 (fractional time: 129.0812517361483)
+    %       total profile time: 11.5 min, centered on 01:57
+    % Fisrt profile on May 9: 10:19:00 (start time: 10:12:30)
+    load('/home/kristof/work/BEEs/for plotting_180509.mat')    
+
+    maxdoas.O4SlColo4=maxdoas.O4SlColo4*1e40;
+%     maxdoas(maxdoas.DateTime<datetime(2018,05,9,10,12,30),:)=[];
+    
+    % remove incomplete scans that got filtered after the retrieval
+    % (could add gray shading, but would require too much explanation)
+    maxdoas(367:409,:)=[];
+    
+    elevs=[-1,1,2,5,10,15,30];
+%     colors={'r','g','b','y','m','c','k'};
+    colors=jet(7);
+    colors=colors([1,5,2,6,3,7,4],:);
+    colors(2,:)=[.9 .9 0];
+    ls_list={'-','--','x-'};
+    
+    yr=2018;
+    ind_main=find(bee_dataset.times==datetime(yr,05,10,1,57,00));
+    
+    % highlight scan (ignore -1deg from prev scan, which is technically part of this profile)
+    scan_limits=[datetime(2018,05,10,1,55,00),datetime(2018,05,10,2,3,00)];
+    
+    % empty legend cell
+    legends=cell(1,length(elevs));
+
+    figure
+    set(gcf, 'Position', [100, 100, 1000, 700]);
+    fig_ax = tight_subplot(2,3,[0.05,0.05],[0.1035,0.1],[0.087,0.13]);
+            
+    % empty space
+    axes(fig_ax(2)), delete(gca)
+    axes(fig_ax(5)), delete(gca)    
+
+    
+    %%% BrO and O4 dSCDs
+    
+    data_col=maxdoas.BrOSlColbro;
+    y_lim_arr=[-.5,2.5]*1e14;
+    letter_label='a bc d';
+    
+    for ax_num=[1,4]
+        
+        axes(fig_ax(ax_num));
+        
+        if ax_num==4
+            data_col=maxdoas.O4SlColo4;
+            y_lim_arr=[0,5.5]*1e43;
+        end
+        
+        % set up legend, make sure rectangle doesn't delete axis tick labels..
+        for i=1:length(elevs)
+            ind=(maxdoas.Elevviewingangle==elevs(i) & maxdoas.Fractionalday<129.34);
+            plot(maxdoas.DateTime(ind)-days(2),data_col(ind),'.',...
+                'color',colors(i,:),'markersize', 15), hold on
+            % create legend entry
+            if ax_num==1, legends{i}=[num2str(elevs(i)) '\circ']; end
+        end 
+
+        rectangle('position',[datenum([yr,5,9,6,50,0]) y_lim_arr(1) ...
+                              datenum([yr,5,9,10,12,29])-datenum([yr,5,9,6,50,0]) ...
+                              abs(diff(y_lim_arr))],...
+                  'facecolor',[.9 .9 .9],'edgecolor',[.9 .9 .9])
+
+        for i=1:length(elevs)
+
+            % find indices with current elevation
+            ind=(maxdoas.Elevviewingangle==elevs(i));
+
+            % plot
+            plot(maxdoas.DateTime(ind),data_col(ind),'.','color',colors(i,:),...
+                 'markersize', 10)
+
+            tmp=(ind & maxdoas.DateTime>scan_limits(1) & maxdoas.DateTime<scan_limits(2));
+            plot(maxdoas.DateTime(tmp),data_col(tmp),'s','color',colors(i,:),...
+                 'markersize',8,'linewidth',1.2)
+
+            % create legend entry
+            legends{i}=[num2str(elevs(i)) '\circ'];
+
+        end 
+
+        tmp=get(fig_ax(ax_num),'Position');
+        tmp(3)=tmp(3)*2.2;
+        set(fig_ax(ax_num),'Position',tmp); 
+        xlim(datenum([[yr,5,9,6,50,0];[yr,5,10,4,40,0]]))
+
+        set(gca, 'XTick', datenum([[yr,5,9,8,0,0];[yr,5,9,12,0,0];[yr,5,9,16,0,0];...
+                                   [yr,5,9,20,0,0];[yr,5,10,0,0,0];[yr,5,10,4,0,0]]))
+        set(gca, 'Layer', 'top')
+        box on, grid on
+
+        if ax_num==1
+            
+            ylb=ylabel('BrO dSCD (molec cm^{-2})');
+            ylb.Position(1)=ylb.Position(1)-0.005;
+            ylb.Position(2)=mean(y_lim_arr);
+            
+            set(gca,'xticklabel',[])
+            ylim(y_lim_arr)
+
+            ll=legend(legends,'orientation','horizontal','location','north');
+            ll.Position(1)=ll.Position(1)+0.15; 
+            ll.Position(2)=ll.Position(2)+0.08; 
+                                    
+        elseif ax_num==4
+            
+            xlabel('Time of day, May 9-10, 2018 (UTC)')
+            ylb=ylabel('O4 dSCD (molec^2 cm^{-5})');
+            ylb.Position(1)=ylb.Position(1)-0.015;
+            ylb.Position(2)=mean(y_lim_arr);
+            
+            ylim(y_lim_arr)
+            set(gca, 'XTicklabel', {'8:00','12:00','16:00','20:00','0:00','4:00'})
+                        
+        end
+
+        text(0.05,0.9,[letter_label(ax_num) ')'],'color','k','FontWeight','bold',...
+             'Units','normalized')
+        
+    end
+    
+    
+    % BrO and aerosol avks
+    avk_arr=avk_bro_180510_0157;
+    
+    for ax_num=[3,6]
+        
+        axes(fig_ax(ax_num))
+        if ax_num==6, avk_arr=avk_aer_180510_0157; end
+        
+        n=1;
+        ls_tmp=ls_list;
+        legends2=cell(1,length(alt));
+        for i=1:length(alt)
+
+            plot(avk_arr(:,i), alt,ls_tmp{1},'color',colors(n,:),'markersize',4,...
+                 'linewidth',1.2), hold on
+
+            if n<7,
+                n=n+1;
+            else
+                n=1;
+                ls_tmp(1)=[];
+            end
+            legends2{i}=num2str(alt(i),2);
+        end
+
+        ylabel('Altitude (km)')
+        
+        if ax_num==3
+            ll=legend(legends2,'orientation','vertical','location','east');
+            ll.Position(1)=ll.Position(1)+0.11; 
+            ll.Position(2)=ll.Position(2)-0.18; 
+            text(1.255,0.87,sprintf('Altitude\n(km)'),'units','normalized',...
+                 'horizontalalignment','center')
+            set(gca,'xticklabel',[])
+        else
+            xlabel('Averaging kernel')
+        end
+        
+        text(0.95,0.9,['DOFS: ' num2str(sum(trace(avk_arr)),2)],...
+             'units','normalized','horizontalalignment','right')
+        text(0.1,0.9,[letter_label(ax_num) ')'],'color','k','FontWeight','bold',...
+             'Units','normalized')
+         
+        h = gca;
+        h.YAxis.MinorTickValues=0:0.2:4; % align minor grid with retrieval grid
+         
+        grid on
+        grid minor
+        
+    end
+    
+    set(findall(gcf,'-property','FontSize'),'FontSize',fig_fs)
+    set(findall(gcf,'-property','FontName'),'FontName',fig_font)
+    
+    save_pdf(save_figs, 'dscd_avk')
+     
+end
+
+
+if o3_bro_box
+    
+    figure
+    set(gcf, 'Position', [100, 100, 600, 360]);
+    fig_ax = tight_subplot(1,1,[0.07,0.07],[0.154,0.113],[0.132,0.049]);
+
+    nbars=3;
+    a=0.2;
+    
+    grp_labels={'<10','10-15','15-25','>25'};
+
+    data=bee_dataset.bro_col;
+    
+    o3_var=NaN(size(bee_dataset.o3_surf));
+    o3_var(bee_dataset.o3_surf<10)=1;
+    o3_var(bee_dataset.o3_surf>=10 & bee_dataset.o3_surf<15)=2;
+    o3_var(bee_dataset.o3_surf>=15 & bee_dataset.o3_surf<25)=3;
+    o3_var(bee_dataset.o3_surf>=25)=4;
+    
+    box_group=o3_var*10+bee_dataset.N_SE_rest;
+
+    axes(fig_ax(1))
+    plot_box_by_grp(data,box_group,a,nbars,grp_labels,c_list(1:3,:),box_lw,box_outlier,2);
+               
+    ylim([-0.5,10]*1e13)    
+    ylabel('BrO part. col. (molec cm^{-2})')
+    xlabel('Surface ozone (ppbv)')
+    
+    set(gca, 'YMinorGrid', 'on')
+    
+    set(findall(gcf,'-property','FontSize'),'FontSize',fig_fs)
+    set(findall(gcf,'-property','FontName'),'FontName',fig_font)
+    
+    save_pdf(save_figs, 'o3_bro_box')
+    
+end
+
+
+if si_maps
+    
+    load('/home/kristof/work/BEEs/sea_ice_data/EASE_grid_SI_age.mat')
+    age(age>=2 & age<=16)=2; % MYI
+    age(age>=20)=NaN; % land mask, no data
+
+    figure
+    set(gcf, 'Position', [100, 100, 1000, 700]);
+    fig_ax = tight_subplot(2,2,[0.06,0.02],[0.055,0.055],[0.03,0.15]);
+    
+    axes(fig_ax(1))
+    [~,ind1]=min(abs(date_age-datetime(2016,3,5)));
+    [~,ind2]=min(abs(date_age-datetime(2016,5,4)));
+    plot_si_map(lat_age,lon_age,nanmean(age(:,:,ind1:ind2),3),'2016')    
+    
+    axes(fig_ax(2))
+    [~,ind1]=min(abs(date_age-datetime(2017,3,5)));
+    [~,ind2]=min(abs(date_age-datetime(2017,3,27)));
+    plot_si_map(lat_age,lon_age,nanmean(age(:,:,ind1:ind2),3),'2017')    
+
+    axes(fig_ax(3))
+    [~,ind1]=min(abs(date_age-datetime(2018,3,5)));
+    [~,ind2]=min(abs(date_age-datetime(2018,5,24)));
+    plot_si_map(lat_age,lon_age,nanmean(age(:,:,ind1:ind2),3),'2018')    
+
+    axes(fig_ax(4))
+    [~,ind1]=min(abs(date_age-datetime(2019,3,5)));
+    [~,ind2]=min(abs(date_age-datetime(2019,5,24)));
+    plot_si_map(lat_age,lon_age,nanmean(age(:,:,ind1:ind2),3),'2019',[0.845,0.5-0.2,0.03,0.4])    
+    
+    
+    set(findall(gcf,'-property','FontSize'),'FontSize',fig_fs)
+    set(findall(gcf,'-property','FontName'),'FontName',fig_font)
+    
+    if save_figs==1
+        save_pdf(3, 'SI_map')
+    else
+        save_pdf(save_figs, 'SI_map')
+    end
+    
+end
+
+if accum_pax
+    
+    % BrO vs accumulation mode aer (all wdir together), as well as BrO ws
+    % PAX (all wdir together)
+    load('/home/kristof/work/SMPS/PAX_BC.mat')
+
+    figure
+    set(gcf, 'Position', [100, 100, 1000, 345]);
+    fig_ax = tight_subplot(1,3,[0.1,0.08],[0.22,0.11],[0.087,0.04]);
+    
+    axes(fig_ax(1))
+    ind=~isnan(bee_dataset.SMPS_100_500);
+    dscatter(bee_dataset.SMPS_100_500(ind), bee_dataset.bro_col(ind),'cmap',c_scale), hold on
+    plot_mean_std(bee_dataset.SMPS_100_500(ind), bee_dataset.bro_col(ind),1,fig_fs,'all','a',98)
+    
+    box on
+    if major_grid
+        grid on
+        if minor_grid, grid minor, end
+    end
+    ylim([0,bro_lim_full]*1e13)
+    xlim([0,500])
+    
+    ylabel('BrO part. col. (molec cm^{-2})')
+    xlabel('0.1 < d_p < 0.5 \mum (cm^{-3})')
+    
+    axes(fig_ax(2))
+    tmp=interp1(pax405.DateTime,pax405.BC_mass_conc,bee_dataset.times);
+    ind=(~isnan(tmp) & tmp<0.3);
+    dscatter(tmp(ind),bee_dataset.bro_col(ind),'cmap',c_scale), hold on
+    plot_mean_std(tmp(ind),bee_dataset.bro_col(ind),1,fig_fs,'all','b',99)
+    
+    box on
+    if major_grid
+        grid on
+        if minor_grid, grid minor, end
+    end
+    xlim([-0.1,0.3])
+    ylim([0,bro_lim_full]*1e13)
+    xlabel('PAX405 BC (\mug/m^3)')
+
+    axes(fig_ax(3))
+    tmp=interp1(pax870.DateTime,pax870.BC_mass_conc,bee_dataset.times);
+    ind=(~isnan(tmp) & tmp<0.3);
+    dscatter(tmp(ind),bee_dataset.bro_col(ind),'cmap',c_scale), hold on
+    plot_mean_std(tmp(ind),bee_dataset.bro_col(ind),1,fig_fs,'all','c',99)
+    
+    box on
+    if major_grid
+        grid on
+        if minor_grid, grid minor, end
+    end
+    xlim([-0.1,0.3])
+    ylim([0,bro_lim_full]*1e13)
+    xlabel('PAX870 BC (\mug/m^3)')
+        
+    set(findall(gcf,'-property','FontSize'),'FontSize',fig_fs)
+    set(findall(gcf,'-property','FontName'),'FontName',fig_font)
+    
+    save_pdf(save_figs, 'haze_corr')
+    
+end
+
 
 if presentation_plots
     
@@ -1616,14 +2026,18 @@ function save_pdf(save_figs, fname)
 end
 
 
-function ll=plot_yearly_box(data,box_group,a,nbars,c_list,box_lw,box_outlier,do_legend)
+function ll=plot_box_by_grp(data,box_group,a,nbars,grp_labels,c_list,box_lw,box_outlier,do_legend)
 
     % get position of each bar
-    box_pos=sort([1:a:1+a*(nbars-1),2:a:2+a*(nbars-1),3:a:3+a*(nbars-1)]);
-
+    if length(grp_labels)==3
+        box_pos=sort([1:a:1+a*(nbars-1),2:a:2+a*(nbars-1),3:a:3+a*(nbars-1)]);
+    elseif length(grp_labels)==4
+        box_pos=sort([1:a:1+a*(nbars-1),2:a:2+a*(nbars-1),3:a:3+a*(nbars-1),4:a:4+a*(nbars-1)]);
+    end
+    
     % set tick position as the meanof each group
     tick_pos=[];
-    for i=1:3
+    for i=1:length(grp_labels)
         tick_pos=[tick_pos,mean(box_pos((nbars)*(i-1)+1:(nbars)*i))];
     end
 
@@ -1633,7 +2047,7 @@ function ll=plot_yearly_box(data,box_group,a,nbars,c_list,box_lw,box_outlier,do_
     hold on, box on
         
     % plot mean as well
-    group_ind=unique(box_group);
+    group_ind=unique(box_group(~isnan(box_group)));
     c_ind=repmat(1:nbars,1,length(group_ind)/nbars);
     for i=1:length(group_ind)
         plot(box_pos(i), nanmean(data(box_group==group_ind(i))),'x','color',c_list(c_ind(i),:))
@@ -1644,16 +2058,20 @@ function ll=plot_yearly_box(data,box_group,a,nbars,c_list,box_lw,box_outlier,do_
     set(findall(gca,'tag','Outliers'),'MarkerSize',box_outlier);
     
     set(gca,'xtick',tick_pos)
-    set(gca,'xticklabel',{'March','April','May'})
+    set(gca,'xticklabel',grp_labels)
     
     xlim([box_pos(1)-0.15,box_pos(end)+0.15])
     
     set(gca, 'YGrid', 'on')
 
     % legend for one figure only -- position set later
-    if do_legend
+    if do_legend==1
         ll=legend(flipud(findall(gca,'Tag','Box')),...
                {'2016','2017','2018','2019'},...
+               'Orientation','horizontal','location','northeast');
+    elseif do_legend==2
+        ll=legend(flipud(findall(gca,'Tag','Box')),...
+               {'N','SE','Other'},...
                'Orientation','horizontal','location','northeast');
     end
 end
@@ -1704,7 +2122,19 @@ function plot_mean_std(xx,yy,edges,text_size,wdir_str,subplot_id,fliplabels)
         
         text(x1,0.8,sprintf('{R^2}=%.2f', R2),'color','k','Units','normalized',...
             'fontsize',text_size,'HorizontalAlignment',x1_align)
+
+    elseif fliplabels==98 % same as 99, letter slightly to the right
         
+        [~, ~, R2] = line_fit(xx,yy);
+        
+        x1=0.95;
+        x1_align='right';
+        x2=0.15;
+        x2_align='left';
+        
+        text(x1,0.8,sprintf('{R^2}=%.2f', R2),'color','k','Units','normalized',...
+            'fontsize',text_size,'HorizontalAlignment',x1_align)
+
     end
 
     if length(edges)==1
@@ -1877,6 +2307,39 @@ function plot_sens_map(latitude,longitude,sensitivities,trajectories,plot_ind,..
         data=trajectories(trajectories.index==i,:);
         plotm(data.lat,data.lon,'c','linewidth',0.6)
     end
+
+    plotm(80.053, -86.416, 'kp','markerfacecolor','k','markersize',12)
+
+end
+
+function plot_si_map(latitude,longitude,age,subplot_id,cbar_pos)
+
+    if nargin==4, cbar_pos=[]; end
+    
+    load coast;
+    ax = worldmap([67,90], [-180,180]);
+    geoshow(ax, lat, long,'DisplayType', 'polygon', 'FaceColor', [0.7,0.7,0.7])
+    hold on
+
+    % subplot lalel
+    text(0.04,0.95,['{\bf' subplot_id '}'], 'color','k','Units','normalized',...
+        'fontsize',14,'HorizontalAlignment','left')
+    
+    % plot age
+    surfm(latitude,longitude,age,'facecolor', 'interp','facealpha',0.9);
+
+    if ~isempty(cbar_pos)
+        % add colorbar with manual labels (convert back to lin space)
+        cb=colorbar('east','position',cbar_pos);
+        cb_lim=0:2;
+        set(cb,'YTick',cb_lim)
+        set(cb,'YTick',cb_lim,'YTickLabel',{'Water','FYI','MYI'})
+        ylabel(cb,'Mean sea ice age category','FontSize',14)
+    end
+
+    setm(gca,'MLineLocation',30,'PLineLocation',10,'MLabelLocation',90,...
+         'PLabelLocation',10,'MLabelParallel',70,'PLabelMeridian',45,...
+         'FontSize',10)
 
     plotm(80.053, -86.416, 'kp','markerfacecolor','k','markersize',12)
 

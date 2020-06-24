@@ -19,7 +19,7 @@ add_ptom=0;
 
 %% Save BrO and aerosol data in NetCDF
 
-save_and_quit=1; % save BrO and aer data only
+save_and_quit=0; % save BrO and aer data only
 save_all=0; % include paired variables
 
 %% select a priori for BrO data!
@@ -269,6 +269,10 @@ if add_ptom
 end
 
 %% Pair all variables to the BrO profiles
+
+%%% o4-normalised -1deg to 1deg dSCD ratio
+[ ratio_all, time_all ] = dscd_ratios( 1 );
+dscd_1m1=find_coincident_mean(times, time_all, ratio_all, prof_len);
 
 %%% wind speed and direction
 disp('Pairing weather data')
@@ -537,6 +541,8 @@ bee_dataset.bro_col_err=info.col_err;
 bee_dataset.bro_surf_ppt=prof(1,:)'*1e6;
 bee_dataset.bro_surf_ppt_err=prof_err(1,:)'*1e6;
 bee_dataset.bro_col_ratio=below_lab./info.col;
+
+bee_dataset.dscd_1m1=dscd_1m1;
 
 bee_dataset.aer_ext=info_aer.col;
 bee_dataset.aer_ext_err=info_aer.col_err;

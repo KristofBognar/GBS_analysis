@@ -5,12 +5,13 @@ function [r_all,lag_all]=bro_corr_plots()
 windrose=0;
 wspd_corr=0;
 wdir_corr=0;
+wspd_T_corr=0;
 T_rl_corr=0;
 T_ews_corr=0;
 sonde_dT_corr=0;
-sonde_dT_o3=0;
+sonde_dT_o3=1;
 ssa_corr=0;
-ssa_corr_oneplot=1;
+ssa_corr_oneplot=0;
 smps_corr=0;
 o3_corr=0;
 
@@ -136,6 +137,7 @@ if wdir_corr
     dscatter(bee_dataset.wdir(ind), plot_var(ind))
     
 end
+
 
 if sonde_dT_corr
     
@@ -282,6 +284,74 @@ if sonde_dT_o3
     text(0.95,txt_pos,'Wind: other', 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment','right')
     
+    
+end
+
+if wspd_T_corr
+    
+%     figure
+%     dscatter(bee_dataset.T_PWS(ind), plot_var(ind))
+    
+    plot_var_old=plot_var;
+    plot_var=bee_dataset.wspd_ms;
+    
+    figure
+    txt_pos=0.92;
+
+    % all data
+    subplot(221), hold on, box on
+    dscatter(bee_dataset.T_PWS(ind_t_rl), plot_var(ind_t_rl))
+    
+    plot_fit_line(bee_dataset.T_PWS(ind_t_rl),plot_var(ind_t_rl),text_size)
+    plot_mean_std(bee_dataset.T_PWS(ind_t_rl),plot_var(ind_t_rl),-45:5:5,plot_column)
+    
+    xlim([-45,5])    
+    ylabel('wspd')
+
+    text(0.95,txt_pos,'Wind: 0-360°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    
+    % Northerly winds only
+    txt_pos=0.92;
+    subplot(222), hold on, box on
+    ind=(ind_t_rl & ind_N);
+    dscatter(bee_dataset.T_PWS(ind), plot_var(ind))
+    
+    plot_fit_line(bee_dataset.T_PWS(ind),plot_var(ind),text_size)    
+    
+    xlim([-45,5])    
+
+    text(0.95,txt_pos,'Wind: 354° \pm 30°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    
+    % Southeasterly winds only
+    subplot(223), hold on, box on
+    ind=(ind_t_rl & ind_SE);
+    dscatter(bee_dataset.T_PWS(ind), plot_var(ind))
+    
+    plot_fit_line(bee_dataset.T_PWS(ind),plot_var(ind),text_size)    
+    
+    xlim([-45,5])    
+    xlabel('PWS T (°C)')
+    ylabel('wspd')
+
+    text(0.95,txt_pos,'Wind: 123° \pm 30°', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    
+    % all other wind directions
+    subplot(224), hold on, box on
+    ind=(ind_t_rl & ind_rest);
+    dscatter(bee_dataset.T_PWS(ind), plot_var(ind))
+    
+    plot_fit_line(bee_dataset.T_PWS(ind),plot_var(ind),text_size)    
+    
+    xlim([-45,5])    
+    xlabel('PWS T (°C)')
+
+    text(0.95,txt_pos,'Wind: other', 'color','k','Units','normalized',...
+        'fontsize',text_size,'HorizontalAlignment','right')
+    
+    plot_var=plot_var_old;
     
 end
 
@@ -742,6 +812,10 @@ if smps_corr
     xlim([0,500])
     ylim([0,16]*1e13)
     
+    plot([0,500],[median(plot_var(ind_smps)),median(plot_var(ind_smps))],'k-')
+    plot([median(bee_dataset.SMPS_100_500(ind_smps)),...
+         median(bee_dataset.SMPS_100_500(ind_smps))],[0,16]*1e13,'k-')
+    
     subplot(222), hold on, box on
     ind=(ind_smps & ind_N);
     dscatter(bee_dataset.SMPS_100_500(ind), plot_var(ind))
@@ -980,7 +1054,8 @@ if SI_corr
          
     plot_x=bee_dataset.FYSI_3day;
     
-    si_x_lim=log([50,8.1e5]);
+%     si_x_lim=log([50,8.1e5]);
+    si_x_lim=[50,8.1e5];
     
     % all winds
     figure
