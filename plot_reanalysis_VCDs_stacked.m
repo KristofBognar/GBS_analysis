@@ -9,10 +9,18 @@ tg='NO2_UV';
 
 switch instr
     case 'UT-GBS'
-        load(['/home/kristof/work/GBS/VCD_results/UT-GBS_' tg '_VCD_all.mat'])
+        if ismac
+            load(['/Users/raminaalwarda/Downloads/UT-GBS_' tg '_VCD_all.mat'])
+        elseif isunix
+            load(['/home/kristof/work/GBS/VCD_results/UT-GBS_' tg '_VCD_all.mat'])
+        end
     case 'PEARL-GBS'
+        if ismac
+            load(['/Users/raminaalwarda/Downloads/PEARL-GBS_' tg '_VCD_all.mat'])
+        elseif isunix
 %         load(['/home/kristof/work/GBS/VCD_results/VCD_with_bad_rcd/PEARL-GBS_' tg '_VCD_all.mat'])
-        load(['/home/kristof/work/GBS/VCD_results/PEARL-GBS_' tg '_VCD_all.mat'])
+            load(['/home/kristof/work/GBS/VCD_results/PEARL-GBS_' tg '_VCD_all.mat'])
+        end    
 end
 
 
