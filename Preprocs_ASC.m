@@ -88,7 +88,7 @@ if write_ASC==write_L2, error('Must select only one file format'); end
 
 %% averaging for twilight and noon spectra
 
-do_twilight_avg=0;
+do_twilight_avg=1;
 
 % make sure averaging is required
 avg_path='';
@@ -174,10 +174,19 @@ else
     disp('Error: location not recognized')
 end     
 
+% Ramina: added ismac/isunix condition due to differences between Kristof and
+% Ramina's MATLAB versions (July 21, 2020):
+
 % check that we are in correct directory, and bias/dc files are there
-if ~isdir('csv/'), error('Must run code in yearly GBS folder, where the csv/ directory is'), end
-if ~exist('bias.inp','file'), error('Bias file must be in working directory'), end
-if ~exist('dark_c.inp','file'), error('Bias file must be in working directory'), end
+if ismac
+    if ~isfolder('csv/'), error('Must run code in yearly GBS folder, where the csv/ directory is'), end
+    if ~isfile('bias.inp'), error('Bias file must be in working directory'), end
+    if ~isfile('dark_c.inp'), error('Bias file must be in working directory'), end
+elseif isunix
+    if ~isdir('csv/'), error('Must run code in yearly GBS folder, where the csv/ directory is'), end
+    if ~exist('bias.inp','file'), error('Bias file must be in working directory'), end
+    if ~exist('dark_c.inp','file'), error('Bias file must be in working directory'), end
+end
 
 % make output file directory if necessary
 if write_ASC
@@ -829,12 +838,29 @@ function sp_l2 = calc_l2(sp_l1, exp, nbr_pix)
 % NOTE: this function also requires that there be dark_c.inp and bias.inp
 % directories in the working directory.
 
-try 
-    dc = textread('dark_c.inp','%f');
-    bias = textread('bias.inp','%f');
-catch
-    disp('Error: dark_c.inp and bias.inp needs to be in working directory')
-    user_input = input('Press enter to continue');
+% Ramina: added ismac/isunix condition due to differences between Kristof and
+% Ramina's MATLAB versions (July 21, 2020).
+if ismac
+    if isfile('dark_c.inp')
+        dc = textread('dark_c.inp','%f');
+    else
+        disp('Error: dark_c.inp needs to be in working directory')
+        user_input = input('Press enter to continue');
+    end
+    if isfile('bias.inp')
+        bias = textread('bias.inp','%f');
+    else
+        disp('Error: bias.inp needs to be in working directory')
+        user_input = input('Press enter to continue');
+    end
+elseif isunix
+    try
+        dc = textread('dark_c.inp','%f');
+        bias = textread('bias.inp','%f');
+    catch
+        disp('Error: dark_c.inp and bias.inp needs to be in working directory')
+        user_input = input('Press enter to continue');
+    end
 end
 
 sp_l2 = [];
