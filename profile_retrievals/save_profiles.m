@@ -6,7 +6,7 @@
 
 % profiles to read
 % 'a' for aerosol, 'tg' for tracegas
-option='tg'; 
+option='a'; 
 
 % year=2018;
 year=1; % for reading tests/rerurns for multiple years
@@ -14,8 +14,8 @@ year=1; % for reading tests/rerurns for multiple years
 % elevation correction used in the retrieval (to correctly read in number of elevs used)
 elev_corr=0;
 
-% location, 'Eureka' or 'CINDI-2'
-loc='eureka';
+% location, 'eureka' or 'CINDI-2' or 'pandora'
+data_type='pandora';
 
 % string after ymd in folder names, if applicable
 folder_str='';
@@ -31,6 +31,10 @@ default_version_eureka='Retrieval_settings_A';
 % version_eureka='surf_ppt_1to5'; % surf conc = 1 ppt replaced with 5 ppt
 version_eureka='det_lim_test'; % august 2018, for detection limit
 
+
+% pandora folder naming (independent of Eureka folder selection):
+% version_pandora='p103_spec_v5';
+version_pandora='p103_spec_v5_short';
 
 
 %% years and dates
@@ -79,9 +83,9 @@ elseif year==2019
     end_date=datetime(year,5,31,12,0,0);
     
 elseif year==1
-    % reading a priori test results
+    % reading all data found in specified subfolder
     start_date=datetime(2015,3,1,12,0,0);
-    end_date=datetime(2019,5,31,12,0,0);
+    end_date=datetime(2021,5,31,12,0,0);
     
 end
 
@@ -112,6 +116,23 @@ if elev_corr
     
 end
 
+
+%%% for pandoras: replace profile time (middle of retrieval window)
+%%% with median time of measurements used for each profile
+%%% necessary since there are large gaps between scans, and retrieval
+%%% windows are much wider than the duration of each scan
+if strcmp(data_type,'pandora')
+    if strcmp(version_pandora,'p103_spec_v5')
+        load(['/home/kristof/work/PANDORA/profiling/retrieval_input/HEIPRO_input/' ...
+              'long_p103_vis_2019_retr_times.mat'])
+    elseif strcmp(version_pandora,'p103_spec_v5_short')
+        load(['/home/kristof/work/PANDORA/profiling/retrieval_input/HEIPRO_input/' ...
+              'short_p103_vis_2019_retr_times.mat'])
+    else
+        error(['Implement time correction for ' version_pandora])
+    end
+end
+    
 %% loop over all days
 for current_date=start_date:1:end_date
 
@@ -121,48 +142,61 @@ for current_date=start_date:1:end_date
     %% select directories
     if option=='a'
 
-        if strcmp(loc,'eureka')
+        if strcmp(data_type,'eureka')
             prof_dir=['/media/kristof/Windows7_OS/SCIATRAN2/AEROSOL_RETRIEVAL_v-1-2/',...
                        'Campaign/' version_eureka '/',ymd,folder_str,'/general/'];
 
             if strcmp(version_eureka,default_version_eureka)
-                savedir=['/home/kristof/work/profile_retrievals/profile_results/',loc,'_'...
+                savedir=['/home/kristof/work/profile_retrievals/profile_results/',data_type,'_'...
                          num2str(year) '/aerosol/'];
             else
-                savedir=['/home/kristof/work/profile_retrievals/profile_results/',loc,'_'...
+                savedir=['/home/kristof/work/profile_retrievals/profile_results/',data_type,'_'...
                          num2str(year) '_' version_eureka '/aerosol/'];
             end 
             
-        elseif strcmp(loc,'CINDI-2')         
+        elseif strcmp(data_type,'CINDI-2')         
             prof_dir=['/media/kristof/Windows7_OS/SCIATRAN2/AEROSOL_RETRIEVAL_v-1-2/',...
                        'Campaign/Retrieval_settings_A/',version_cindi2,'/',ymd,folder_str,...
                        '/general/'];
 
             savedir=['/home/kristof/work/profile_retrievals/profile_results/',...
                       'CINDI-2/matlab_files/',version_cindi2,'/aerosol/'];
+                  
+        elseif strcmp(data_type,'pandora')         
+            prof_dir=['/media/kristof/Windows7_OS/SCIATRAN2/AEROSOL_RETRIEVAL_v-1-2/',...
+                      'Campaign/', version_pandora, '/',ymd,folder_str,'/general/'];
+            savedir=['/home/kristof/work/profile_retrievals/profile_results/Pandora/', version_pandora,...
+                     '/aerosol/'];
+            
         end 
 
     elseif option=='tg'
 
-        if strcmp(loc,'eureka')
+        if strcmp(data_type,'eureka')
             prof_dir=['/media/kristof/Windows7_OS/SCIATRAN2/TRACEGAS_RETRIEVAL_v-1-2/',...
                        'Campaign/' version_eureka '/',ymd,folder_str,'/general/'];
 
             if strcmp(version_eureka,default_version_eureka)
-                savedir=['/home/kristof/work/profile_retrievals/profile_results/',loc,'_'...
+                savedir=['/home/kristof/work/profile_retrievals/profile_results/',data_type,'_'...
                          num2str(year) '/tracegas/'];
             else
-                savedir=['/home/kristof/work/profile_retrievals/profile_results/',loc,'_'...
+                savedir=['/home/kristof/work/profile_retrievals/profile_results/',data_type,'_'...
                          num2str(year) '_' version_eureka '/tracegas/'];
             end
             
-        elseif strcmp(loc,'CINDI-2')
+        elseif strcmp(data_type,'CINDI-2')
             prof_dir=['/media/kristof/Windows7_OS/SCIATRAN2/TRACEGAS_RETRIEVAL_v-1-2/',...
                        'Campaign/Retrieval_settings_A/',version_cindi2,'/',ymd,folder_str,...
                        '/general/'];
 
             savedir=['/home/kristof/work/profile_retrievals/profile_results/',...
                       'CINDI-2/matlab_files/',version_cindi2,'/tracegas/'];
+                  
+        elseif strcmp(data_type,'pandora')         
+            prof_dir=['/media/kristof/Windows7_OS/SCIATRAN2/TRACEGAS_RETRIEVAL_v-1-2/',...
+                      'Campaign/', version_pandora, '/',ymd,folder_str,'/general/'];
+            savedir=['/home/kristof/work/profile_retrievals/profile_results/Pandora/', version_pandora,...
+                     '/tracegas/'];
         end
     end
 
@@ -272,25 +306,24 @@ for current_date=start_date:1:end_date
     [ft]=fracdate(times, 'yyyymmdd_HH:MM:SS');
     times=datetime(times, 'inputformat', 'yyyyMMdd_HH:mm:SS')';
     
-
     %% kick out bad profiles
 
-    ind=find(prof(1,:)==-9999 | prof(1,:)==-11);
+    ind=find(prof(1,:)==-9999 | prof(1,:)==-11 | prof(1,:)==-1);
     if ~isempty(ind)
         ft(ind)=[];
         times(ind)=[];
     end
 
-    prof(prof==-9999 | prof==-11)=NaN;
-    prof_err(prof_err==-9999 | prof_err==-11)=NaN;
+    prof(prof==-9999 | prof==-11 | prof==-1)=NaN;
+    prof_err(prof_err==-9999 | prof_err==-11 | prof_err==-1)=NaN;
 
     prof=prof(:,all(~isnan(prof)));
     prof_err=prof_err(:,all(~isnan(prof_err)));
 
     % same for nd profile
     % columns that failed should be the same as for vmr profile
-    prof_nd(prof_nd==-9999 | prof_nd==-11)=NaN;
-    prof_nd_err(prof_nd_err==-9999 | prof_nd_err==-11)=NaN;
+    prof_nd(prof_nd==-9999 | prof_nd==-11 | prof_nd==-1)=NaN;
+    prof_nd_err(prof_nd_err==-9999 | prof_nd_err==-11 | prof_nd_err==-1)=NaN;
 
     prof_nd=prof_nd(:,all(~isnan(prof_nd)));
     prof_nd_err=prof_nd_err(:,all(~isnan(prof_nd_err)));
@@ -338,7 +371,56 @@ for current_date=start_date:1:end_date
     
     info=[info,HHMM];
 
+    % check for bad profiles again 
+    %%% pandora retrievals: sometimes aer retrieval returns all -1 (no idea why)
+    %%% in that case, tg retrieval returns the a priori, but fails to
+    %%% calculate profile errors or DOFS -- the profile array is therefore
+    %%% larger than the error array
+    tmp=find(isnan(info.DOFS));
+    if ~isempty(tmp)
+        ft(tmp)=[];
+        times(tmp)=[];
+        prof(:,tmp)=[];
+        prof_nd(:,tmp)=[];
+        info(tmp,:)=[];
+    end
+    
 
+    %% correct ft for pandora
+    %%% replace profile time (middle of retrieval window) with median time
+    %%% of measurements used for each profile
+    if strcmp(data_type,'pandora')
+        
+        % find time interval used for given day
+        tmp=find_in_cell(daily_times_all(:,1), ymd);
+        dt=minutes(str2double(daily_times_all{tmp,4}));
+        
+        % need to recalculate mean time, since heipro reports hh:mm (and
+        % we need seconds as well to find all the measurements included in a given profile)
+        start=datetime([ymd '_' daily_times_all{tmp,2}], 'inputformat','yyyyMMdd_HH:mm:SS');
+        time_exact=mean([start,start+dt]);
+        
+        % correct each time
+        for i=1:length(ft)
+            % find matching interval -- need extra loop since not all
+            % intervals have valid profiles
+             % using mismatch < 31sec, since I'm not sure if heipro rounds
+            % to nearset minute or just discards the seconds
+            while abs(datetime([ymd '_' info.HHMM{i}], 'inputformat','yyyyMMdd_HHmm') - ...
+                      time_exact) > seconds(31)
+                if start.Day~=times(1).Day
+                    error(['Time ' info.HHMM{i} ' not found for ' ymd]);
+                end
+                time_exact=mean([start,start+dt]);
+                start=start+dt;
+            end
+            % get median time of measurements used in given profile
+            tmp=median(dscd.date_time( abs(dscd.date_time-time_exact)<=dt/2 ));
+            ft(i)=fracdate(tmp);
+        end
+    end
+
+    
     %% save elevations used for each profile
     
     % weighting functions have elevations in the easiest-to-read format
@@ -346,39 +428,39 @@ for current_date=start_date:1:end_date
     
     year_tmp=str2double(ymd(1:4));
 
-    % create elevations table: different for pre-2015 data (5/6 deg is lowest)
-    if year_tmp>=2015 
-        elevs=zeros(size(ft,1),8);
-        elevs=array2table(elevs,'VariableNames',...
-                          {'el_90','el_30','el_15','el_10','el_5','el_2','el_1','el_m1'});
-    else
-        if year_tmp==2010
-            elevs=zeros(size(ft,1),7);
+    if strcmp(data_type,'eureka')
+        % create elevations table: different for pre-2015 data (5/6 deg is lowest)
+        if year_tmp>=2015 
+            elevs=zeros(size(ft,1),8);
             elevs=array2table(elevs,'VariableNames',...
-                              {'el_90','el_30','el_15','el_10','el_4','el_2','el_1'});
+                              {'el_90','el_30','el_15','el_10','el_5','el_2','el_1','el_m1'});
         else
-            elevs=zeros(size(ft,1),6);
-            elevs=array2table(elevs,'VariableNames',...
-                              {'el_90','el_30','el_15','el_10','el_8','el_5_6'});
-        end            
+            if year_tmp==2010
+                elevs=zeros(size(ft,1),7);
+                elevs=array2table(elevs,'VariableNames',...
+                                  {'el_90','el_30','el_15','el_10','el_4','el_2','el_1'});
+            else
+                elevs=zeros(size(ft,1),6);
+                elevs=array2table(elevs,'VariableNames',...
+                                  {'el_90','el_30','el_15','el_10','el_8','el_5_6'});
+            end            
+        end
+        
+    elseif strcmp(data_type,'pandora')
+        % elevations array for pandora data
+        elevs=zeros(size(ft,1),12);
+        elevs=array2table(elevs,'VariableNames',...
+                          {'el_90','el_50','el_40','el_30','el_20','el_15','el_10','el_8',...
+                           'el_5','el_3','el_2','el_1'});
     end
     
-    % get filenames
-    if option=='a'
-        tmp = dir('*_ext_20*'); 
-    else
-        tmp = dir('*wf_*'); 
-    end
-    
-    f_info={tmp.name}';
-    
-    for i=1:max(size(f_info))
-
+    for i=1:length(ft)
+        
         if option=='a'
-            tmp=dlmread(f_info{i},' ',1,1);
+            tmp=dlmread(['wfO4_ext_' ymd '_' info.HHMM{i} '.dat'],' ',1,1);
             tmp=tmp(1,tmp(1,:)~=0);
         else
-            tmp=dlmread(f_info{i},' ',0,1);
+            tmp=dlmread(['wf_' ymd '_' info.HHMM{i} '.dat'],' ',0,1);
             tmp=tmp(1,tmp(1,:)~=0);
         end
     
@@ -391,33 +473,46 @@ for current_date=start_date:1:end_date
         elevs.el_15(i)=sum(tmp==15+elev_corr);
         elevs.el_10(i)=sum(tmp==10+elev_corr);
         
-        if year_tmp<2015
-           
-            if year_tmp==2010
-                % different sequence for 2010: 90, 30, 15, 10, 4, 2, 1:
-                elevs.el_4(i)=sum(tmp==4+elev_corr);
-                elevs.el_2(i)=sum(tmp==2+elev_corr); 
-                elevs.el_1(i)=sum(tmp==1+elev_corr);
-            else
-                % 8 deg always there, some years have 5, some 6 as lowest elev
-                % (only one at a time)
-                elevs.el_8(i)=sum(tmp==8+elev_corr);
-                elevs.el_5_6(i)=sum(tmp==5+elev_corr | tmp==6+elev_corr);
-            end
-            
-        else
-            
-            elevs.el_5(i)=sum(tmp==5+elev_corr);
+        if strcmp(data_type,'eureka')
+            if year_tmp<2015
 
-            if year_tmp~=2015,
-                elevs.el_2(i)=sum(tmp==2+elev_corr); 
+                if year_tmp==2010
+                    % different sequence for 2010: 90, 30, 15, 10, 4, 2, 1:
+                    elevs.el_4(i)=sum(tmp==4+elev_corr);
+                    elevs.el_2(i)=sum(tmp==2+elev_corr); 
+                    elevs.el_1(i)=sum(tmp==1+elev_corr);
+                else
+                    % 8 deg always there, some years have 5, some 6 as lowest elev
+                    % (only one at a time)
+                    elevs.el_8(i)=sum(tmp==8+elev_corr);
+                    elevs.el_5_6(i)=sum(tmp==5+elev_corr | tmp==6+elev_corr);
+                end
+
             else
-                % no 2 deg elevation for 2015, keep table format for consistency
-                elevs.el_2(i)=9999; 
+
+                elevs.el_5(i)=sum(tmp==5+elev_corr);
+
+                if year_tmp~=2015,
+                    elevs.el_2(i)=sum(tmp==2+elev_corr); 
+                else
+                    % no 2 deg elevation for 2015, keep table format for consistency
+                    elevs.el_2(i)=9999; 
+                end
+
+                elevs.el_1(i)=sum(tmp==1+elev_corr);
+                elevs.el_m1(i)=sum(tmp==-1+elev_corr);
+
             end
+        elseif strcmp(data_type,'pandora')
             
+            elevs.el_50(i)=sum(tmp==50+elev_corr);
+            elevs.el_40(i)=sum(tmp==40+elev_corr);
+            elevs.el_20(i)=sum(tmp==20+elev_corr);
+            elevs.el_8(i)=sum(tmp==8+elev_corr);
+            elevs.el_5(i)=sum(tmp==5+elev_corr);
+            elevs.el_3(i)=sum(tmp==3+elev_corr);
+            elevs.el_2(i)=sum(tmp==2+elev_corr);
             elevs.el_1(i)=sum(tmp==1+elev_corr);
-            elevs.el_m1(i)=sum(tmp==-1+elev_corr);
             
         end
     end
