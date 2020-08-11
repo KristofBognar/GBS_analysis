@@ -45,7 +45,7 @@ for i=bad_ind'
     if table_out.SpecNo(i+1)-table_out.SpecNo(i)~=1
         
         % bad line is the last spectrum of the day; extrapolate from
-        % previous twomeasurements
+        % previous two measurements
         table_out.Timehhmmss(i)=table_out.Timehhmmss(i-1)+diff(table_out.Timehhmmss(i-2:i-1));
         
         % SZA, SAA also needs extrapolation
@@ -74,9 +74,13 @@ end
 
 % unrelated: fill other NaT from fractionaldate (matlab sometimes fails to
 % read valid time fields)
-table_out.Timehhmmss(isnat(table_out.Timehhmmss))=...
-    ft_to_date(table_out.Fractionalday(isnat(table_out.Timehhmmss))-1,...
-    table_out.Year(isnat(table_out.Timehhmmss)));
+% NaTs for the bad lines have been filled already, any remining NaTs are
+% due to matlab messing up, but Fractionalday is fine for those lines
+if sum(isnat(table_out.Timehhmmss))>0
+    table_out.Timehhmmss(isnat(table_out.Timehhmmss))=...
+        ft_to_date(table_out.Fractionalday(isnat(table_out.Timehhmmss))-1,...
+        table_out.Year(isnat(table_out.Timehhmmss)));
+end
 
 % redo date field
 table_out.DateDDMMYYYY=table_out.Timehhmmss;
