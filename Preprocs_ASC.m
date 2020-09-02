@@ -1316,6 +1316,10 @@ function [ind_out,  line3_out, line4_out, line5_out, line6_out, ...
                     end_elev=line4_fin(ind_twilight(end),3);
 
                     % recalculate average time
+                    
+                    %%% implement proper time average!
+                    error('Implement proper time avg (for averaging across midnight)!')
+                    
                     t1=start_time(1)+start_time(2)/60 + start_time(3)/3600;
                     t2=end_time(1)+end_time(2)/60 + end_time(3)/3600;
                     a1=floor(mean([t1,t2]));
