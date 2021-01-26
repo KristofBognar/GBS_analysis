@@ -1,11 +1,11 @@
 
 
-% instr='UT-GBS';
-instr='PEARL-GBS';
+instr='UT-GBS';
+% instr='PEARL-GBS';
 
-% tg='O3';
+tg='O3';
 % tg='NO2';
-tg='NO2_UV';
+% tg='NO2_UV';
 
 switch instr
     case 'UT-GBS'
@@ -31,7 +31,7 @@ colors=jet(length(years));
 
 legendstr={};
 
-figure(1)
+figure()
 % subplot(223)
 
 for i=1:length(years)

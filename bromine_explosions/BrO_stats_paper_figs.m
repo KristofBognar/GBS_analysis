@@ -16,7 +16,7 @@ function BrO_stats_paper_figs()
 presentation_plots=0;
 
 windrose=0;
-plot_box=1;
+plot_box=0;
 plot_box_weather=0;
 bro_dailymean=0;
 bro_dailymean_o3=0;
@@ -34,10 +34,10 @@ btraj_len='3'; % length of back trajectories
 dscd_avk=0;
 o3_bro_box=0;
 si_maps=0;
-accum_pax=0;
+accum_pax=1;
 
 %%% 0 to not save, 1 to save as pdf, 2 to save as jpg
-save_figs=0;
+save_figs=1;
 
 % uniform look
 major_grid=0; % major grid on correlation plots
@@ -1686,8 +1686,8 @@ if dscd_avk
                                     
         elseif ax_num==4
             
-            xlabel('Time of day, May 9-10, 2018 (UTC)')
-            ylb=ylabel('O4 dSCD (molec^2 cm^{-5})');
+            xlabel('Time of day, 9-10 May 2018 (UTC)')
+            ylb=ylabel('O_4 dSCD (molec^2 cm^{-5})');
             ylb.Position(1)=ylb.Position(1)-0.015;
             ylb.Position(2)=mean(y_lim_arr);
             
@@ -2120,7 +2120,7 @@ function plot_mean_std(xx,yy,edges,text_size,wdir_str,subplot_id,fliplabels)
         x2=0.05;
         x2_align='left';
         
-        text(x1,0.8,sprintf('{R^2}=%.2f', R2),'color','k','Units','normalized',...
+        text(x1,0.8,sprintf('{\\itR^2}=%.2f', R2),'color','k','Units','normalized',...
             'fontsize',text_size,'HorizontalAlignment',x1_align)
 
     elseif fliplabels==98 % same as 99, letter slightly to the right
@@ -2132,7 +2132,7 @@ function plot_mean_std(xx,yy,edges,text_size,wdir_str,subplot_id,fliplabels)
         x2=0.15;
         x2_align='left';
         
-        text(x1,0.8,sprintf('{R^2}=%.2f', R2),'color','k','Units','normalized',...
+        text(x1,0.8,sprintf('{\\itR^2}=%.2f', R2),'color','k','Units','normalized',...
             'fontsize',text_size,'HorizontalAlignment',x1_align)
 
     end
@@ -2229,7 +2229,7 @@ function plot_fit_line(xx,yy,text_size,wdir_str,subplot_id,fliplabels)
     text(x1,0.92,sprintf(['Wind: ' wdir_str]), 'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment',x1_align)
 
-    text(x1,0.8,sprintf('{R^2}=%.2f', R2),'color','k','Units','normalized',...
+    text(x1,0.8,sprintf('{\\itR^2}=%.2f', R2),'color','k','Units','normalized',...
         'fontsize',text_size,'HorizontalAlignment',x1_align)
     
     text(x2,0.92,['{\bf' subplot_id ')}'], 'color','k','Units','normalized',...

@@ -88,7 +88,7 @@ if write_ASC==write_L2, error('Must select only one file format'); end
 
 %% averaging for twilight and noon spectra
 
-do_twilight_avg=1;
+do_twilight_avg=0;
 
 % make sure averaging is required
 avg_path='';

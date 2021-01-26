@@ -34,7 +34,9 @@ version_eureka='det_lim_test'; % august 2018, for detection limit
 
 % pandora folder naming (independent of Eureka folder selection):
 % version_pandora='p103_spec_v5';
-version_pandora='p103_spec_v5_short';
+% version_pandora='p103_spec_v5_short';
+% version_pandora='p103_spec_v5_uv';
+version_pandora='p103_spec_v5_short_uv';
 
 
 %% years and dates
@@ -128,6 +130,12 @@ if strcmp(data_type,'pandora')
     elseif strcmp(version_pandora,'p103_spec_v5_short')
         load(['/home/kristof/work/PANDORA/profiling/retrieval_input/HEIPRO_input/' ...
               'short_p103_vis_2019_retr_times.mat'])
+    elseif strcmp(version_pandora,'p103_spec_v5_uv')
+        load(['/home/kristof/work/PANDORA/profiling/retrieval_input/HEIPRO_input/' ...
+              'long_p103_uv_2019_retr_times.mat'])
+    elseif strcmp(version_pandora,'p103_spec_v5_short_uv')
+        load(['/home/kristof/work/PANDORA/profiling/retrieval_input/HEIPRO_input/' ...
+              'short_p103_uv_2019_retr_times.mat'])
     else
         error(['Implement time correction for ' version_pandora])
     end
