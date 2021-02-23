@@ -1,4 +1,4 @@
-function dc_all_auto(filename_orig,biasfile,dcfile,flag_plot)
+function dc_all_auto(filename_orig,biasfile,dcfile,path,flag_plot)
 
 % this function calculates the bias and dark current from a series of
 % files, beginning with filename_orig.
@@ -22,6 +22,7 @@ function dc_all_auto(filename_orig,biasfile,dcfile,flag_plot)
 % Modified Cristen Adams, August 2010
 
 num_pixels=2048;     % the number of pixels across the CCD.
+
 
 % specifies the defaults if there are input arguments missing.
 if nargin==1
@@ -87,10 +88,10 @@ for i=1:7   % loop for going through each file
 
     % this loop goes through the file(i) and creates a matrix of all the intensities in the file.
     for k=1:20
-        [data]=textread(filename,'',num_pixels,'delimiter',',','headerlines',3+(num_pixels+1)*(k-1));
+        [data]=textread([path, filename],'',num_pixels,'delimiter',',','headerlines',3+(num_pixels+1)*(k-1));
         if isempty(data),break,end
         [start_date start_time end_date end_time shutter ideal_counts slit grating turret blaze target exp_time_i accumulations ...
-                mean_T min_T max_T mean_Tbox gps_signal satellites altitude longitude latitude]=textread(filename,...
+                mean_T min_T max_T mean_Tbox gps_signal satellites altitude longitude latitude]=textread([path filename],...
                 '%q %q %q %q %q %q %q %q %q %q %q %f %q %f %q %q %q %q %q %q %q %q',1,'delimiter',',','headerlines',2+(num_pixels+1)*(k-1));
         if str2num(cell2mat(shutter)) == 0
             exp_time = [exp_time; exp_time_i];
@@ -136,9 +137,9 @@ plot(exp_time,dark_sp(1500,:),'+','color','g')
 legend('Pixel 1', 'Pixel 1000', 'Pixel 1500')
 xlabel('Exposure time (s)')
 ylabel('Dark spectrum count')
-plot(exp_time,bias(1)+dc(1)*exp_time/1000,'b');
-plot(exp_time,bias(1000)+dc(1000)*exp_time/1000,'r');
-plot(exp_time,bias(1500)+dc(1500)*exp_time/1000,'g');
+plot(exp_time,bias(1)+dc(1)*exp_time/1000,'b','HandleVisibility','Off');
+plot(exp_time,bias(1000)+dc(1000)*exp_time/1000,'r','HandleVisibility','Off');
+plot(exp_time,bias(1500)+dc(1500)*exp_time/1000,'g','HandleVisibility','Off');
 subplot(3,1,2)
 plot(bias)
 xlabel('Pixel')

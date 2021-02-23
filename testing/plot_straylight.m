@@ -93,7 +93,7 @@ redfile=specfile;
 redtime='6:34:26';
 
 
-path='/Users/raminaalwarda/Desktop/PhysicsPhD/GBSdata/UT-GBSdata/UTGBS_2020/testing_Eureka/csv/'
+path='/Users/raminaalwarda/Desktop/PhysicsPhD/GBSdata/UT-GBSdata/UTGBS_2020/testing_Eureka/csv/';
 
 spec=get_spectrum_v2([path specfile],spectime);
 dc=get_spectrum_v2([path dcfile],dctime);
@@ -104,7 +104,7 @@ red=get_spectrum_v2([path redfile],redtime);
 
 straylight=red-dc;
 
-plot(straylight./spec)
+plot(straylight./(spec))
 xlim([0,2048])
 xlabel('CCD Pixel')
 ylabel('Straylight / regular spectrum')

@@ -32,13 +32,13 @@ plot_colors(highlight==2011,:)=plot_colors(highlight==2020,:);
 plot_colors(highlight==2020,:)=[1 .1 0];
 
 % merged GBS data, up to 2017 (from merged VCDs, already filtered)
-load('/home/kristof/work/satellite_validation/GBS_O3.mat')
-load('/home/kristof/work/satellite_validation/GBS_NO2.mat')
-load('/home/kristof/work/satellite_validation/GBS_NO2_UV.mat')
+load('/Users/raminaalwarda/Downloads/GBS_O3.mat')
+load('/Users/raminaalwarda/Downloads/GBS_NO2.mat')
+load('/Users/raminaalwarda/Downloads/GBS_NO2_UV.mat')
 
 %% add later ozone data
 % load merged files only, since those are filtered
-load('/home/kristof/work/GBS/VCD_results/UT-GBS_O3_VCD_all.mat')
+load('/Users/raminaalwarda/Desktop/PhysicsPhD/GBSdata/VCD_results/UT-GBS_O3_VCD_all.mat')
 gbs_o3=[gbs_o3; reanalysis(reanalysis.year>2017,:)];
 
 % check if some data is still RD (no standard processing yet)

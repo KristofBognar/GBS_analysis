@@ -4,8 +4,11 @@ function sonde_column_for_VCD(start_yr, end_year)
 %%%
 
 % load old VCD input file 
-if ismac %****
-    error('Get sample VCD file and set up path')
+if ismac
+    file_path='/Users/raminaalwarda/Desktop/PhysicsPhD/ozonesonde/Eureka/';
+    sonde_path='/Users/raminaalwarda/Desktop/PhysicsPhD/ozonesonde/Eureka/';
+    
+    load([file_path 'sonde_for_VCD.mat'])
 elseif isunix
 
     file_path='/home/kristof/work/ozonesonde/Eureka/';

@@ -13,7 +13,8 @@ function data=merge_RD_QDOAS_output( instrument, year )
 %% setup
 
 if ismac
-    error('Set file paths')
+    rd_dir='/Users/raminaalwarda/Desktop/PhysicsPhD/GBSdata/QDOAS_results/NDACC_RD_tables';
+    yearly_dir='/Users/raminaalwarda/Desktop/PhysicsPhD/GBSdata/QDOAS_results/yearly_tables';
 elseif isunix
     rd_dir='/home/kristof/work/GBS/QDOAS_results/NDACC_RD_tables';
     yearly_dir='/home/kristof/work/GBS/QDOAS_results/yearly_tables';
