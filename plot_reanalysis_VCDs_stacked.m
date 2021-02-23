@@ -10,7 +10,7 @@ tg='O3';
 switch instr
     case 'UT-GBS'
         if ismac
-            load(['/Users/raminaalwarda/Downloads/UT-GBS_' tg '_VCD_all.mat'])
+            load(['/Users/raminaalwarda/Desktop/PhysicsPhD/GBSdata/VCD_results/UT-GBS_' tg '_VCD_all.mat'])
         elseif isunix
             load(['/home/kristof/work/GBS/VCD_results/UT-GBS_' tg '_VCD_all.mat'])
         end
