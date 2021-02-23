@@ -4,7 +4,11 @@ function plot_timeseries()
 
 % tg_str='NO2';
 
-save_dir='/home/kristof/work/NDACC/HDF4_data_submission/archive_v3/plots/';
+if ismac
+    save_dir='/Users/raminaalwarda/Desktop/PhysicsPhD/NDACC/HDF4_data_submission/archive_v3/plots/';
+elseif isunix
+    save_dir='/home/kristof/work/NDACC/HDF4_data_submission/archive_v3/plots/';
+end
 
 for tg=1:3
     
@@ -16,13 +20,21 @@ for tg=1:3
         tg_str='NO2_UV';
     end
     
-    load(['/home/kristof/work/NDACC/HDF4_data_submission/archive_v3/PEARL-GBS_' tg_str '_VCD_all_v3.mat'])
-    p=reanalysis;
-    load(['/home/kristof/work/NDACC/HDF4_data_submission/archive_v3/UT-GBS_' tg_str '_VCD_all_v3.mat'])
-    ut=reanalysis;
+    if ismac
+        load(['/Users/raminaalwarda/Desktop/PhysicsPhD/NDACC/HDF4_data_submission/archive_v3/PEARL-GBS_' tg_str '_VCD_all_v3.mat'])
+        p=reanalysis;
+        load(['/Users/raminaalwarda/Desktop/PhysicsPhD/NDACC/HDF4_data_submission/archive_v3/UT-GBS_' tg_str '_VCD_all_v3.mat'])
+        ut=reanalysis;
+    elseif isunix
+        load(['/home/kristof/work/NDACC/HDF4_data_submission/archive_v3/PEARL-GBS_' tg_str '_VCD_all_v3.mat'])
+        p=reanalysis;
+        load(['/home/kristof/work/NDACC/HDF4_data_submission/archive_v3/UT-GBS_' tg_str '_VCD_all_v3.mat'])
+        ut=reanalysis;
+    end
+        
 
     %% plot yearly data
-    for yy=1999:2017
+    for yy=1999:2020
 
         ind_p=find(p.year==yy);
         ind_ut=find(ut.year==yy);

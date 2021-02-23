@@ -26,11 +26,20 @@ do_cams_filter=true;
 %% output
 
 % VCD directory
-if ~is_rd
-    vcd_dir='/home/kristof/work/GBS/VCD_results/';
-else
-    vcd_dir='/home/kristof/work/GBS/VCD_results/NDACC_RD/';
+if ismac
+    if ~is_rd
+        vcd_dir='/Users/raminaalwarda/Desktop/PhysicsPhD/GBSdata/VCD_results/';
+    else
+        vcd_dir='/Users/raminaalwarda/Desktop/PhysicsPhD/GBSdata/VCD_results/NDACC_RD/';
+    end
+elseif isunix
+    if ~is_rd
+        vcd_dir='/home/kristof/work/GBS/VCD_results/';
+    else
+        vcd_dir='/home/kristof/work/GBS/VCD_results/NDACC_RD/';
+    end
 end
+    
 
 % output file name (remove file if already exists)
 
